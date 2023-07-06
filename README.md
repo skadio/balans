@@ -1,16 +1,25 @@
-# MAB_ALNS
+# MAB_ALNS - Mutation Operator
 
 
 ## Description
-The project is about the implementation of a bandit selector outside of the MIP solver such as "SCIP".  
+The project is about the implementation of operators and a bandit selector outside of the MIP solver such as "SCIP".  
 
-The library provides the algorithm and various acceptance criteria, operator selection schemes, and stopping criteria. To solve your own MIP problem, you should provide the following:
+The library provides the operators and the algorithm in which operator selection schemes will be implemented.. To solve your own MIP problem, you should provide the following:
 
--A solution state for your problem that implements an objective() function.
+-MIP instance
 -An initial solution.
--One or more destroy and repair operators tailored to your problem.
+
+
+-Note: LP relaxation and problem class will be implemented automatically inside the library.
 
 Here is a minimum we are implementing:
+MUTATION OPERATOR
+1. Reading a MIP instance from MIPLIP library.
+2. Obtaining a MIP instance class and lp relaxed solution. 
+3. Defining Mutation Operator to get the next solution.
+
+
+Here is a minimum we will be implementing:
 
 1. LNS Heuristics as operators and we enumerate these operators and assign them as "arms".
 2. Efficient bandit algorithm is run on top these heuristics. 
