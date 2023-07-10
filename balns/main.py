@@ -5,7 +5,7 @@ from crossover import _Crossover
 
 
 def run_mip_operator_extractor(instance_path):
-    
+
     operator_extractor = OperatorExtractor(problem_instance_file=instance_path)
     operator_extractor_init = OperatorExtractor(problem_instance_file=instance_path)
     operator_extractor_init2 = OperatorExtractor(problem_instance_file=instance_path)
@@ -16,8 +16,8 @@ def run_mip_operator_extractor(instance_path):
 
     # lp relaxed value
     lp_relaxed_value, solution, n = operator_extractor.lp_relax()
-
-    model = operator_extractor.Model()
+    #Get MIP instance model, variable features (e.g., binary, discrete or cont) and objective (min or max)
+    model = operator_extractor.get_model()
     var_features = operator_extractor.get_var_features()
     sense1 = operator_extractor.get_sense()
 

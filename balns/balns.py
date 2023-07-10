@@ -29,7 +29,6 @@ class OperatorExtractor(BaseOperator):
         for v in self.model.getVars():
             if v.name != "n":
                 solution.append(self.model.getVal(v))
-        # print(solution)
         solution = np.array(solution)
         len_sol = len(solution)
         print("init sol", self.model.getObjVal())
@@ -71,7 +70,7 @@ class OperatorExtractor(BaseOperator):
         sense = self.model.getObjectiveSense()
         return sense
 
-    def Model(self):
+    def get_model(self):
         return self.model
 
     def extract_variable_features(self):
