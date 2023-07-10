@@ -5,12 +5,9 @@ from crossover import _Crossover
 
 
 def run_mip_operator_extractor(instance_path):
-    SEED = 42
-    rnd_state = np.random.RandomState(SEED)
-
+    
     operator_extractor = OperatorExtractor(problem_instance_file=instance_path)
     operator_extractor_init = OperatorExtractor(problem_instance_file=instance_path)
-
     operator_extractor_init2 = OperatorExtractor(problem_instance_file=instance_path)
 
     # init solutions
