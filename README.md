@@ -1,50 +1,77 @@
-# MAB_ALNS - Mutation Operator
+# MAB ALNS
 
+MAB ALNS is a research library written in Python for ..
 
-## Description
-The project is about the implementation of operators and a bandit selector outside of the MIP solver such as "SCIP".  
+MAB ALNS follows a scikit-learn style public interface, adheres to 
+[PEP-8 standards](https://www.python.org/dev/peps/pep-0008/), and is tested heavily. 
 
-The library provides the operators and the algorithm in which operator selection schemes will be implemented.. To solve your own MIP problem, you should provide the following:
+Documentation is available at 
+[github.io/XXX](https://github.io/XXX).
 
--MIP instance
--An initial solution.
+## Quick Start
 
+```python
+# Beautiful example that shows how to ..
 
--Note: LP relaxation and problem class will be implemented automatically inside the library.
+# Import ???? Library
+from ????.xx import xx
 
-Here is a minimum we are implementing:
-MUTATION OPERATOR
-1. Reading a MIP instance from MIPLIP library.
-2. Obtaining a MIP instance class and lp relaxed solution. 
-3. Defining Mutation Operator to get the next solution.
+# Data
+xx .. 
 
-
-Here is a minimum we will be implementing:
-
-1. LNS Heuristics as operators and we enumerate these operators and assign them as "arms".
-2. Efficient bandit algorithm is run on top these heuristics. 
-3. Novel rewarding scheme to measure how each operator is performing for a given instance.
-3. Training the model with MIPLIP instances.
-
-
-
-#Bandit Rewards 
-
-The selected operators are applied to the current solution, resulting in a new candidate solution. This candidate is evaluated by the algorithm, which leads to one of four outcomes:
-
--The candidate solution is a new global best.
-
--The candidate solution is better than the current solution, but not a new global best.
-
--The candidate solution is accepted.
-
--The candidate solution is rejected.
-
-
-### DATA REQUIREMENTS
-MIPLIB 2017
-
-
+# Run
+xx
 ```
 
-### Output: Objective Function Values 
+
+## Installation
+
+XXX can be installed from the wheel file or building from source by following the instructions in 
+our [documentation](https://github.io/XXX/installation.html).
+
+## Support
+
+Please submit bug reports and feature requests as [Issues](https://github.com/XXX/issues).
+
+## License
+
+XXX is licensed under the [Apache License 2.0](LICENSE.md).
+
+## Installation
+xxx requires Python 3.6+ and can be installed from the provided wheel file.  
+
+1) Clone the repository (you can discard folders other than fidtone)
+2) Go to the fidtone directory
+3) Install from the wheel file
+
+```
+$ git clone https://xxx   
+$ cd xxx
+$ pip install dist/xxx-X.X.X-py3-none-any.whl
+```
+
+The wheel file automatically installs `requirements.txt`, downloads and installs `en_core_web_lg` language model (~700 MB) from `spacy`, 
+and downloads `punkt` tokenizer (~50 MB) from `nltk`.
+
+
+## Running Unit Tests
+
+```
+$ cd fidtone
+$ python -m unittest discover tests
+```
+
+
+## Changelog
+
+| Date | Notes |
+|--------|-------------|
+| July 7, 2023 | Draft Initial release |
+
+<br>
+
+```
+mab_alns © Copyright, mab_alns
+````
+
+<br>
