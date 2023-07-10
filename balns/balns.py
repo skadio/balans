@@ -8,7 +8,6 @@ import pandas as pd
 from typing import List, Union
 
 
-
 class BaseOperator:
     def __init__(self, problem_instance_file: str) -> None:
         self.model = scip.Model()
@@ -19,27 +18,25 @@ class BaseOperator:
 class OperatorExtractor(BaseOperator):
     def __init__(self, problem_instance_file: str) -> None:
         super().__init__(problem_instance_file)
-        self.var_features=self.extract_variable_features()
+        self.var_features = self.extract_variable_features()
 
-    def Init_Sol(self):
-        #solution gap is less than %50  > STOP.
+    def init_sol(self):
+        # solution gap is less than %50  > STOP.
         self.model.setParam("limits/gap", 0.50)
         self.model.setParam('limits/time', 30)
         self.model.optimize()
-        solution=[]
+        solution = []
         for v in self.model.getVars():
             if v.name != "n":
                 solution.append(self.model.getVal(v))
-        #print(solution)
+        # print(solution)
         solution = np.array(solution)
         len_sol = len(solution)
         print("init sol", self.model.getObjVal())
 
-        #self.model.freeSol(self.model.getBestSol())
+        return self.model.getObjVal(), solution, len_sol
 
-        return self.model.getObjVal(),solution,len_sol
-
-    def LP_relax(self):
+    def lp_relax(self):
 
         """
         Gets and Solves LP relaxed version of the same problem
@@ -55,17 +52,22 @@ class OperatorExtractor(BaseOperator):
             # Continuous relaxation of the problem
             self.model.chgVarType(v, 'CONTINUOUS')
         self.model.optimize()
-        solution=[]
+        solution = []
         for v in self.model.getVars():
             if v.name != "n":
                 solution.append(self.model.getVal(v))
 
         solution = np.array(solution)
         len_sol = len(solution)
-        return self.model.getObjVal(),solution,len_sol
-    
-    
+        return self.model.getObjVal(), solution, len_sol
+
     def get_sense(self) -> str:
+        """
+        Returns
+        -------
+        objective -> Minimize or Maximize
+        """
+
         sense = self.model.getObjectiveSense()
         return sense
 
@@ -89,7 +91,8 @@ class OperatorExtractor(BaseOperator):
 
         variable_features = variable_features.astype({'var_type': int, 'var_lb': float, 'var_ub': float})
 
-        return variable_features #pd.dataframe
+        return variable_features  # pd.dataframe
+
     def extract_feature(self) -> Union[List[Union[int, float]], np.ndarray, pd.Series, pd.DataFrame]:
         """
         Extracts features from MIP instances
@@ -119,8 +122,13 @@ class OperatorExtractor(BaseOperator):
     def create_sol(self):
         return self.model.createSol()
 
+    def forget_sol(self, create_solution):
+        self.model.freeSol(create_solution)
 
+    def transform_solution_to_array(self, solution1):
+        solution_array = []
+        for i in range(self.model.getNVars()):
+            solution_array.append(self.model.getSolVal(solution1, self.model.getVars()[i]))
+        solution_array = np.array(solution_array)
 
-
-
-
+        return solution_array
