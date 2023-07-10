@@ -8,6 +8,8 @@ This module provides a number of constants and helper functions.
 """
 
 import numpy as np
+import pyscipopt as scip
+
 from balns import OperatorExtractor
 
 class MIPState:

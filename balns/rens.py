@@ -58,12 +58,10 @@ class _Mutation(OperatorExtractor):
 
         to_remove = rnd_state.choice(discretes, size=self.to_destroy(discretes))
         #assignments = self.solution.copy()
-        self.model.freeSol(self.model.getBestSol())
+        #self.model.freeSol(self.model.getBestSol())
 
         print("solution", self.solution)
-        #
-
-        self.model.freeTransform()
+        #self.model.freeTransform()
         # solve problem
         self.model.optimize()
 

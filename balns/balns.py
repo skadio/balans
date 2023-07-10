@@ -21,6 +21,24 @@ class OperatorExtractor(BaseOperator):
         super().__init__(problem_instance_file)
         self.var_features=self.extract_variable_features()
 
+    def Init_Sol(self):
+        #solution gap is less than %50  > STOP.
+        self.model.setParam("limits/gap", 0.50)
+        self.model.setParam('limits/time', 30)
+        self.model.optimize()
+        solution=[]
+        for v in self.model.getVars():
+            if v.name != "n":
+                solution.append(self.model.getVal(v))
+        #print(solution)
+        solution = np.array(solution)
+        len_sol = len(solution)
+        print("init sol", self.model.getObjVal())
+
+        #self.model.freeSol(self.model.getBestSol())
+
+        return self.model.getObjVal(),solution,len_sol
+
     def LP_relax(self):
 
         """
@@ -32,15 +50,16 @@ class OperatorExtractor(BaseOperator):
         solution =array
         len_sol=int
         """
-        # Extract variable and constraints features
+
         for v in self.model.getVars():
-            self.model.chgVarType(v, 'CONTINUOUS') #Continious relaxation of the problem
+            # Continuous relaxation of the problem
+            self.model.chgVarType(v, 'CONTINUOUS')
         self.model.optimize()
         solution=[]
         for v in self.model.getVars():
             if v.name != "n":
                 solution.append(self.model.getVal(v))
-        #print(solution)
+
         solution = np.array(solution)
         len_sol = len(solution)
         return self.model.getObjVal(),solution,len_sol
@@ -63,7 +82,7 @@ class OperatorExtractor(BaseOperator):
         var_types_numeric = [type_mapping.get(t, 0) for t in var_types]
 
         variable_features = pd.DataFrame({
-            'var_type': var_types_numeric,  # Use the converted numeric representation
+            'var_type': var_types_numeric,
             'var_lb': lbs,
             'var_ub': ubs
         })
@@ -96,6 +115,9 @@ class OperatorExtractor(BaseOperator):
 
     def get_var_features(self):
         return self.var_features
+
+    def create_sol(self):
+        return self.model.createSol()
 
 
 
