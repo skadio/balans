@@ -6,7 +6,7 @@ import numpy as np
 import pyscipopt as scip
 import pandas as pd
 from typing import List, Union
-
+from utils import ProblemState
 
 class BaseOperator:
     def __init__(self, problem_instance_file: str) -> None:
@@ -20,10 +20,10 @@ class OperatorExtractor(BaseOperator):
         super().__init__(problem_instance_file)
         self.var_features = self.extract_variable_features()
 
-    def init_sol(self,gap,time):
+    def init_sol(self) -> ProblemState:
         # solution gap is less than %50  > STOP, terrible but, good start.
-        self.model.setParam("limits/gap", gap) #0.50
-        self.model.setParam('limits/time', time) #30
+        self.model.setParam("limits/gap", 0.50)
+        self.model.setParam('limits/time', 30)
         self.model.optimize()
         solution = []
         for v in self.model.getVars():
@@ -33,7 +33,9 @@ class OperatorExtractor(BaseOperator):
         len_sol = len(solution)
         print("init sol", self.model.getObjVal())
 
-        return self.model.getObjVal(), solution, len_sol
+        state = ProblemState(solution, self.model)
+
+        return state
 
     def lp_relax(self):
 
@@ -118,18 +120,9 @@ class OperatorExtractor(BaseOperator):
     def get_var_features(self):
         return self.var_features
 
-    def get_objective_sol(self,solution):
-        return  self.model.getSolObjVal(solution)
     def create_sol(self):
         return self.model.createSol()
 
     def forget_sol(self, create_solution):
         self.model.freeSol(create_solution)
 
-    def transform_solution_to_array(self, solution1):
-        solution_array = []
-        for i in range(self.model.getNVars()):
-            solution_array.append(self.model.getSolVal(solution1, self.model.getVars()[i]))
-        solution_array = np.array(solution_array)
-
-        return solution_array
