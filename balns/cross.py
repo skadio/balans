@@ -2,9 +2,9 @@
 # coding: utf-8
 
 import matplotlib.pyplot as plt
+import copy
 import numpy as np
 from mabwiser.mab import LearningPolicy
-
 from alns import ALNS
 from alns.accept import *
 from alns.select import *
@@ -15,7 +15,18 @@ import os
 import pyscipopt as scip
 from problemstate import ProblemState
 from readinstance import ReadInstance
-import copy
+
+instance_path = "neos-5140963-mincio.mps.gz"
+
+# Terrible - but simple - two first solution, where only the first item is
+# selected.
+instance = ReadInstance(problem_instance_file=instance_path)
+instance2 = ReadInstance(problem_instance_file=instance_path)
+
+# Time =30 and gap limit = 50 percent gap within the solution
+init_sol = instance.initial_state(0.50, 30)
+# Time =30 and gap limit = 75 percent gap within the solution
+init_sol2 = instance2.initial_state(0.75, 30)
 
 
 def extract_variable_features(state: ProblemState):
@@ -38,11 +49,6 @@ def extract_variable_features(state: ProblemState):
     return variable_features  # pd.dataframe
 
 
-def to_destroy_rins(init_sol, init_sol2, discrete):
-    to_remove = np.where(np.in1d(init_sol, init_sol2))[0]
-    return to_remove
-
-
 def find_discrete(state: ProblemState):
     discrete = []
     for i in range(state.length()):
@@ -52,44 +58,11 @@ def find_discrete(state: ProblemState):
     return discrete
 
 
-def lp_relax(state: ProblemState):
-    """
-    Gets and Solves LP relaxed version of the same problem
-
-    Returns
-    -------
-    objective value=float
-    solution =array
-    len_sol=int
-    """
-    vars = state.model.getVars()
-    for v in vars:
-        # Continuous relaxation of the problem
-        state.model.chgVarType(v, 'CONTINUOUS')
-    state.model.optimize()
-
-    solution = state.model.getBestSol()
-
-    state = ProblemState(solution, state.model)
-    print("current iteration: ", state.solution)
-    print("current obj val: ", state.objective())
-
-    return state
-
-
-def rins_op(state: ProblemState, rnd_state):
-    discrete = find_discrete(state)
-    lp_state = lp_relax(state)
-    to_remove = rnd_state.choice(discrete, size=to_destroy_rins(discrete))
-
-    assignments = state.solution.copy()
-    assignments[to_remove] = None
-    # print(assignments)
-
-    subMIP_vars = state.model.getVars()
+def crossover_op(state: ProblemState, rnd_state):
+    sub_vars = state.model.getVars()
     same_vars = []
-    for var in subMIP_vars:
-        if lp_state.x[var] == state.x[var]:
+    for var in sub_vars:
+        if init_sol.x[var] == init_sol2.x[var]:
             same_vars.append(var)
 
     for var in same_vars:

@@ -1,135 +1,70 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-
 import numpy as np
-import pyscipopt as scip
-import pandas as pd
-from typing import List, Union
+from mabwiser.mab import LearningPolicy
+from alns import ALNS
+from alns.accept import *
+from alns.select import *
+from alns.stop import *
+from problemstate import ProblemState
+from readinstance import ReadInstance
+from mutation import mutation_op, mutation_op2, mutation_op3, to_destroy_mut, find_discrete, extract_variable_features, \
+    repair_op
+from cross import crossover_op
+from rins import rins_op
 
 
-class BaseOperator:
-    def __init__(self, problem_instance_file: str) -> None:
-        self.model = scip.Model()
-        self.model.hideOutput()
-        self.model.readProblem(problem_instance_file)
+SEED = 42
+np.random.seed(SEED)
+
+if __name__ == "__main__":
+    instance_path = "neos-5140963-mincio.mps.gz"
+
+    # Terrible - but simple - two first solution, where only the first item is
+    # selected.
+    instance = ReadInstance(problem_instance_file=instance_path)
+    instance2 = ReadInstance(problem_instance_file=instance_path)
+
+    # Time =30 and gap limit = 50 percent gap within the solution
+    init_sol = instance.initial_state(0.50, 30)
+    # Time =30 and gap limit = 75 percent gap within the solution
+    init_sol2 = instance2.initial_state(0.75, 30)
+
+    print("Initial Feasible Solution:", init_sol.transform_solution_to_array2())
+    print("Initial Objective Value:", init_sol.objective())
+
+    print("Initial Feasible Solution:", init_sol2.transform_solution_to_array2())
+    print("Initial Objective Value:", init_sol2.objective())
 
 
-class OperatorExtractor(BaseOperator):
-    def __init__(self, problem_instance_file: str) -> None:
-        super().__init__(problem_instance_file)
-        self.var_features = self.extract_variable_features()
+def make_alns() -> ALNS:
+    rnd_state = np.random.RandomState(SEED)
+    alns = ALNS(rnd_state)
 
-    def init_sol(self,gap,time):
-        # solution gap is less than %50  > STOP, terrible but, good start.
-        self.model.setParam("limits/gap", gap) #0.50
-        self.model.setParam('limits/time', time) #30
-        self.model.optimize()
-        solution = []
-        for v in self.model.getVars():
-            if v.name != "n":
-                solution.append(self.model.getVal(v))
-        solution = np.array(solution)
-        len_sol = len(solution)
-        print("init sol", self.model.getObjVal())
+    # noinspection PyTypeChecker
+    alns.add_destroy_operator(mutation_op)
+    # noinspection PyTypeChecker
+    alns.add_destroy_operator(mutation_op2)
+    # noinspection PyTypeChecker
+    alns.add_destroy_operator(mutation_op3)
+    # noinspection PyTypeChecker
+    alns.add_destroy_operator(crossover_op)
+    # noinspection PyTypeChecker
+    alns.add_destroy_operator(rins_op)
+    # noinspection PyTypeChecker
+    alns.add_repair_operator(repair_op)
+    return alns
 
-        return self.model.getObjVal(), solution, len_sol
 
-    def lp_relax(self):
+accept = HillClimbing()
 
-        """
-        Gets and Solves LP relaxed version of the same problem
+# MABSelector
+# noinspection PyTypeChecker
+select = MABSelector(scores=[5, 2, 1, 0.5],
+                     num_destroy=5,
+                     num_repair=1,
+                     learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
 
-        Returns
-        -------
-        objective value=float
-        solution =array
-        len_sol=int
-        """
+alns = make_alns()
 
-        for v in self.model.getVars():
-            # Continuous relaxation of the problem
-            self.model.chgVarType(v, 'CONTINUOUS')
-        self.model.optimize()
-        solution = []
-        for v in self.model.getVars():
-            if v.name != "n":
-                solution.append(self.model.getVal(v))
+res = alns.iterate(init_sol, select, accept, MaxIterations(5))
 
-        solution = np.array(solution)
-        len_sol = len(solution)
-        return self.model.getObjVal(), solution, len_sol
-
-    def get_sense(self) -> str:
-        """
-        Returns
-        -------
-        objective -> Minimize or Maximize
-        """
-
-        sense = self.model.getObjectiveSense()
-        return sense
-
-    def get_model(self):
-        return self.model
-
-    def extract_variable_features(self):
-        varbls = self.model.getVars()
-        var_types = [v.vtype() for v in varbls]
-        lbs = [v.getLbGlobal() for v in varbls]
-        ubs = [v.getUbGlobal() for v in varbls]
-
-        type_mapping = {"BINARY": 0, "INTEGER": 1, "IMPLINT": 2, "CONTINUOUS": 3}
-        var_types_numeric = [type_mapping.get(t, 0) for t in var_types]
-
-        variable_features = pd.DataFrame({
-            'var_type': var_types_numeric,
-            'var_lb': lbs,
-            'var_ub': ubs
-        })
-
-        variable_features = variable_features.astype({'var_type': int, 'var_lb': float, 'var_ub': float})
-
-        return variable_features  # pd.dataframe
-
-    def extract_feature(self) -> Union[List[Union[int, float]], np.ndarray, pd.Series, pd.DataFrame]:
-        """
-        Extracts features from MIP instances
-
-        Returns
-        -------
-        feature_features : Union[List[Union[int, float]], np.ndarray, pd.Series, pd.DataFrame]
-            The extracted features
-        """
-        # Extract variable and constraints features
-        variable_features = self.extract_variable_features()
-        constraint_features, constraint_signs = self.extract_constraint_features()
-        objective_sense = self.get_sense()
-
-        # Create a DataFrame with the desired format for MABSelector
-        feature_df = pd.concat([variable_features, constraint_features, constraint_signs], axis=1)
-        feature_df.insert(0, 'objective_sense', objective_sense)
-        feature_df.loc[1:, 'objective_sense'] = np.nan
-        feature_df.fillna('nan', inplace=True)
-        feature_df.reset_index(drop=True, inplace=True)
-
-        return feature_df
-
-    def get_var_features(self):
-        return self.var_features
-
-    def get_objective_sol(self,solution):
-        return  self.model.getSolObjVal(solution)
-    def create_sol(self):
-        return self.model.createSol()
-
-    def forget_sol(self, create_solution):
-        self.model.freeSol(create_solution)
-
-    def transform_solution_to_array(self, solution1):
-        solution_array = []
-        for i in range(self.model.getNVars()):
-            solution_array.append(self.model.getSolVal(solution1, self.model.getVars()[i]))
-        solution_array = np.array(solution_array)
-
-        return solution_array
+print(f"Found solution with objective {res.best_state.objective()}.")

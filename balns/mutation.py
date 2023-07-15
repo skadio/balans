@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 import numpy as np
 from mabwiser.mab import LearningPolicy
@@ -7,12 +6,14 @@ from alns import ALNS
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
+import copy
 import pandas as pd
 import math
 import os
 import pyscipopt as scip
 from problemstate import ProblemState
 from readinstance import ReadInstance
+
 
 def extract_variable_features(state: ProblemState):
     varbls = state.model.getVars()
@@ -34,8 +35,7 @@ def extract_variable_features(state: ProblemState):
     return variable_features  # pd.dataframe
 
 
-def to_destroy_mut(discrete) -> int:
-    delta = 0.75
+def to_destroy_mut(discrete, delta) -> int:
     return int(delta * len(discrete))
 
 
@@ -49,51 +49,81 @@ def find_discrete(state: ProblemState):
 
 
 def mutation_op(state: ProblemState, rnd_state):
+
+
     discrete = find_discrete(state)
 
-    to_remove = rnd_state.choice(discrete, size=to_destroy_mut(discrete))
+    to_remove = rnd_state.choice(discrete, size=to_destroy_mut(discrete, delta=0.25))
 
-    # fix variable yapman lazim burada
 
     assignments = state.solution.copy()
     assignments[to_remove] = None
-    # print(assignments)
 
-    scip_sol = state.model.createSol()
     subMIP_vars = state.model.getVars()
 
-    for i in range(state.model.getNVars()):
-        val = assignments[i]
-        state.model.setSolVal(scip_sol, subMIP_vars[i], val)
+    for var in subMIP_vars:
 
-    #         for var in state.model.getVars()[var]:
-    #             print("var",var)
-    #             #state.model.setSolVal(scip_sol, var, assignments[var])
+        if var.getIndex() in to_remove:
+            state.x[var] = 0
 
-    return ProblemState(scip_sol, state.model)
+    return ProblemState(state.x, state.model)
+
+
+def mutation_op2(state: ProblemState, rnd_state):
+    #state = copy.deepcopy(state)
+
+    discrete = find_discrete(state)
+
+    to_remove = rnd_state.choice(discrete, size=to_destroy_mut(discrete, delta=0.50))
+
+
+    assignments = state.solution.copy()
+    assignments[to_remove] = None
+
+    subMIP_vars = state.model.getVars()
+
+    for var in subMIP_vars:
+
+        if var.getIndex() in to_remove:
+            state.x[var] = 0
+
+    return ProblemState(state.x, state.model)
+
+
+def mutation_op3(state: ProblemState, rnd_state):
+    #state = copy.deepcopy(state)
+
+    discrete = find_discrete(state)
+
+    to_remove = rnd_state.choice(discrete, size=to_destroy_mut(discrete, delta=0.75))
+    assignments = state.solution.copy()
+    assignments[to_remove] = None
+    sub_vars = state.model.getVars()
+    for var in sub_vars:
+
+        if var.getIndex() in to_remove:
+            state.x[var] = 0
+
+    return ProblemState(state.x, state.model)
 
 
 def repair_op(state: ProblemState, rnd_state) -> ProblemState:
-    # Not the most effective way but it works!
-    # for i in to_remove:
-    #   state.model.addCons(state.model.getVars()[i] == state.solution[i])
 
-    #var.getIndex()
     for var in state.model.getVars():
-        if not np.isnan(state.x[var]):
+        # if not np.isnan(state.x[var]):
+        # print(state.x[var])
+        if state.x[var] == 0:
             # not the best way to enforce that, but it works
             state.model.addCons(var == state.x[var])
-            # model.addCons(x  == 9)
 
-            # model.addCons(x + y + z == 32, name="Heads")
 
-    # s.getVal(x) == s.getSolVal(solution, x)
-
-    #solve sub_MIP
+    # solve sub_MIP
     state.model.optimize()
 
     solution = state.model.getBestSol()
 
     state = ProblemState(solution, state.model)
-    print(state.solution)
+    print("current iteration: ", state.solution)
+    print("current obj val: ", state.objective())
+
     return state
