@@ -1,13 +1,13 @@
 import os
-import unittest
-import numpy as np
-
-from alns import ALNS
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
 
+from balans.destroy import DestroyOperators
+from balans.repair import RepairOperators
+from balans.solver import Balans
 from balans.utils import Constants
+from tests.test_base import BaseTest
 
 from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
 
@@ -16,41 +16,29 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 
-class BALNSTest(unittest.TestCase):
+class BalansTest(BaseTest):
 
-    def test_balns(self):
+    def test_balans(self):
 
-        # Set RNG
-        np.random.seed(Constants.default_seed)
-
-        # ALNS
-        alns = ALNS(np.random.RandomState(Constants.default_seed))
-
-        # Operators
-        alns.add_destroy_operator(mutation)
-
-        # Initial solution
+        # Input
         instance = "neos-5140963-mincio.mps.gz"
-        instance_path = os.path.join(ROOT_DIR, "data", instance)
-        initial_state = solve(instance_path, gap=0.50, time=30)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
 
-        initial_solution_value = initial_state.objective()
-
-        # Bandit selector
-        select = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
-                             learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
-
-        # Accept criterion
+        # Parameters
+        seed = Constants.default_seed
+        destroy_ops = [DestroyOperators.Mutation]
+        repair_ops = [RepairOperators.Repair]
+        selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
+                               learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
         accept = HillClimbing()
-
-        # Stop condition
         stop = MaxIterations(5)
 
+        # Solver
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
+
         # Run
-        result = alns.iterate(initial_state, select, accept, stop)
+        result = balans.solve(instance_path)
+        print("Best solution:", result.best_state.objective())
 
-        # Result
-        print(f"Found solution with objective {result.best_state.objective()}.")
-
-        # Check optimization sense first (this assumes minimization)
-        self.assertTrue(result.best_state.objective() < initial_solution_value)
+        # Assert
+        self.assertIsBetter(balans.initial_obj_val, result.best_state.objective(), balans.instance.sense)

@@ -1,12 +1,7 @@
-import numpy as np
-import pyscipopt as scip
-from balans import BaseOperator
-from balans import OperatorExtractor
-from utils import MIPState
-import pyscipopt as scip
+from balans.base_state import _State
 
 
-def local_branching(state: State, rnd_state):
+def crossover(state: _State, rnd_state):
     sub_vars = state.model.getVars()
     same_vars = []
     for var in sub_vars:

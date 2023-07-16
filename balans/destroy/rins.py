@@ -1,20 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-import matplotlib.pyplot as plt
 import numpy as np
-from mabwiser.mab import LearningPolicy
-
-from alns import ALNS
-from alns.accept import *
-from alns.select import *
-from alns.stop import *
-import pandas as pd
-import math
-import os
-import pyscipopt as scip
-from base_state import State
-import copy
+from balans.base_state import _State
 
 
 def to_destroy_rins(init_sol, init_sol2, discrete):
@@ -22,7 +7,7 @@ def to_destroy_rins(init_sol, init_sol2, discrete):
     return to_remove
 
 
-def lp_relax(state: State):
+def lp_relax(state: _State):
     """
     Gets and Solves LP relaxed version of the same problem
 
@@ -40,14 +25,14 @@ def lp_relax(state: State):
 
     solution = state.model.getBestSol()
 
-    state = State(solution, state.model)
+    state = _State(solution, state.model)
     print("current iteration: ", state.solution)
     print("current obj val: ", state.objective())
 
     return state
 
 
-def rins(state: State, rnd_state):
+def rins(state: _State, rnd_state):
     discrete = find_discrete(state)
     lp_state = lp_relax(state)
     to_remove = rnd_state.choice(discrete, size=to_destroy_rins(discrete))
@@ -65,4 +50,3 @@ def rins(state: State, rnd_state):
     for var in same_vars:
         state.x[var] = 0
 
-    return State(state.x, state.model)

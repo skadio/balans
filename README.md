@@ -8,30 +8,43 @@ Balans follows a scikit-learn style public interface,
 adheres to [PEP-8 standards](https://www.python.org/dev/peps/pep-0008/), 
 and is tested heavily. 
 
-Documentation is available at [github.io/skadio](https://github.com/skadio/balans).
-
 ## Quick Start
 
 ```python
-# Beautiful example that shows how to ..
+from alns.accept import HillClimbing
+from alns.select import MABSelector
+from alns.stop import MaxIterations
+from mabwiser.mab import LearningPolicy
+from balans.destroy import DestroyOperators
+from balans.repair import RepairOperators
+from balans.solver import Balans
 
-# Import ???? Library
-from ????.xx import xx
-
-# Data
-xx .. 
+# Solver
+balans = Balans(destroy_ops=[DestroyOperators.Mutation], 
+                repair_ops=[RepairOperators.Repair], 
+                selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
+                                       learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15)),
+                accept=HillClimbing(),
+                stop=MaxIterations(5))
 
 # Run
-xx
+result = balans.solve("neos-5140963-mincio.mps.gz")
+
+# Result
+print("Best solution:", result.best_state.objective())
 ```
 
-## Available Operators
+## Available Destroy Operators
+* Crossover [reference]
+* Dins
+* Local_Branching
+* Mutation
+* No_Objective
+* Proximit
+* Rens
 
-Available Destroy Operators:
-* xx [1]
-
-Available Repair Operators: 
-* yy [6]
+## Available Repair Operators
+* Repair Sub-MIP
 
 
 ## Installation
@@ -47,17 +60,12 @@ Alternatively, here is the official [Visual Studio C++ Build Tools](https://visu
 Balans can be installed from the wheel file or building from source by following the instructions in 
 our [documentation](https://github.io/balans/installation.html).
 
-## Support
-
-Please submit bug reports and feature requests as [Issues](https://github.com/skadio/balans/issues).
-
 ## License
 
 Balans is licensed under the [Apache License 2.0](LICENSE.md).
 
 ## Installation
 Balans requires Python 3.8+ and can be installed from the provided wheel file.  
-
 
 ```
 $ git clone https://github.com/skadio/balans   
@@ -76,7 +84,7 @@ $ python -m unittest discover tests
 
 | Date | Notes |
 |--------|-------------|
-| July 7, 2023 | Draft Initial release |
+| July 7, 2023 | Initial release |
 
 ## References
 

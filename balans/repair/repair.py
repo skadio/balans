@@ -1,7 +1,7 @@
-from balans.base_state import State
+from balans.base_state import _State
 
 
-def repair(current: State, rnd_state) -> State:
+def repair(current: _State, rnd_state) -> _State:
     print("\t Repair")
 
     # Solve the state with fixed variables to repair and update solution and objective

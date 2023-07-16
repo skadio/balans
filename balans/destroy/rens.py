@@ -1,5 +1,8 @@
+import copy
+from balans.base_state import _State
 
-def no_objective(state: State, rnd_state):
+
+def rens(state: _State, rnd_state):
     sub_vars = state.model.getVars()
     same_vars = []
     for var in sub_vars:
@@ -9,4 +12,4 @@ def no_objective(state: State, rnd_state):
     for var in same_vars:
         state.x[var] = 0
 
-    return State(state.x, state.model)
+    return _State(state.x, state.model)

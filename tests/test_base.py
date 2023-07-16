@@ -5,16 +5,14 @@ from balans.utils import Constants
 
 class BaseTest(unittest.TestCase):
 
-    @staticmethod
-    def is_better(before, after, sense):
+    def assertIsBetter(self, before, after, sense):
         if sense == Constants.minimize:
-            return after < before
+            self.assertLess(after, before)
         else:
-            return after > before
+            self.assertGreater(after, before)
 
-    @staticmethod
-    def is_not_worse(before, after, sense):
+    def is_not_worse(self, before, after, sense):
         if sense == Constants.minimize:
-            return after <= before
+            self.assertLessEqual(after, before)
         else:
-            return after >= before
+            self.assertGreaterEqual(after, before)

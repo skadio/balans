@@ -6,14 +6,13 @@ from alns.accept import *
 from alns.select import *
 from alns.stop import *
 
-from balans.base_state import State
-from balans.base_instance import Instance
-from balans.mutation import mutation_25, mutation_50, mutation_75
-from balans.repair import repair
+from balans.base_state import _State
+from balans.base_instance import _Instance
+from balans.mutation import mutation_25
+from balans.repair.repair import repair
 from balans.utils import Constants
 from tests.test_base import BaseTest
-from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
-
+from mabwiser.mab import LearningPolicy
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
@@ -36,13 +35,13 @@ class DinsTest(BaseTest):
         # Create instance from mip file
         instance_name = "neos-5140963-mincio.mps.gz"
         instance_path = os.path.join(ROOT_DIR, "data", instance_name)
-        instance = Instance(instance_path)
+        instance = _Instance(instance_path)
 
         # Initial solution
         initial_var_to_val, initial_obj_val = instance.solve(gap=0.50, time=30)
 
         # Initial state with the initial solution
-        initial_state = State(instance, initial_var_to_val, initial_obj_val)
+        initial_state = _State(instance, initial_var_to_val, initial_obj_val)
 
         # Bandit selector
         select = MABSelector(scores=[5, 2, 1, 0.5],

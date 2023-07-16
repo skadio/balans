@@ -4,7 +4,7 @@ from balans.utils import Constants
 from typing import Tuple, Dict, Any
 
 
-class Instance:
+class _Instance:
     """
     Instance from a given MIP file
     """
@@ -18,7 +18,7 @@ class Instance:
         self.discrete_indexes = None  # static, set once and for all in solve()
         self.sense = None  # static, set once and for all in solve()
 
-    def solve(self, gap=None, time=None, destroy_set=None, var_to_val=None) -> Tuple[Dict[Any, float], float]:
+    def solve(self, is_initial_solve=False, destroy_set=None, var_to_val=None) -> Tuple[Dict[Any, float], float]:
 
         # Model
         model = scip.Model()
@@ -29,10 +29,12 @@ class Instance:
 
         # Parameters
         # model.setPresolve(scip.SCIP_PARAMSETTING.OFF) ## we should use presolve, no?
-        if gap:
-            model.setParam("limits/gap", gap)
-        if time:
-            model.setParam('limits/time', time)
+        if is_initial_solve:
+            model.setParam("limits/bestsol", 1)
+        # if gap:
+        #     model.setParam("limits/gap", gap)
+        # if time:
+        #     model.setParam('limits/time', time)
 
         # Variables
         variables = model.getVars()
