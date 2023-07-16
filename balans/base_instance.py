@@ -1,6 +1,6 @@
 import pandas as pd
 import pyscipopt as scip
-from balns.utils import Constants
+from balans.utils import Constants
 from typing import Tuple, Dict, Any
 
 

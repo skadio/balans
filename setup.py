@@ -8,7 +8,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 with open("requirements.txt", "r", encoding="utf-8") as f:
     required = f.read().splitlines()
 
-with open(os.path.join('balns', '_version.py')) as f:
+with open(os.path.join('balans', '_version.py')) as f:
     exec(f.read())
 
 # python setup.py bdist_wheel

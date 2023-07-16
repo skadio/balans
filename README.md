@@ -1,14 +1,14 @@
-# BALNS: Bandit-based Adaptive Large Neighborhood Search
+# BALANS: Bandit-based Adaptive Large Neighborhood Search
 
-BALNS is a research library written in Python 
+Balans is a research library written in Python 
 for solving Mixed-Integer Programming problems (MIPs) 
 using bandit-based adaptive large neighborhood search.
 
-MAB ALNS follows a scikit-learn style public interface, 
+Balans follows a scikit-learn style public interface, 
 adheres to [PEP-8 standards](https://www.python.org/dev/peps/pep-0008/), 
 and is tested heavily. 
 
-Documentation is available at [github.io/skadio](https://github.com/skadio/balns).
+Documentation is available at [github.io/skadio](https://github.com/skadio/balans).
 
 ## Quick Start
 
@@ -36,19 +36,19 @@ Available Repair Operators:
 
 ## Installation
 
-BALNS can be installed from the wheel file or building from source by following the instructions in 
-our [documentation](https://github.io/BALNS/installation.html).
+Balans can be installed from the wheel file or building from source by following the instructions in 
+our [documentation](https://github.io/balans/installation.html).
 
 ## Support
 
-Please submit bug reports and feature requests as [Issues](https://github.com/XXX/issues).
+Please submit bug reports and feature requests as [Issues](https://github.com/skadio/balans/issues).
 
 ## License
 
-BALNS is licensed under the [Apache License 2.0](LICENSE.md).
+Balans is licensed under the [Apache License 2.0](LICENSE.md).
 
 ## Installation
-BALNS requires Python 3.6+ and can be installed from the provided wheel file.  
+Balans requires Python 3.8+ and can be installed from the provided wheel file.  
 
 
 ```

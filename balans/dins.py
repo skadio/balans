@@ -6,8 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from tests.test_base import BaseTest
 
 
-class ExampleTest(BaseTest):
 
-    def test_tautology(self):
+def dinst(state: State, rnd_state):
 
-        self.assertEqual(True, True)
+    return State(state.x, state.model)

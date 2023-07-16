@@ -6,11 +6,11 @@ from alns.accept import *
 from alns.select import *
 from alns.stop import *
 
-from balns.base_state import State
-from balns.base_instance import Instance
-from balns.mutation import mutation_25, mutation_50, mutation_75
-from balns.repair import repair
-from balns.utils import Constants
+from balans.base_state import State
+from balans.base_instance import Instance
+from balans.mutation import mutation_25, mutation_50, mutation_75
+from balans.repair import repair
+from balans.utils import Constants
 from tests.test_base import BaseTest
 from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
 
@@ -63,5 +63,5 @@ class BALNSTest(BaseTest):
         final_obj_value = result.best_state.objective()
         print("Objective", final_obj_value)
 
-        # Check optimization sense first (this assumes minimization)
+        # Assert
         self.assertTrue(self.is_better(initial_obj_val, final_obj_value, instance.sense))

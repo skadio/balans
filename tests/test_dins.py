@@ -7,7 +7,7 @@ from alns.accept import *
 from alns.select import *
 from alns.stop import *
 
-from balns.utils import solve, Constants
+from balans.utils import solve, Constants
 
 from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
 
@@ -37,7 +37,9 @@ class XXXTest(unittest.TestCase):
         initial_solution_value = initial_state.objective()
 
         # Bandit selector
-        select = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
+        select = MABSelector(scores=[5, 2, 1, 0.5],
+                             num_destroy=1,
+                             num_repair=1,
                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
 
         # Accept criterion
@@ -52,5 +54,5 @@ class XXXTest(unittest.TestCase):
         # Result
         print(f"Found solution with objective {result.best_state.objective()}.")
 
-        # Check optimization sense first (this assumes minimization)
+        # Assert
         self.assertTrue(result.best_state.objective() < initial_solution_value)

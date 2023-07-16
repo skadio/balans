@@ -1,6 +1,6 @@
 import unittest
 
-from balns.utils import Constants
+from balans.utils import Constants
 
 
 class BaseTest(unittest.TestCase):

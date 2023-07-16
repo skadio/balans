@@ -7,7 +7,7 @@ from alns.accept import *
 from alns.select import *
 from alns.stop import *
 
-from balns.utils import Constants
+from balans.utils import Constants
 
 from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
 
