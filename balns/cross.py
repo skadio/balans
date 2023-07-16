@@ -20,8 +20,8 @@ instance_path = "neos-5140963-mincio.mps.gz"
 
 # Terrible - but simple - two first solution, where only the first item is
 # selected.
-instance = ReadInstance(problem_instance_file=instance_path)
-instance2 = ReadInstance(problem_instance_file=instance_path)
+instance = ReadInstance(instance_file=instance_path)
+instance2 = ReadInstance(instance_file=instance_path)
 
 # Time =30 and gap limit = 50 percent gap within the solution
 init_sol = instance.initial_state(0.50, 30)

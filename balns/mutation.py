@@ -13,7 +13,7 @@ import os
 import pyscipopt as scip
 from problemstate import ProblemState
 from readinstance import ReadInstance
-
+# from balns import solve
 
 def extract_variable_features(state: ProblemState):
     varbls = state.model.getVars()
@@ -39,7 +39,7 @@ def to_destroy_mut(discrete, delta) -> int:
     return int(delta * len(discrete))
 
 
-def find_discrete(state: ProblemState):
+def find_discrete_index(state: ProblemState):
     discrete = []
     for i in range(state.length()):
         var_features = extract_variable_features(state)
@@ -48,82 +48,74 @@ def find_discrete(state: ProblemState):
     return discrete
 
 
-def mutation_op(state: ProblemState, rnd_state):
+def mutation_op(current: ProblemState, rnd_state):
+
+    destroy = copy.deepcopy(current)
+
+    destroy_index = find_discrete_index(destroy)
+
+    # 5 , 7 , 9
+    # [0, 0, 0, 0, 1, 0, 1, 0, 1, 0]
+    destroy.destroy_set = set(rnd_state.choice(destroy_index, size=to_destroy_mut(destroy_index, delta=0.25)))
+
+    return destroy
 
 
-    discrete = find_discrete(state)
-
-    to_remove = rnd_state.choice(discrete, size=to_destroy_mut(discrete, delta=0.25))
-
-
-    assignments = state.solution.copy()
-    assignments[to_remove] = None
-
-    subMIP_vars = state.model.getVars()
-
-    for var in subMIP_vars:
-
-        if var.getIndex() in to_remove:
-            state.x[var] = 0
-
-    return ProblemState(state.x, state.model)
-
-
-def mutation_op2(state: ProblemState, rnd_state):
+def mutation_op2(current: ProblemState, rnd_state):
     #state = copy.deepcopy(state)
 
-    discrete = find_discrete(state)
+    discrete = find_discrete_index(current)
 
     to_remove = rnd_state.choice(discrete, size=to_destroy_mut(discrete, delta=0.50))
 
-
-    assignments = state.solution.copy()
+    assignments = current.solution.copy()
     assignments[to_remove] = None
 
-    subMIP_vars = state.model.getVars()
+    subMIP_vars = current.model.getVars()
 
     for var in subMIP_vars:
 
         if var.getIndex() in to_remove:
-            state.x[var] = 0
+            current.x[var] = 0
 
-    return ProblemState(state.x, state.model)
+    return ProblemState(current.x, current.model)
 
 
-def mutation_op3(state: ProblemState, rnd_state):
+def mutation_op3(current: ProblemState, rnd_state):
     #state = copy.deepcopy(state)
 
-    discrete = find_discrete(state)
+    discrete = find_discrete_index(current)
 
     to_remove = rnd_state.choice(discrete, size=to_destroy_mut(discrete, delta=0.75))
-    assignments = state.solution.copy()
+    assignments = current.solution.copy()
     assignments[to_remove] = None
-    sub_vars = state.model.getVars()
+    sub_vars = current.model.getVars()
     for var in sub_vars:
 
         if var.getIndex() in to_remove:
-            state.x[var] = 0
+            current.x[var] = 0
 
-    return ProblemState(state.x, state.model)
-
-
-def repair_op(state: ProblemState, rnd_state) -> ProblemState:
-
-    for var in state.model.getVars():
-        # if not np.isnan(state.x[var]):
-        # print(state.x[var])
-        if state.x[var] == 0:
-            # not the best way to enforce that, but it works
-            state.model.addCons(var == state.x[var])
+    return ProblemState(current.x, current.model)
 
 
-    # solve sub_MIP
-    state.model.optimize()
+def solve(instance, gap, time, destroy_set=None, var_to_val=None):
+    model = scip.Model()
+    model.hideOutput()
+    model.readProblem(instance)
+    model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
+    model.setParam("limits/gap", gap)
+    model.setParam('limits/time', time)
 
-    solution = state.model.getBestSol()
+    if destroy_set:
+        for var in model.getVars():
+            index = var.getIndex()
+            if index not in destroy_set:
+                model.addCons(var == var_to_val[var])
 
-    state = ProblemState(solution, state.model)
-    print("current iteration: ", state.solution)
-    print("current obj val: ", state.objective())
+    model.optimize()
 
-    return state
+    var_to_val = {}
+    for var in model.getVars():
+        var_to_val[var] = model.getVal(var)
+
+    return ProblemState(instance, var_to_val)

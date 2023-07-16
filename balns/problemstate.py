@@ -20,11 +20,14 @@ class ProblemState:
     Current objective also stored.
     """
 
-    def __init__(self, x, model):
-        self.x = x  # solution type:scip.sol
-        self.model = model
-        self.solution = self.transform_solution_to_array()  # type: np.array
-        self.incumbent = self.solution
+    def __init__(self, instance, var_to_val):
+        self.instance = instance
+        self.var_to_val = var_to_val
+        self.destroy_set = None
+
+        self.model = scip.Model()
+        self.incumbent = self.var_to_val
+        self.x = None
 
     def objective(self):
         # retrieve the objective value of the current solution

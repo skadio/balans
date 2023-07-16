@@ -1,70 +1,65 @@
-import numpy as np
 from mabwiser.mab import LearningPolicy
+import numpy as np
+import pyscipopt as scip
+from problemstate import ProblemState
 from alns import ALNS
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-from problemstate import ProblemState
-from readinstance import ReadInstance
-from mutation import mutation_op, mutation_op2, mutation_op3, to_destroy_mut, find_discrete, extract_variable_features, \
-    repair_op
+from mutation import mutation_op, mutation_op2, mutation_op3
 from cross import crossover_op
 from rins import rins_op
+from repair import  repair_op
 
 
 SEED = 42
 np.random.seed(SEED)
 
+
+def solve(instance, gap, time, destroy_set=None, var_to_val=None):
+    model = scip.Model()
+    model.hideOutput()
+    model.readProblem(instance)
+    model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
+    model.setParam("limits/gap", gap)
+    model.setParam('limits/time', time)
+
+    if destroy_set:
+        for var in model.getVars():
+            index = var.getIndex()
+            if index not in destroy_set:
+                model.addCons(var == var_to_val[var])
+
+    model.optimize()
+
+    var_to_val = {}
+    for var in model.getVars():
+        var_to_val[var] = model.getVal(var)
+
+    return ProblemState(instance, var_to_val)
+
+
 if __name__ == "__main__":
-    instance_path = "neos-5140963-mincio.mps.gz"
 
-    # Terrible - but simple - two first solution, where only the first item is
-    # selected.
-    instance = ReadInstance(problem_instance_file=instance_path)
-    instance2 = ReadInstance(problem_instance_file=instance_path)
+    # ALNS
+    alns = ALNS(np.random.RandomState(SEED))
 
-    # Time =30 and gap limit = 50 percent gap within the solution
-    init_sol = instance.initial_state(0.50, 30)
-    # Time =30 and gap limit = 75 percent gap within the solution
-    init_sol2 = instance2.initial_state(0.75, 30)
-
-    print("Initial Feasible Solution:", init_sol.transform_solution_to_array2())
-    print("Initial Objective Value:", init_sol.objective())
-
-    print("Initial Feasible Solution:", init_sol2.transform_solution_to_array2())
-    print("Initial Objective Value:", init_sol2.objective())
-
-
-def make_alns() -> ALNS:
-    rnd_state = np.random.RandomState(SEED)
-    alns = ALNS(rnd_state)
-
-    # noinspection PyTypeChecker
+    # Operators
     alns.add_destroy_operator(mutation_op)
-    # noinspection PyTypeChecker
     alns.add_destroy_operator(mutation_op2)
-    # noinspection PyTypeChecker
     alns.add_destroy_operator(mutation_op3)
-    # noinspection PyTypeChecker
     alns.add_destroy_operator(crossover_op)
-    # noinspection PyTypeChecker
     alns.add_destroy_operator(rins_op)
-    # noinspection PyTypeChecker
     alns.add_repair_operator(repair_op)
-    return alns
 
+    # Initial solution
+    initial_state = solve(instance="neos-5140963-mincio.mps.gz", gap=0.50, time=30)
 
-accept = HillClimbing()
+    # MABSelector
+    select = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
+                         learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
 
-# MABSelector
-# noinspection PyTypeChecker
-select = MABSelector(scores=[5, 2, 1, 0.5],
-                     num_destroy=5,
-                     num_repair=1,
-                     learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
+    # Run
+    result = alns.iterate(initial_state, select, accept=HillClimbing(), MaxIterations(5))
 
-alns = make_alns()
-
-res = alns.iterate(init_sol, select, accept, MaxIterations(5))
-
-print(f"Found solution with objective {res.best_state.objective()}.")
+    print(f"Found solution with objective {result.best_state.objective()}.")
