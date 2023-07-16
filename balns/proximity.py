@@ -1,13 +1,10 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-
 import numpy as np
 import pyscipopt as scip
 from balns import BaseOperator
 from balns import OperatorExtractor
 from utils import MIPState
 import pyscipopt as scip
+
 
 class _Mutation(OperatorExtractor):
     """

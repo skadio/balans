@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import matplotlib.pyplot as plt
 import copy
 import numpy as np
@@ -13,7 +10,7 @@ import pandas as pd
 import math
 import os
 import pyscipopt as scip
-from problemstate import ProblemState
+from base_state import State
 from readinstance import ReadInstance
 
 instance_path = "neos-5140963-mincio.mps.gz"
@@ -29,7 +26,7 @@ init_sol = instance.initial_state(0.50, 30)
 init_sol2 = instance2.initial_state(0.75, 30)
 
 
-def extract_variable_features(state: ProblemState):
+def extract_variable_features(state: State):
     varbls = state.model.getVars()
     var_types = [v.vtype() for v in varbls]
     lbs = [v.getLbGlobal() for v in varbls]
@@ -49,7 +46,7 @@ def extract_variable_features(state: ProblemState):
     return variable_features  # pd.dataframe
 
 
-def find_discrete(state: ProblemState):
+def find_discrete(state: State):
     discrete = []
     for i in range(state.length()):
         var_features = extract_variable_features(state)
@@ -58,7 +55,7 @@ def find_discrete(state: ProblemState):
     return discrete
 
 
-def crossover_op(state: ProblemState, rnd_state):
+def crossover_op(state: State, rnd_state):
     sub_vars = state.model.getVars()
     same_vars = []
     for var in sub_vars:
@@ -68,4 +65,4 @@ def crossover_op(state: ProblemState, rnd_state):
     for var in same_vars:
         state.x[var] = 0
 
-    return ProblemState(state.x, state.model)
+    return State(state.x, state.model)
