@@ -44,7 +44,7 @@ print("Best solution:", result.best_state.objective())
 [^1]: xxx
 * Dins[^2]
 [^2]: xxx
-* Local_Branching[^3]
+* Local Branching[^3]
 [^3]: xxx
 * Mutation[^4]
 [^4]: xxx
