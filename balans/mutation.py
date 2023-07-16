@@ -1,5 +1,5 @@
 import copy
-from base_state import State
+from balans.base_state import State
 
 
 def _mutation(current: State, rnd_state, delta) -> State:

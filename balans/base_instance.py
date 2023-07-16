@@ -55,14 +55,14 @@ class Instance:
         var_to_val = dict([(var, model.getVal(var)) for var in model.getVars()])
 
         # Objective
-        obj_value = model.getBestSolObj()
+        obj_value = model.getSolObjVal()
 
         # Return solution and objective
         return var_to_val, obj_value
 
     @staticmethod
     def is_discrete(var_type) -> bool:
-        return var_type in (Constants.Binary, Constants.Integer)
+        return var_type in (Constants.binary, Constants.integer)
 
     def extract_features(self, model, variables):
 

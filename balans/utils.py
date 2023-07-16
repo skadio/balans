@@ -1,6 +1,4 @@
-import pyscipopt as scip
-from base_state import State
-import pandas as pd
+from typing import NamedTuple
 
 
 class Constants(NamedTuple):

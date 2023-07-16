@@ -31,7 +31,7 @@ ipython_config.py
 
 # Dev and data folders on working branch
 dev/*
-data/*
+#data/*
 #notebooks/*
 
 # Metadata

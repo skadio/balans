@@ -1,4 +1,4 @@
-from base_state import State
+from balans.base_state import State
 
 
 def repair(current: State) -> State:

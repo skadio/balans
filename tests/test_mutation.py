@@ -19,7 +19,7 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 
-class BALNSTest(BaseTest):
+class MutationTest(BaseTest):
 
     def test_mutation(self):
 
