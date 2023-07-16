@@ -40,6 +40,7 @@ class MutationTest(BaseTest):
 
         # Initial solution
         initial_var_to_val, initial_obj_val = instance.solve(gap=0.50, time=30)
+        print(">>> START objective:", initial_obj_val)
 
         # Initial state with the initial solution
         initial_state = State(instance, initial_var_to_val, initial_obj_val)
@@ -54,14 +55,14 @@ class MutationTest(BaseTest):
         accept = HillClimbing()
 
         # Stop condition
-        stop = MaxIterations(5)
+        stop = MaxIterations(100)
 
         # Run
         result = alns.iterate(initial_state, select, accept, stop)
 
         # Result
         final_obj_value = result.best_state.objective()
-        print("Objective", final_obj_value)
+        print(">>> FINISH objective:", final_obj_value)
 
         # Assert
         self.assertTrue(self.is_better(initial_obj_val, final_obj_value, instance.sense))

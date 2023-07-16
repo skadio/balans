@@ -46,16 +46,16 @@ class Instance:
             for var in variables:
                 index = var.getIndex()
                 if index not in destroy_set:
-                    model.addCons(var == var_to_val[var])
+                    model.addCons(var == var_to_val[index])
 
         # Solve, potentially with fixed variables
         model.optimize()
 
         # Solution
-        var_to_val = dict([(var, model.getVal(var)) for var in model.getVars()])
+        var_to_val = dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
 
         # Objective
-        obj_value = model.getSolObjVal()
+        obj_value = model.getObjVal()
 
         # Return solution and objective
         return var_to_val, obj_value
@@ -80,10 +80,10 @@ class Instance:
                                          Constants.var_lb: [v.getLbGlobal() for v in variables],
                                          Constants.var_ub: [v.getUbGlobal() for v in variables]})
 
-        # Change df types
-        self.features_df = self.features_df.astype({Constants.var_type: int,
-                                                    Constants.var_lb: float,
-                                                    Constants.var_ub: float})
+        # # Change df types
+        # self.features_df = self.features_df.astype({Constants.var_type: int,
+        #                                             Constants.var_lb: float,
+        #                                             Constants.var_ub: float})
 
         # Optimization direction
         self.sense = model.getObjectiveSense()
