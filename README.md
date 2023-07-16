@@ -36,19 +36,19 @@ print("Best solution:", result.best_state.objective())
 
 ## Available Destroy Operators
 * Crossover[^1]
-[^1] xxx
+[^1]: xxx
 * Dins[^2]
-[^2] xxx
+[^2]: xxx
 * Local_Branching[^3]
-[^3] xxx
+[^3]: xxx
 * Mutation[^4]
-[^4] xxx
+[^4]: xxx
 * No Objective[^5]
-[^5] xxx 
+[^5]: xxx 
 * Proximity[^6]
-[^6] xxx
+[^6]: xxx
 * Rens[^7]
-[^7] xxx
+[^7]: xxx
 
 ## Available Repair Operators
 * Repair MIP
