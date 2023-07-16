@@ -156,7 +156,7 @@ class Balans:
             check_true(isinstance(backend, str), TypeError("Parallel backend must be a string." + str(backend)))
 
     @staticmethod
-    def _validate_solve(instance_path, gap, time):
+    def _validate_solve_args(instance_path, gap, time):
 
         check_true(isinstance(instance_path, str), TypeError("Instance path must be a string" + str(instance_path)))
         check_false(instance_path == "", ValueError("Instance cannot be empty" + str(instance_path)))

@@ -16,9 +16,9 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 
-class BalansTest(BaseTest):
+class RepairTest(BaseTest):
 
-    def test_balans(self):
+    def test_repair(self):
 
         # Input
         instance = "neos-5140963-mincio.mps.gz"
