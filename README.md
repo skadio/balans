@@ -11,18 +11,18 @@ The framework integrates [MABWiser](https://github.com/fidelity/mabwiser/) for c
 ## Quick Start
 
 ```python
-# Adaptive large neigborhood
-from alns.accept import HillClimbing
-from alns.select import MABSelector
-from alns.stop import MaxIterations
-
 # Contextual multi-armed bandits
 from mabwiser.mab import LearningPolicy
 
-# Balans meta-solver built on top of SCIP
+# Adaptive large neigborhood
+from alns.select import MABSelector
+from alns.accept import HillClimbing
+from alns.stop import MaxIterations
+
+# Meta-solver built on top of SCIP
+from balans.solver import Balans
 from balans.destroy import DestroyOperators
 from balans.repair import RepairOperators
-from balans.solver import Balans
 
 # Balans
 balans = Balans(destroy_ops=[DestroyOperators.Mutation], 
