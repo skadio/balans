@@ -35,27 +35,32 @@ print("Best solution:", result.best_state.objective())
 ```
 
 ## Available Destroy Operators
-* Crossover [reference]
-* Dins
-* Local_Branching
-* Mutation
-* No_Objective
-* Proximit
-* Rens
+* Crossover[^1]
+[^1] xxx
+* Dins[^2]
+[^2] xxx
+* Local_Branching[^3]
+[^3] xxx
+* Mutation[^4]
+[^4] xxx
+* No Objective[^5]
+[^5] xxx 
+* Proximity[^6]
+[^6] xxx
+* Rens[^7]
+[^7] xxx
 
 ## Available Repair Operators
-* Repair Sub-MIP
-
+* Repair MIP
 
 ## Installation
 
-1. Install a Python-compatible[^1] version of [SCIP Optimization Solver](https://www.scipopt.org/index.php#download) which requires prepackaged C++ libraries[^2]. 
-[^1]: The Pyhon interface only works with major solver versions, see [(SCIP Compatibility Table](https://pypi.org/project/PySCIPOpt/) to pick the right solver version.
-[^2]: The Solver is written in C++ so it requires [Visual C++ Redistributable Packages](), see the link under precompiled packages section.
-Alternatively, here is the official [Visual Studio C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) to download and install C++ development tools. 
-2. Now that the Solver and the required C++ backend is installed, set environment variable for [SCIPOPTDIR](https://imada.sdu.dk/u/marco/DM871/PySCIPOpt/md_INSTALL.html)
-3. Now that the Solver, required C++ backend is installed and is references in the environment, install the Python interface v`pip install pyscipopt` via pip[^3]
-[^3]: A good practice is to update first via `pip install --upgrade` or `python -m pip install --upgrade pip`
+1. Install a Python-compatible[^8] version of [SCIP Optimization Solver](https://www.scipopt.org/index.php#download) which requires prepackaged C++ libraries[^9].
+[^8]: The Pyhon interface only works with major solver versions, see [(SCIP Compatibility Table](https://pypi.org/project/PySCIPOpt/) to pick the right solver version.
+[^9]: The Solver is written in C++ so it requires [Visual C++ Redistributable Packages](), see the link under precompiled packages section. Alternatively, here is the official [Visual Studio C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) to download and install C++ development tools. 
+2. Now that the Solver _and_ the required C++ backend are installed, set the environment variable for [SCIPOPTDIR](https://imada.sdu.dk/u/marco/DM871/PySCIPOpt/md_INSTALL.html).
+3. Now that the Solver and required C++ backend are installed _and_ is references in the environment, install the Python interface via `pip install pyscipopt` or `conda install --channel conda-forge pyscipopt`[^10].
+[^10]: A good practice is to update first via `pip install --upgrade` or `python -m pip install --upgrade pip`
 
 Balans can be installed from the wheel file or building from source by following the instructions in 
 our [documentation](https://github.io/balans/installation.html).
