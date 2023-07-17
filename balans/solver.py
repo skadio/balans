@@ -109,6 +109,8 @@ class Balans:
 
     def solve(self, instance_path) -> Result:
 
+        self._validate_solve_args(instance_path)
+
         # Create instance from mip file
         self._instance = _Instance(instance_path)
 
@@ -156,18 +158,18 @@ class Balans:
             check_true(isinstance(backend, str), TypeError("Parallel backend must be a string." + str(backend)))
 
     @staticmethod
-    def _validate_solve_args(instance_path, gap, time):
+    def _validate_solve_args(instance_path):
 
         check_true(isinstance(instance_path, str), TypeError("Instance path must be a string" + str(instance_path)))
         check_false(instance_path == "", ValueError("Instance cannot be empty" + str(instance_path)))
         check_false(instance_path is None, ValueError("Instance cannot be None" + str(instance_path)))
         check_true(os.path.isfile(instance_path), ValueError("Instance must exist" + str(instance_path)))
 
-        if gap is not None:
-            check_true(isinstance(gap, int), TypeError("Gap must be an integer." + str(gap)))
-            check_true(gap >= 0, ValueError("Gap must be non-negative" + str(gap)))
-
-        if time is not None:
-            check_true(isinstance(time, int), TypeError("Time must be an integer." + str(time)))
-            check_true(time >= 0, ValueError("Time must be non-negative" + str(gap)))
+        # if gap is not None:
+        #     check_true(isinstance(gap, int), TypeError("Gap must be an integer." + str(gap)))
+        #     check_true(gap >= 0, ValueError("Gap must be non-negative" + str(gap)))
+        #
+        # if time is not None:
+        #     check_true(isinstance(time, int), TypeError("Time must be an integer." + str(time)))
+        #     check_true(time >= 0, ValueError("Time must be non-negative" + str(gap)))
 
