@@ -24,10 +24,15 @@ from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterio
 DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Dins),
                type(DestroyOperators.Local_Branching),
+               type(DestroyOperators.Local_Branching2),
+               type(DestroyOperators.Local_Branching3),
                type(DestroyOperators.Mutation),
+               type(DestroyOperators.Mutation2),
+               type(DestroyOperators.Mutation3),
                type(DestroyOperators.No_Objective),
                type(DestroyOperators.Proximity),
-               type(DestroyOperators.Rens))
+               type(DestroyOperators.Rens),
+               type(DestroyOperators.Rins))
 
 RepairType = (type(RepairOperators.Repair))
 
