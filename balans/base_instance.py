@@ -20,8 +20,10 @@ class _Instance:
         self.discrete_indexes = None  # static, set once and for all in solve()
         self.binary_indexes = None  # static, set once and for all in solve()
         self.sense = None  # static, set once and for all in solve()
+        self.lp_var_to_val, self.lp_obj = self.lp_solve()
 
-    def solve(self, is_initial_solve=False, destroy_set=None, var_to_val=None,float_index_to_be_bounded=None) -> Tuple[Dict[Any, float], float]:
+    def solve(self, is_initial_solve=False, destroy_set=None, var_to_val=None, float_index_to_be_bounded=None,
+              is_zero_obj=None, dins_set=None) -> Tuple[Dict[Any, float], float]:
 
         if is_initial_solve:
             # Model
@@ -64,12 +66,26 @@ class _Instance:
                 for var in variables:
                     if var.getIndex() not in destroy_set:
                         model.addCons(var == var_to_val[var.getIndex()])
+                    # ONLY FOR DINS
+                    if dins_set:
+                        if var.getIndex() in destroy_set:
+                            model.addCons(abs(var - self.lp_var_to_val[var.getIndex()]) <= abs(
+                                self.lp_var_to_val[var.getIndex()] - var_to_val[var.getIndex()]))
 
+            # ONLY FOR DINS, binary variables have more strict condition, dins_set = binary_indexes
+            if dins_set:
+                for var in variables:
+                    if var.getIndex() in dins_set:
+                        model.addCons(var == var_to_val[var.getIndex()])
+            # ONLY FOR RENS
             if float_index_to_be_bounded:
                 for var in variables:
                     if var.getIndex() in float_index_to_be_bounded:
                         model.addCons(var <= math.floor(var_to_val[var.getIndex()]))
                         model.addCons(var >= math.ceil(var_to_val[var.getIndex()]))
+            # ONLY FOR NO OBJECTIVE
+            if is_zero_obj:
+                model.setObjective(0, self.sense)
 
             model.optimize()
 

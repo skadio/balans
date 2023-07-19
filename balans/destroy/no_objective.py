@@ -1,14 +1,19 @@
+import copy
 from balans.base_state import _State
 
 
-def no_objective(state: _State, rnd_state):
-    sub_vars = state.model.getVars()
-    same_vars = []
-    for var in sub_vars:
-        if init_sol.x[var] == init_sol2.x[var]:
-            same_vars.append(var)
+def no_objective(current: _State, rnd_state) -> _State:
+    print("\t Destroy current objective:", current.obj_val)
+    next_state = copy.deepcopy(current)
 
-    for var in same_vars:
-        state.x[var] = 0
+    discrete_indexes = current.instance.discrete_indexes
 
-    return _State(state.x, state.model)
+    # Will be used later to improve its performance through delta*obj_lp_relax constraint
+    lp_var_to_val, lp_obj_val = current.instance.lp_solve()
+
+    next_state.destroy_set = None
+    is_zero_obj = [1]
+
+    print("\t Destroy set:", next_state.destroy_set)
+    return _State(next_state.instance, next_state.var_to_val, next_state.obj_val, next_state.destroy_set,
+                  is_zero_obj=is_zero_obj)
