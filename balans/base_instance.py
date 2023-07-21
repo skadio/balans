@@ -23,17 +23,22 @@ class _Instance:
         self.lp_var_to_val, self.lp_obj = self.lp_solve()
 
     def solve(self, is_initial_solve=False, destroy_set=None, var_to_val=None, float_index_to_be_bounded=None,
-              is_zero_obj=None, dins_set=None) -> Tuple[Dict[Any, float], float]:
+              is_zero_obj=None, dins_set=None, proximity_set=None) -> Tuple[Dict[Any, float], float]:
 
+        # ONLY FOR INITIAL SOLVE
         if is_initial_solve:
             # Model
             model = scip.Model()
+
+            # Setting the verbosity level to 0
             model.hideOutput()
+
+            # # Instance
             model.readProblem(self.path)
 
-            #
-            # # Instance
-            model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
+            # Turning off presolve
+            # model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
+
             model.setParam("limits/bestsol", 1)
             variables = model.getVars()
             # Features, set once and for all
@@ -48,15 +53,19 @@ class _Instance:
             if is_initial_solve:
                 model.freeProb()
             return var_to_val, obj_value
+
+        # IF NOT INITIAL SOLVE:
         if not is_initial_solve:
             # Model
             model = scip.Model()
+
+            # Setting the verbosity level to 0
             model.hideOutput()
-            model.readProblem(self.path)
-            #
+
             # # Instance
+            model.readProblem(self.path)
+
             # model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
-            # model.setParam("limits/bestsol", 100)
             variables = model.getVars()
             # Features, set once and for all
             if not self.has_features:
@@ -77,15 +86,37 @@ class _Instance:
                 for var in variables:
                     if var.getIndex() in dins_set:
                         model.addCons(var == var_to_val[var.getIndex()])
+
             # ONLY FOR RENS
             if float_index_to_be_bounded:
                 for var in variables:
                     if var.getIndex() in float_index_to_be_bounded:
                         model.addCons(var <= math.floor(var_to_val[var.getIndex()]))
                         model.addCons(var >= math.ceil(var_to_val[var.getIndex()]))
+
             # ONLY FOR NO OBJECTIVE
             if is_zero_obj:
                 model.setObjective(0, self.sense)
+
+            # if proximity_set:
+            #TODO -proximity needs modification of constraints.
+            #     currentNumVar=1
+            #     for var in variables:
+            #         # BINARY VARS
+            #         if var.getIndex() in proximity_set:
+            #
+            #             if var_to_val[var.getIndex()] == 0:
+            #                 model.addVar("var" + str(currentNumVar), vtype="B", obj=1.0)
+            #
+            #             if var_to_val[var.getIndex()] == 1:
+            #                 model.addVar("var" + str(currentNumVar), vtype="B", obj=-1.0)
+            #
+            #         currentNumVar = currentNumVar+1
+            #         model.delVar(var)
+
+                    # # DROP ALL NON-BINARY VARIABLES
+                    # if var.getIndex() not in proximity_set:
+                    #     model.delVar(var)
 
             model.optimize()
 
@@ -138,7 +169,7 @@ class _Instance:
         # Optimization direction
         self.sense = model.getObjectiveSense()
 
-        # Other possible features can be LP relaxation?
+        # Other possible features can be LP relaxation? (Done)
 
     def lp_solve(self, destroy_set=None, var_to_val=None) -> Tuple[Dict[Any, float], float]:
 
@@ -154,8 +185,8 @@ class _Instance:
         if not self.has_features:
             self.extract_features(model, variables)
 
+        # Continuous relaxation of the problem
         for var in variables:
-            # Continuous relaxation of the problem
             model.chgVarType(var, 'CONTINUOUS')
 
         model.optimize()
