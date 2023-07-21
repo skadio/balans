@@ -25,22 +25,24 @@ from balans.destroy import DestroyOperators
 from balans.repair import RepairOperators
 
 # Balans
-balans = Balans(destroy_ops=[DestroyOperators.Mutation], 
-                repair_ops=[RepairOperators.Repair], 
-                selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
+balans = Balans(destroy_ops=[DestroyOperators.Mutation,DestroyOperators.Dins,DestroyOperators.Local_Branching,
+                             DestroyOperators.Rens,DestroyOperators.Rins,DestroyOperators.No_Objective],
+                repair_ops=[RepairOperators.Repair],
+                selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=6, num_repair=1,
                                        learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15)),
                 accept=HillClimbing(),
-                stop=MaxIterations(5))
+                stop=MaxIterations(100))
+
 
 # Run
-result = balans.solve("neos-5140963-mincio.mps.gz")
+result=balans.solve("noswot.mps.gz")
 
 # Result
 print("Best solution:", result.best_state.objective())
 ```
 
 ## Available Destroy Operators
-* Crossover[^1]
+* Rins[^1]
 [^1]: xxx
 * Dins[^2]
 [^2]: xxx
@@ -50,10 +52,8 @@ print("Best solution:", result.best_state.objective())
 [^4]: xxx
 * No Objective[^5]
 [^5]: xxx 
-* Proximity[^6]
+* Rens[^6]
 [^6]: xxx
-* Rens[^7]
-[^7]: xxx
 
 ## Available Repair Operators
 * Repair MIP
@@ -71,11 +71,20 @@ While MABWiser and ALNS are pip-installable as shown in [requirements.txt](https
 SCIP needs to be installed: 
 
 1. Install a Python-compatible[^8] version of [SCIP Optimization Solver](https://www.scipopt.org/index.php#download) which requires prepackaged C++ libraries[^9].
-[^8]: The Python interface of SCIP only works with major versions, see [SCIP Compatibility Table](https://pypi.org/project/PySCIPOpt/) to pick the right solver version.
-[^9]: SCIP is written in C++ so it requires [Visual C++ Redistributable Packages](), see the link under precompiled packages section. Alternatively, here is the official [Visual Studio C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) to download and install C++ development tools. 
+[^1]:E. Danna, E. Rothberg, and C. L. Pape. Exploring relaxation induced neighborhoods to improve MIP solutions. Mathematical Programming, 102(1):71–90,
+2005.
+[^2]: S. Ghosh. DINS, a MIP Improvement Heuristic. In M. Fischetti and D. P. Williamson, editors, Integer Programming and Combinatorial Optimization:
+12th International IPCO Conference, Ithaca, NY, USA, June 25-27, 2007. Proceedings, pages 310–323, Berlin, Heidelberg, 2007. Springer Berlin Heidelberg.
+[^3]: M. Fischetti and A. Lodi. Local branching. Mathematical Programming, 98(1-
+3):23–47, 2003.
+[^4]: . Rothberg. An Evolutionary Algorithm for Polishing Mixed Integer Programming Solutions. INFORMS Journal on Computing, 19(4):534–541, 2007.
+[^5]: Zero Objective.
+[^6]:  Berthold. RENS–the optimal rounding. Mathematical Programming Computation, 6(1):33–54, 2014.
+[^7]: The Python interface of SCIP only works with major versions, see [SCIP Compatibility Table](https://pypi.org/project/PySCIPOpt/) to pick the right solver version.
+[^8]: SCIP is written in C++ so it requires [Visual C++ Redistributable Packages](), see the link under precompiled packages section. Alternatively, here is the official [Visual Studio C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) to download and install C++ development tools. 
 2. Now that SCIP _and_ the required C++ backend are installed, set the environment variable for [SCIPOPTDIR](https://imada.sdu.dk/u/marco/DM871/PySCIPOpt/md_INSTALL.html).
 3. Now that SCIP and required C++ backend are installed _and_ is references in the environment, install the Python interface via `pip install pyscipopt` or `conda install --channel conda-forge pyscipopt`[^10].
-[^10]: A good practice is to update first via `pip install --upgrade` or `python -m pip install --upgrade pip`
+[^9]: A good practice is to update first via `pip install --upgrade` or `python -m pip install --upgrade pip`
 
 ## Test Your Setup
 
