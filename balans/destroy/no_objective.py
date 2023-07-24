@@ -3,6 +3,10 @@ from balans.base_state import _State
 
 
 def no_objective(current: _State, rnd_state) -> _State:
+
+    # CHANGE OBJECTIVE TO ZERO OBJECTIVE
+    # is_zero_obj sends non-empty list to base instance to do that.
+
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
 
@@ -12,6 +16,8 @@ def no_objective(current: _State, rnd_state) -> _State:
     lp_var_to_val, lp_obj_val = current.instance.lp_solve()
 
     next_state.destroy_set = None
+
+    # Just to make "is_zero_obj" not None
     is_zero_obj = [1]
 
     print("\t Destroy set:", next_state.destroy_set)

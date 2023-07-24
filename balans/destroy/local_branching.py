@@ -3,6 +3,11 @@ from balans.base_state import _State
 
 
 def _local_branching(current: _State, rnd_state, delta) -> _State:
+
+    #  For discrete variables we have a hard constraint,
+    #  here we say change at most half of them (delta=0.5).
+    #  Other possible delta values are 0.25 and 0.75.
+    #  Send the destroy set to base_instance.
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
 

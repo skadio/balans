@@ -9,7 +9,6 @@ from balans.base_instance import _Instance
 from balans.base_state import _State
 from balans.utils import Constants, check_false, check_true, create_rng
 
-
 from balans.destroy import DestroyOperators
 from balans.repair import RepairOperators
 
@@ -18,7 +17,6 @@ from alns.accept import LateAcceptanceHillClimbing, NonLinearGreatDeluge, Random
 from alns.accept import RecordToRecordTravel, SimulatedAnnealing, WorseAccept
 from alns.select import AlphaUCB, MABSelector, RandomSelect, RouletteWheel, SegmentedRouletteWheel
 from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterion
-
 
 # Type Declarations
 DestroyType = (type(DestroyOperators.Crossover),
@@ -29,6 +27,7 @@ DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Mutation),
                type(DestroyOperators.Mutation2),
                type(DestroyOperators.Mutation3),
+               type(DestroyOperators.Mutation4),
                type(DestroyOperators.No_Objective),
                type(DestroyOperators.Proximity),
                type(DestroyOperators.Rens),
@@ -100,6 +99,8 @@ class Balans:
         self._initial_var_to_val: Optional[Dict[int, float]] = None
         self._initial_obj_val: Optional[float] = None
 
+
+
     @property
     def instance(self) -> _Instance:
         return self._instance
@@ -120,11 +121,16 @@ class Balans:
         self._instance = _Instance(instance_path)
 
         # Initial solution
-        self._initial_var_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True)
+        self._initial_var_to_val, self._initial_obj_val, lp_var_to_val, lp_obj_val \
+            = self._instance.solve(is_initial_solve=True)
         print(">>> START objective:", self._initial_obj_val)
+        # LP solution
+        # self._lp_var_to_val, self._lp_obj_val = self._instance.lp_solve()
+        print(">>> LP objective:", lp_obj_val)
 
         # Initial state and solution
-        initial_state = _State(self._instance, self.initial_var_to_val, self.initial_obj_val)
+        initial_state = _State(self._instance, self.initial_var_to_val, self.initial_obj_val,
+                               lp_var_to_val=lp_var_to_val, lp_obj_val=lp_obj_val)
 
         # Run
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
@@ -177,4 +183,3 @@ class Balans:
         # if time is not None:
         #     check_true(isinstance(time, int), TypeError("Time must be an integer." + str(time)))
         #     check_true(time >= 0, ValueError("Time must be non-negative" + str(gap)))
-

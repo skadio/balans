@@ -17,6 +17,10 @@ from balans.base_state import _State
 #     return State(state.x, state.model)
 
 def crossover(current: _State, rnd_state) -> _State:
+    #  Take two random solutions.
+    #  If a DISCRETE variable x_inc1 = x_inc2, do not change it.
+    #  Otherwise, put it to the destroy set.
+    #  Send the destroy set to base_instance.
     # TODO
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)

@@ -9,6 +9,13 @@ from pyscipopt import Model
 class _Instance:
     """
     Instance from a given MIP file
+
+    instance.solve() operates as a main body of the operators, depending on which operator
+    is used its solution procedure changes.
+
+    initial solve > lp solve only for the first iteration.
+
+    non-initial solve > for the rest of the remaining iterations.
     """
 
     def __init__(self, path):
@@ -20,7 +27,7 @@ class _Instance:
         self.discrete_indexes = None  # static, set once and for all in solve()
         self.binary_indexes = None  # static, set once and for all in solve()
         self.sense = None  # static, set once and for all in solve()
-        self.lp_var_to_val, self.lp_obj = self.lp_solve()
+        # self.lp_var_to_val, self.lp_obj = self.lp_solve()
 
     def solve(self, is_initial_solve=False, destroy_set=None, var_to_val=None, float_index_to_be_bounded=None,
               is_zero_obj=None, dins_set=None, proximity_set=None) -> Tuple[Dict[Any, float], float]:
@@ -47,12 +54,16 @@ class _Instance:
             model.optimize()
             # Solution
             var_to_val = dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
+
             # Objective
             obj_value = model.getObjVal()
 
-            if is_initial_solve:
-                model.freeProb()
-            return var_to_val, obj_value
+            model.freeProb()
+
+            # Just solve LP one time together with initial state and use it since it is static.
+            self.lp_var_to_val, self.lp_obj_value = self.lp_solve()
+
+            return var_to_val, obj_value, self.lp_var_to_val, self.lp_obj_value
 
         # IF NOT INITIAL SOLVE:
         if not is_initial_solve:
@@ -68,8 +79,6 @@ class _Instance:
             # model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
             variables = model.getVars()
             # Features, set once and for all
-            if not self.has_features:
-                self.extract_features(model, variables)
 
             if destroy_set:
                 for var in variables:
@@ -99,7 +108,7 @@ class _Instance:
                 model.setObjective(0, self.sense)
 
             # if proximity_set:
-            #TODO -proximity needs modification of constraints.
+            # TODO -proximity needs modification of constraints.
             #     currentNumVar=1
             #     for var in variables:
             #         # BINARY VARS
@@ -114,9 +123,9 @@ class _Instance:
             #         currentNumVar = currentNumVar+1
             #         model.delVar(var)
 
-                    # # DROP ALL NON-BINARY VARIABLES
-                    # if var.getIndex() not in proximity_set:
-                    #     model.delVar(var)
+            # # DROP ALL NON-BINARY VARIABLES
+            # if var.getIndex() not in proximity_set:
+            #     model.delVar(var)
 
             model.optimize()
 
@@ -132,6 +141,10 @@ class _Instance:
     def is_discrete(var_type) -> bool:
         return var_type in (Constants.binary, Constants.integer)
 
+    @staticmethod
+    def is_binary(var_type) -> bool:
+        return var_type in Constants.binary
+
     def extract_features(self, model, variables):
 
         # Set features to true
@@ -143,7 +156,7 @@ class _Instance:
         # Set discrete indexes MODIFIED
         discrete = []
         for var in variables:
-            if var.vtype() == 'INTEGER' or var.vtype() == 'BINARY':
+            if self.is_discrete(var.vtype()):
                 discrete.append(var.getIndex())
 
         self.discrete_indexes = discrete
@@ -151,7 +164,7 @@ class _Instance:
         # Set binary indexes MODIFIED
         binary = []
         for var in variables:
-            if var.vtype() == 'BINARY':
+            if self.is_binary(var.vtype()):
                 binary.append(var.getIndex())
 
         self.binary_indexes = binary
@@ -161,15 +174,8 @@ class _Instance:
                                          Constants.var_lb: [v.getLbGlobal() for v in variables],
                                          Constants.var_ub: [v.getUbGlobal() for v in variables]})
 
-        # # Change df types
-        # self.features_df = self.features_df.astype({Constants.var_type: int,
-        #                                             Constants.var_lb: float,
-        #                                             Constants.var_ub: float})
-
         # Optimization direction
         self.sense = model.getObjectiveSense()
-
-        # Other possible features can be LP relaxation? (Done)
 
     def lp_solve(self, destroy_set=None, var_to_val=None) -> Tuple[Dict[Any, float], float]:
 
