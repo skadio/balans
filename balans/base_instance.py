@@ -80,15 +80,20 @@ class _Instance:
             variables = model.getVars()
             # Features, set once and for all
 
+            # For 1) Mutation, 2) Dins, 3) Rins and 4) Local Branching
             if destroy_set:
                 for var in variables:
                     if var.getIndex() not in destroy_set:
-                        model.addCons(var == var_to_val[var.getIndex()])
+
+                        # Put the extra constraint only for discrete variables
+                        if var.getIndex() in self.discrete_indexes:
+                            model.addCons(var == var_to_val[var.getIndex()])
                     # ONLY FOR DINS
                     if dins_set:
                         if var.getIndex() in destroy_set:
-                            model.addCons(abs(var - self.lp_var_to_val[var.getIndex()]) <= abs(
-                                self.lp_var_to_val[var.getIndex()] - var_to_val[var.getIndex()]))
+                            if var.getIndex() in self.discrete_indexes:
+                                model.addCons(abs(var - self.lp_var_to_val[var.getIndex()]) <= abs(
+                                    self.lp_var_to_val[var.getIndex()] - var_to_val[var.getIndex()]))
 
             # ONLY FOR DINS, binary variables have more strict condition, dins_set = binary_indexes
             if dins_set:
@@ -96,14 +101,14 @@ class _Instance:
                     if var.getIndex() in dins_set:
                         model.addCons(var == var_to_val[var.getIndex()])
 
-            # ONLY FOR RENS
+            # ONLY FOR 5) RENS
             if float_index_to_be_bounded:
                 for var in variables:
                     if var.getIndex() in float_index_to_be_bounded:
                         model.addCons(var <= math.floor(var_to_val[var.getIndex()]))
                         model.addCons(var >= math.ceil(var_to_val[var.getIndex()]))
 
-            # ONLY FOR NO OBJECTIVE
+            # ONLY FOR 6) NO OBJECTIVE
             if is_zero_obj:
                 model.setObjective(0, self.sense)
 
@@ -134,7 +139,7 @@ class _Instance:
 
             # Objective
             obj_value = model.getObjVal()
-
+            print(var_to_val, "var to val")
             return var_to_val, obj_value
 
     @staticmethod

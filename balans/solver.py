@@ -99,8 +99,6 @@ class Balans:
         self._initial_var_to_val: Optional[Dict[int, float]] = None
         self._initial_obj_val: Optional[float] = None
 
-
-
     @property
     def instance(self) -> _Instance:
         return self._instance
@@ -132,7 +130,7 @@ class Balans:
         initial_state = _State(self._instance, self.initial_var_to_val, self.initial_obj_val,
                                lp_var_to_val=lp_var_to_val, lp_obj_val=lp_obj_val)
 
-        # Run
+        print()
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
         print(">>> FINISH objective:", result.best_state.objective())
 
