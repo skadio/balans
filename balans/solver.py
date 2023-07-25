@@ -130,7 +130,6 @@ class Balans:
         initial_state = _State(self._instance, self.initial_var_to_val, self.initial_obj_val,
                                lp_var_to_val=lp_var_to_val, lp_obj_val=lp_obj_val)
 
-        print()
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
         print(">>> FINISH objective:", result.best_state.objective())
 

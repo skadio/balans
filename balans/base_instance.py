@@ -139,7 +139,6 @@ class _Instance:
 
             # Objective
             obj_value = model.getObjVal()
-            print(var_to_val, "var to val")
             return var_to_val, obj_value
 
     @staticmethod
