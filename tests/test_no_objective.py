@@ -1,18 +1,20 @@
 import os
-import numpy as np
-
-from alns import ALNS
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
+from pyscipopt import Model
+import numpy as np
+from alns.ALNS import ALNS
 
-from balans.base_state import _State
-from balans.base_instance import _Instance
-from balans.mutation import mutation_25
-from balans.repair.repair import repair
+from balans.destroy import DestroyOperators
+from balans.repair import RepairOperators
+from balans.solver import Balans
 from balans.utils import Constants
 from tests.test_base import BaseTest
-from mabwiser.mab import LearningPolicy
+from balans.base_state import _State
+from balans.base_instance import _Instance
+
+from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
@@ -20,47 +22,66 @@ ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 class NoObjectiveTest(BaseTest):
 
-    def test_no_objective(self):
+    def test_no_objective_t1(self):
+        # Input
+        instance = "model.cip"
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
 
-        # Set RNG
-        np.random.seed(Constants.default_seed)
+        # Parameters
+        seed = Constants.default_seed
+        destroy_ops = [DestroyOperators.No_Objective]
+        repair_ops = [RepairOperators.Repair]
 
-        # ALNS
-        alns = ALNS(np.random.RandomState(Constants.default_seed))
+        selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
+                               learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
 
-        # Operators
-        alns.add_destroy_operator(mutation_25)
-        alns.add_repair_operator(repair)
-
-        # Create instance from mip file
-        instance_name = "neos-5140963-mincio.mps.gz"
-        instance_path = os.path.join(ROOT_DIR, "data", instance_name)
-        instance = _Instance(instance_path)
-
-        # Initial solution
-        initial_var_to_val, initial_obj_val = instance.solve(gap=0.50, time=30)
-
-        # Initial state with the initial solution
-        initial_state = _State(instance, initial_var_to_val, initial_obj_val)
-
-        # Bandit selector
-        select = MABSelector(scores=[5, 2, 1, 0.5],
-                             num_destroy=1,
-                             num_repair=1,
-                             learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
-
-        # Accept criterion
         accept = HillClimbing()
+        stop = MaxIterations(1)
 
-        # Stop condition
-        stop = MaxIterations(5)
+        # Solver
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
 
         # Run
-        result = alns.iterate(initial_state, select, accept, stop)
+        result = balans.solve(instance_path)
+        print("Best solution:", result.best_state.objective())
 
-        # Result
-        final_obj_value = result.best_state.objective()
-        print("Objective", final_obj_value)
+        self.assertEqual(result.best_state.objective(), 0)
+
+    def test_no_objective_t2(self):
+        # Input
+        instance = "test2.5.cip"
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+
+        # Parameters
+        seed = Constants.default_seed
+        destroy_ops = [DestroyOperators.No_Objective]
+        repair_ops = [RepairOperators.Repair]
+
+        instance = _Instance(instance_path)
+
+        var_to_val = {0: -0.0, 1: 20.0, 2: 10.0, 3: 10.0, 4: 20.0}
+        print("initial var to val:", var_to_val)
+        obj_value = -40
+
+        initial2 = _State(instance, {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0},
+                          -30,
+                          lp_var_to_val={1: 60.0, 0: 0.0, 4: 0.0, 3: 0.0, 2: 0.0},
+                          lp_obj_val=-60.0)
+
+        selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
+                               learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
+        accept = HillClimbing()
+        stop = MaxIterations(1)
+
+        # Solver
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
+
+        # Run
+        result = balans.solve(instance_path)
+        print("Best solution:", result.best_state.objective())
 
         # Assert
-        self.assertTrue(self.is_better(initial_obj_val, final_obj_value, instance.sense))
+        self.assertEqual(result.best_state.objective(), -60)
+
+
+
