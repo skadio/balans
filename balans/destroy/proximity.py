@@ -12,24 +12,25 @@ def proximity(current: _State, rnd_state) -> _State:
     # if x_inc =1, update its objective coefficient to -1.
     # Drop all other variables by making their coefficient 0.
     # Send the destroy set to base_instance.
-    #Note : the required objective operations for proximity search happens in base_instance file.
+    # Note : the required objective operations for proximity search happens in base_instance file.
 
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
 
+    # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
     binary_indexes = current.instance.binary_indexes
-
-    # Take LP solution
-    lp_var_to_val, lp_obj_val = current.instance.lp_solve()
+    lp_var_to_val = current.instance.lp_var_to_val
 
     # for binary variable condition
     proximity_set = set(rnd_state.choice(binary_indexes, int(len(binary_indexes))))
 
-    next_state.destroy_set = None
+    proximity_destroy_set = None
 
-    print("\t Destroy set:", next_state.destroy_set)
+    print("\t Destroy set:", proximity_destroy_set)
     print("\t Binary set:", proximity_set)
 
-    return _State(next_state.instance, next_state.var_to_val, next_state.obj_val, next_state.destroy_set,
+    return _State(next_state.instance, next_state.var_to_val,
+                  next_state.obj_val,
+                  destroy_set=proximity_destroy_set,
                   proximity_set=proximity_set)

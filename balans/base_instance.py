@@ -83,6 +83,7 @@ class _Instance:
             # Variables
             variables = model.getVars()
 
+
             # For 1) Mutation, 2) Dins, 3) Rins and 4) Local Branching
             if destroy_set:
                 for var in variables:
@@ -160,7 +161,7 @@ class _Instance:
 
     @staticmethod
     def is_binary(var_type) -> bool:
-        return var_type in Constants.binary
+        return var_type==Constants.binary
 
     def extract_features(self, model, variables):
 
@@ -171,23 +172,24 @@ class _Instance:
         var_types = [v.vtype() for v in variables]
 
         # Set discrete indexes MODIFIED
-        # %TODO confrim  with list comprehension
-        discrete = [var.getIndex() for var in variables if self.is_discrete(var.vtype)]
+        # %TODO with list comprehension Done!
+        self.discrete_indexes = [var.getIndex() for var in variables if self.is_discrete(var.vtype)]
+
         # discrete = []
         # for var in variables:
         #     if self.is_discrete(var.vtype()):
         #         discrete.append(var.getIndex())
 
-        self.discrete_indexes = discrete
 
         # Set binary indexes MODIFIED
-        # %TODO replace  with list comprehension
-        binary = []
-        for var in variables:
-            if self.is_binary(var.vtype()):
-                binary.append(var.getIndex())
+        # %TODO replace  with list comprehension Done!
+        self.binary_indexes = [var.getIndex() for var in variables if self.is_binary(var.vtype)]
 
-        self.binary_indexes = binary
+        # binary = []
+        # for var in variables:
+        #     if self.is_binary(var.vtype()):
+        #         binary.append(var.getIndex())
+
 
         # Feature df with types and bounds
         self.features_df = pd.DataFrame({Constants.var_type: var_types,

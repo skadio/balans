@@ -121,8 +121,7 @@ class MutationTest(BaseTest):
                           lp_obj_val=-60.0)
 
         # Initial solution
-        initial_var_to_val, initial_obj_val, lp_var_to_val, lp_obj_val \
-            = instance.solve(is_initial_solve=True)
+        initial_var_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS()
@@ -155,21 +154,17 @@ class MutationTest(BaseTest):
 
         instance = _Instance(instance_path)
 
+        # Initial solution
+        initial_var_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+
         # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
         # With this seed, in the firs iteration index=1 is destroy
         # Hence var0 and var2 must remain fixed and only the other variables can change
-        # Objective in the next iteration is 50 (minus becase of minimization)
+        # Objective in the next iteration is 50 (minus since sense is minimization)
         initial_var_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
         print("initial var to val:", initial_var_to_val)
 
-        initial2 = _State(instance, initial_var_to_val,
-                          -30,
-                          lp_var_to_val={1: 60.0, 0: 0.0, 4: 0.0, 3: 0.0, 2: 0.0},
-                          lp_obj_val=-60.0)
-
-        # Initial solution
-        initial_var_to_val, initial_obj_val, lp_var_to_val, lp_obj_val \
-            = instance.solve(is_initial_solve=True)
+        initial2 = _State(instance, initial_var_to_val, -30)
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))

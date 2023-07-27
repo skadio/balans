@@ -3,7 +3,6 @@ from balans.base_state import _State
 
 
 def _local_branching(current: _State, rnd_state, delta) -> _State:
-
     #  For discrete variables we have a hard constraint,
     #  here we say change at most half of them (delta=0.5).
     #  Other possible delta values are 0.25 and 0.75.
@@ -11,13 +10,19 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
 
+    # Static features from the instance
     binary_indexes = current.instance.binary_indexes
     destroy_size = int(delta * len(binary_indexes))
 
-    next_state.destroy_set = set(rnd_state.choice(binary_indexes, destroy_size))
+    # Select a subset of binary variables end fix other binary variables.
+    local_branching_destroy_set = set(rnd_state.choice(binary_indexes, destroy_size))
 
     print("\t Destroy set:", next_state.destroy_set)
-    return _State(next_state.instance, next_state.var_to_val, next_state.obj_val, next_state.destroy_set)
+
+    return _State(next_state.instance,
+                  next_state.var_to_val,
+                  next_state.obj_val,
+                  destroy_set=local_branching_destroy_set)
 
 
 def local_branching_25(current: _State, rnd_state) -> _State:
