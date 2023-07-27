@@ -88,7 +88,7 @@ class Balans:
         self._rng = create_rng(self.seed)
 
         # ALNS
-        alns_seed = self._rng.randint(0, Constants.default_seed)
+        alns_seed = self._rng.randint(0, self.seed)
         self.alns = ALNS(np.random.RandomState(alns_seed))
         for op in destroy_ops:
             self.alns.add_destroy_operator(op)

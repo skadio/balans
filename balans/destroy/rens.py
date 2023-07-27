@@ -18,6 +18,8 @@ def rens(current: _State, rnd_state) -> _State:
     # Take an LP relaxed solution of the original MIP.
     lp_obj_val, lp_var_to_val = current.lp_obj_val, current.lp_var_to_val
 
+
+    print ("lp var to val", lp_var_to_val)
     float_index_to_be_bounded = []
     for i in range(len(discrete_indexes)):
         if lp_var_to_val[i] % 1 != 0:

@@ -12,7 +12,11 @@ class _State:
                  float_index_to_be_bounded=None, is_zero_obj=None, dins_set=None, lp_var_to_val=None, lp_obj_val=None,
                  proximity_set=None):
         self.instance = instance
+
+        #Var is the index we got var.getIndex() and val is the current value of the variable.
         self.var_to_val = var_to_val
+
+
         self.obj_val = obj_val
         self.float_index_to_be_bounded = float_index_to_be_bounded
         self.is_zero_obj = is_zero_obj
