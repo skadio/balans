@@ -2,7 +2,7 @@ import copy
 from balans.base_state import _State
 
 
-def dins(current: _State, rnd_state) -> _State:
+def dins(current: _State, rnd_state,delta) -> _State:
     #  Take an LP relaxed solution of the original MIP.
     #  By considering only discrete variables, forms a Set J where |x_lp -x_inc| >=   0.5
     #  For binary variables we have a hard constraint,
@@ -14,19 +14,24 @@ def dins(current: _State, rnd_state) -> _State:
     next_state = copy.deepcopy(current)
 
     discrete_indexes = current.instance.discrete_indexes
+    print("\t discrete indexes:", discrete_indexes)
+
     binary_indexes = current.instance.binary_indexes
 
     # Take an LP relaxed solution of the original MIP.
     lp_obj_val, lp_var_to_val = current.lp_obj_val, current.lp_var_to_val
 
+    # To track the similarity between lp sol and current sol
+    print("lp var to val:", lp_var_to_val)
+
     # By considering only discrete variables, forms a Set J where |x_lp -x_inc| >=   0.5
     Set_J = []
     for i in range(len(discrete_indexes)):
-        if abs(lp_var_to_val[i] - next_state.var_to_val[i]) >= 0.5:
+        if abs(lp_var_to_val[i] - current.var_to_val[i]) >= 0.5:
             Set_J.append(i)
 
     # For binary variables we have a hard constraint, here we say change at most half of them.
-    dins_set = set(rnd_state.choice(binary_indexes, int(0.5 * len(binary_indexes))))
+    dins_set = set(rnd_state.choice(binary_indexes, int(delta * len(binary_indexes))))
 
     # If a variable is inside the Set J, it is part of the destroy set.
     next_state.destroy_set = set(Set_J)
@@ -34,6 +39,12 @@ def dins(current: _State, rnd_state) -> _State:
     print("\t Destroy set:", next_state.destroy_set)
     print("\t Binary set:", dins_set)
     return _State(next_state.instance, next_state.var_to_val, next_state.obj_val, next_state.destroy_set,
-                  dins_set=dins_set,lp_obj_val=lp_obj_val, lp_var_to_val=lp_var_to_val)
+                  dins_set=dins_set, lp_obj_val=lp_obj_val, lp_var_to_val=lp_var_to_val)
 
 
+def dins_50(current: _State, rnd_state) -> _State:
+    return dins(current, rnd_state, delta=0.50)
+
+
+def dins_75(current: _State, rnd_state) -> _State:
+    return dins(current, rnd_state, delta=0.75)

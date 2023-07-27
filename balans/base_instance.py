@@ -63,6 +63,12 @@ class _Instance:
             # Just solve LP one time together with initial state and use it since it is static.
             self.lp_var_to_val, self.lp_obj_value = self.lp_solve()
 
+
+            #TO TEST UNCOMMENT THE FOLLOWING 3 LINES
+            #var_to_val = {0: -0.0, 1: 20.0, 2: 10.0, 3: 10.0, 4: 20.0}
+            #print("initial var to val:", var_to_val)
+            #obj_value = -40
+
             return var_to_val, obj_value, self.lp_var_to_val, self.lp_obj_value
 
         # IF NOT INITIAL SOLVE:
@@ -79,6 +85,8 @@ class _Instance:
             # model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
             variables = model.getVars()
             # Features, set once and for all
+            if not self.has_features:
+                self.extract_features(model, variables)
 
             # For 1) Mutation, 2) Dins, 3) Rins and 4) Local Branching
             if destroy_set:
@@ -137,8 +145,13 @@ class _Instance:
             # Solution
             var_to_val = dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
 
+            #To keep track of zero objective solution.
+            if is_zero_obj:
+                print("var_to_val:",var_to_val)
+
             # Objective
             obj_value = model.getObjVal()
+            print("Var to Val current:", var_to_val)
             return var_to_val, obj_value
 
     @staticmethod

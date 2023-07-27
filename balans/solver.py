@@ -21,6 +21,7 @@ from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterio
 # Type Declarations
 DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Dins),
+               type(DestroyOperators.Dins2),
                type(DestroyOperators.Local_Branching),
                type(DestroyOperators.Local_Branching2),
                type(DestroyOperators.Local_Branching3),
@@ -120,17 +121,25 @@ class Balans:
 
         # Initial solution
         self._initial_var_to_val, self._initial_obj_val, lp_var_to_val, lp_obj_val \
-            = self._instance.solve(is_initial_solve=True)
+             = self._instance.solve(is_initial_solve=True)
         print(">>> START objective:", self._initial_obj_val)
         # LP solution
-        # self._lp_var_to_val, self._lp_obj_val = self._instance.lp_solve()
+
+        self._lp_var_to_val, self._lp_obj_val = self._instance.lp_solve()
         print(">>> LP objective:", lp_obj_val)
 
         # Initial state and solution
         initial_state = _State(self._instance, self.initial_var_to_val, self.initial_obj_val,
-                               lp_var_to_val=lp_var_to_val, lp_obj_val=lp_obj_val)
+                                lp_var_to_val=lp_var_to_val, lp_obj_val=lp_obj_val)
+
+        # initial2 = _State(self._instance, {0: -0.0, 1: 20.0, 2: 10.0, 3: 10.0, 4: 20.0},
+        #                   40,
+        #                   lp_var_to_val={1: 60.0, 0: 0.0, 4: 0.0, 3: 0.0, 2: 0.0},
+        #                   lp_obj_val=60.0)
+        # print(">>> START objective:", 40)
 
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
+
         print(">>> FINISH objective:", result.best_state.objective())
 
         # Result run

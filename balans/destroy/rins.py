@@ -15,6 +15,9 @@ def rins(current: _State, rnd_state) -> _State:
     # Take an LP relaxed solution of the original MIP.
     lp_obj_val, lp_var_to_val = current.lp_obj_val, current.lp_var_to_val
 
+    # To track the similarity between lp sol and current sol
+    print("lp var to val:", lp_var_to_val)
+
     #  If a variable x_inc = x_lp, do not change it.
     same_index = []
     for i in range(len(discrete_indexes)):

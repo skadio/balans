@@ -12,7 +12,7 @@ def _mutation(current: _State, rnd_state, delta) -> _State:
 
     #
     discrete_indexes = current.instance.discrete_indexes
-
+    print("\t Discrete Indexes:", discrete_indexes)
 
     destroy_size = int(delta * len(discrete_indexes))
 
@@ -34,7 +34,6 @@ def mutation_75(current: _State, rnd_state) -> _State:
     return _mutation(current, rnd_state, delta=0.75)
 
 
-
-#TODO problematic when destroy size = num discretes
+# TODO problematic when destroy size = num discretes
 def mutation_100(current: _State, rnd_state) -> _State:
     return _mutation(current, rnd_state, delta=1.0)
