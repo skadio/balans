@@ -60,6 +60,8 @@ StopType = (MaxIterations,
 
 class Balans:
 
+    # %TODO return the best solution
+    # %TODO accept warm start solution
     def __init__(self,
                  destroy_ops: List,
                  repair_ops: List,
@@ -120,23 +122,11 @@ class Balans:
         self._instance = _Instance(instance_path)
 
         # Initial solution
-        self._initial_var_to_val, self._initial_obj_val, lp_var_to_val, lp_obj_val \
-             = self._instance.solve(is_initial_solve=True)
+        self._initial_var_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True)
         print(">>> START objective:", self._initial_obj_val)
-        # LP solution
-
-        self._lp_var_to_val, self._lp_obj_val = self._instance.lp_solve()
-        print(">>> LP objective:", lp_obj_val)
 
         # Initial state and solution
-        initial_state = _State(self._instance, self.initial_var_to_val, self.initial_obj_val,
-                                lp_var_to_val=lp_var_to_val, lp_obj_val=lp_obj_val)
-
-        # initial2 = _State(self._instance, {0: -0.0, 1: 20.0, 2: 10.0, 3: 10.0, 4: 20.0},
-        #                   40,
-        #                   lp_var_to_val={1: 60.0, 0: 0.0, 4: 0.0, 3: 0.0, 2: 0.0},
-        #                   lp_obj_val=60.0)
-        # print(">>> START objective:", 40)
+        initial_state = _State(self._instance, self.initial_var_to_val, self.initial_obj_val)
 
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
 

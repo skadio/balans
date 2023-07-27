@@ -10,16 +10,16 @@ def _mutation(current: _State, rnd_state, delta) -> _State:
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
 
-    #
     discrete_indexes = current.instance.discrete_indexes
     print("\t Discrete Indexes:", discrete_indexes)
 
     destroy_size = int(delta * len(discrete_indexes))
 
-    next_state.destroy_set = set(rnd_state.choice(discrete_indexes, destroy_size))
+    mutated_set = set(rnd_state.choice(discrete_indexes, destroy_size))
 
     print("\t Destroy set:", next_state.destroy_set)
-    return _State(next_state.instance, next_state.var_to_val, next_state.obj_val, next_state.destroy_set)
+    return _State(next_state.instance, next_state.var_to_val, next_state.obj_val,
+                  destroy_set=mutated_set)
 
 
 def mutation_25(current: _State, rnd_state) -> _State:

@@ -2,7 +2,7 @@ import copy
 from balans.base_state import _State
 
 
-def dins(current: _State, rnd_state,delta) -> _State:
+def dins(current: _State, rnd_state, delta) -> _State:
     #  Take an LP relaxed solution of the original MIP.
     #  By considering only discrete variables, forms a Set J where |x_lp -x_inc| >=   0.5
     #  For binary variables we have a hard constraint,
@@ -13,33 +13,35 @@ def dins(current: _State, rnd_state,delta) -> _State:
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
 
+    # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
-    print("\t discrete indexes:", discrete_indexes)
-
     binary_indexes = current.instance.binary_indexes
+    lp_var_to_val = current.instance.lp_var_to_val
 
-    # Take an LP relaxed solution of the original MIP.
-    lp_obj_val, lp_var_to_val = current.lp_obj_val, current.lp_var_to_val
-
-    # To track the similarity between lp sol and current sol
+    print("\t discrete indexes:", discrete_indexes)
     print("lp var to val:", lp_var_to_val)
 
-    # By considering only discrete variables, forms a Set J where |x_lp -x_inc| >=   0.5
-    Set_J = []
-    for i in range(len(discrete_indexes)):
-        if abs(lp_var_to_val[i] - current.var_to_val[i]) >= 0.5:
-            Set_J.append(i)
+    # By considering only discrete variables, form a set_j where |x_lp - x_inc| >= 0.5
+    # % TODO possible to do comprehension
+    set_j = set([i for i in range(len(discrete_indexes))
+                 if abs(lp_var_to_val[i] - current.var_to_val[i]) >= 0.5])
 
-    # For binary variables we have a hard constraint, here we say change at most half of them.
-    dins_set = set(rnd_state.choice(binary_indexes, int(delta * len(binary_indexes))))
+    # set_j = set()
+    # for i in range(len(discrete_indexes)):
+    #     if abs(lp_var_to_val[i] - current.var_to_val[i]) >= 0.5:
+    #         set_j.add(i)
 
-    # If a variable is inside the Set J, it is part of the destroy set.
-    next_state.destroy_set = set(Set_J)
+    # DINS for discrete: set_j becomes the destroy_set
+    next_state.destroy_set = set_j
+
+    # DINS for binary: hard constraint to change at most half of the binary variables
+    dins_binary_set = set(rnd_state.choice(binary_indexes, int(delta * len(binary_indexes))))
 
     print("\t Destroy set:", next_state.destroy_set)
-    print("\t Binary set:", dins_set)
-    return _State(next_state.instance, next_state.var_to_val, next_state.obj_val, next_state.destroy_set,
-                  dins_set=dins_set, lp_obj_val=lp_obj_val, lp_var_to_val=lp_var_to_val)
+    print("\t Binary set:", dins_binary_set)
+    return _State(next_state.instance, next_state.var_to_val, next_state.obj_val,
+                  destroy_set=set_j,
+                  dins_binary_set=dins_binary_set)
 
 
 def dins_50(current: _State, rnd_state) -> _State:
