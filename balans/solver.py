@@ -60,8 +60,6 @@ StopType = (MaxIterations,
 
 class Balans:
 
-    # %TODO return the best solution
-    # %TODO accept warm start solution
     def __init__(self,
                  destroy_ops: List,
                  repair_ops: List,
