@@ -9,21 +9,22 @@ def _mutation(current: _State, rnd_state, delta) -> _State:
 
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
+    next_state.reset_solve_settings()
 
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
-    print("\t Discrete index:", discrete_indexes)
-
     destroy_size = int(delta * len(discrete_indexes))
 
-    mutated_set = set(rnd_state.choice(discrete_indexes, destroy_size))
+    print("\t Discrete index:", discrete_indexes)
 
-    print("\t Destroy set:", mutated_set)
+    mutation_set = set(rnd_state.choice(discrete_indexes, destroy_size))
+
+    print("\t Destroy set:", mutation_set)
 
     return _State(next_state.instance,
                   next_state.var_to_val,
                   next_state.obj_val,
-                  destroy_set=mutated_set)
+                  destroy_set=mutation_set)
 
 
 def mutation_25(current: _State, rnd_state) -> _State:

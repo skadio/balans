@@ -18,6 +18,7 @@ class Constants(NamedTuple):
     # Scip variable types
     binary = "BINARY"
     integer = "INTEGER"
+    continuous = "C"
 
     # Column names for features df
     var_type = "var_type"

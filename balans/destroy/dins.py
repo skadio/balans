@@ -12,6 +12,7 @@ def dins(current: _State, rnd_state, delta) -> _State:
 
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
+    next_state.reset_solve_settings()
 
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
@@ -22,7 +23,6 @@ def dins(current: _State, rnd_state, delta) -> _State:
     print("lp var to val:", lp_var_to_val)
 
     # By considering only discrete variables, form a set_j where |x_lp - x_inc| >= 0.5
-    # % TODO possible to do comprehension
     set_j = set([i for i in discrete_indexes
                  if abs(lp_var_to_val[i] - current.var_to_val[i]) >= 0.5])
 
@@ -30,7 +30,7 @@ def dins(current: _State, rnd_state, delta) -> _State:
     dins_binary_set = set(rnd_state.choice(binary_indexes, int(delta * len(binary_indexes))))
 
     print("\t Destroy set:", set_j)
-    print("\t Binary set:", dins_binary_set)
+    print("\t DINS Binary set:", dins_binary_set)
 
     return _State(next_state.instance,
                   next_state.var_to_val,

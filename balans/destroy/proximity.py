@@ -16,6 +16,7 @@ def proximity(current: _State, rnd_state) -> _State:
 
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
+    next_state.reset_solve_settings()
 
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes

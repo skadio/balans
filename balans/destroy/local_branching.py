@@ -9,6 +9,7 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
     #  Send the destroy set to base_instance.
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
+    next_state.reset_solve_settings()
 
     # Static features from the instance
     binary_indexes = current.instance.binary_indexes
