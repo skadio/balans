@@ -17,7 +17,7 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
     # Select a subset of binary variables end fix other binary variables.
     local_branching_destroy_set = set(rnd_state.choice(binary_indexes, destroy_size))
 
-    print("\t Destroy set:", next_state.destroy_set)
+    print("\t Destroy set:", local_branching_destroy_set)
 
     return _State(next_state.instance,
                   next_state.var_to_val,

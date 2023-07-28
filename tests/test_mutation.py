@@ -106,25 +106,27 @@ class MutationTest(BaseTest):
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
 
         # Parameters
-        seed = Constants.default_seed
+        seed = 123456
+
         destroy_ops = [DestroyOperators.Mutation2]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
 
-        var_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
-        print("initial var to val:", var_to_val)
-
-        initial2 = _State(instance, {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0},
-                          -30,
-                          lp_var_to_val={1: 60.0, 0: 0.0, 4: 0.0, 3: 0.0, 2: 0.0},
-                          lp_obj_val=-60.0)
-
         # Initial solution
         initial_var_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
 
+        # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
+        # With this seed, in the firs iteration index=1 is destroy
+        # Hence var0 and var2 must remain fixed and only the other variables can change
+        # Objective in the next iteration is 50 (minus since sense is minimization)
+        initial_var_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
+        print("initial var to val:", initial_var_to_val)
+
+        initial2 = _State(instance, initial_var_to_val, -30)
+
         # Create ALNS and add one or more destroy and repair operators
-        alns = ALNS()
+        alns = ALNS(np.random.RandomState(seed))
         alns.add_destroy_operator(DestroyOperators.Mutation2)
         alns.add_repair_operator(RepairOperators.Repair)
 

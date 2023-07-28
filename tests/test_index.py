@@ -76,18 +76,16 @@ class IndexTest(BaseTest):
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
 
         # Parameters
-        seed = Constants.default_seed
+        seed = 123456
         destroy_ops = [DestroyOperators.Mutation]
         repair_ops = [RepairOperators.Repair]
 
         _instance = _Instance(instance_path)
         # Initial solution
-        initial_var_to_val, initial_obj_val, lp_var_to_val, lp_obj_val \
-            = _instance.solve(is_initial_solve=True)
+        initial_var_to_val, initial_obj_val = _instance.solve(is_initial_solve=True)
 
         # Initial state and solution
-        initial_state = _State(_instance, initial_var_to_val, initial_obj_val,
-                               lp_var_to_val=lp_var_to_val, lp_obj_val=lp_obj_val)
+        initial_state = _State(_instance, initial_var_to_val, initial_obj_val)
         # Assert
         self.assertEqual(initial_obj_val, 2.999979654947926)
 
@@ -98,18 +96,16 @@ class IndexTest(BaseTest):
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
 
         # Parameters
-        seed = Constants.default_seed
+        seed = 123456
         destroy_ops = [DestroyOperators.Mutation]
         repair_ops = [RepairOperators.Repair]
 
         _instance = _Instance(instance_path)
         # Initial solution
-        initial_var_to_val, initial_obj_val, lp_var_to_val, lp_obj_val \
-            = _instance.solve(is_initial_solve=True)
+        initial_var_to_val, initial_obj_val = _instance.solve(is_initial_solve=True)
 
         # Initial state and solution
-        initial_state = _State(_instance, initial_var_to_val, initial_obj_val,
-                               lp_var_to_val=lp_var_to_val, lp_obj_val=lp_obj_val)
+        initial_state = _State(_instance, initial_var_to_val, initial_obj_val)
 
         # Assert
         self.assertEqual(initial_state.destroy_set, None)
@@ -121,7 +117,7 @@ class IndexTest(BaseTest):
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
 
         # Parameters
-        seed = Constants.default_seed
+        seed = 123456
         destroy_ops = [DestroyOperators.Mutation]
         repair_ops = [RepairOperators.Repair]
 

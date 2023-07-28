@@ -27,8 +27,8 @@ class _Instance:
         self.discrete_indexes = None  # static, set once and for all in solve()
         self.binary_indexes = None  # static, set once and for all in solve()
         self.sense = None  # static, set once and for all in solve()
-        self.lp_var_to_val = None   # static, set once and for in solve()
-        self.lp_obj_value = None    # static, set once and for in solve()
+        self.lp_var_to_val = None  # static, set once and for in solve()
+        self.lp_obj_value = None  # static, set once and for in solve()
 
     def solve(self, is_initial_solve=False, destroy_set=None, var_to_val=None, float_index_to_be_bounded=None,
               is_zero_obj=None, dins_binary_set=None, proximity_set=None) -> Tuple[Dict[Any, float], float]:
@@ -83,7 +83,6 @@ class _Instance:
             # Variables
             variables = model.getVars()
 
-
             # For 1) Mutation, 2) Dins, 3) Rins and 4) Local Branching
             if destroy_set:
                 for var in variables:
@@ -97,7 +96,6 @@ class _Instance:
                         else:
                             # IF in destroy, and DINS is active
                             if dins_binary_set:
-
                                 # Don't fix but add a constraint to bound it
                                 current_lp_diff = abs(var_to_val[var.getIndex()] - self.lp_var_to_val[var.getIndex()])
                                 # TODO consider reformulation to leave var(x1) alone
@@ -146,13 +144,13 @@ class _Instance:
             # Solution
             var_to_val = dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
 
-            #To keep track of zero objective solution.
+            # To keep track of zero objective solution.
             if is_zero_obj:
-                print("var_to_val:",var_to_val)
+                print("var_to_val:", var_to_val)
 
             # Objective
             obj_value = model.getObjVal()
-            print("Var to Val current:", var_to_val)
+            print("Var to Val Current:", var_to_val)
             return var_to_val, obj_value
 
     @staticmethod
@@ -161,7 +159,7 @@ class _Instance:
 
     @staticmethod
     def is_binary(var_type) -> bool:
-        return var_type==Constants.binary
+        return var_type in Constants.binary
 
     def extract_features(self, model, variables):
 
@@ -172,23 +170,33 @@ class _Instance:
         var_types = [v.vtype() for v in variables]
 
         # Set discrete indexes MODIFIED
-        # %TODO with list comprehension Done!
-        self.discrete_indexes = [var.getIndex() for var in variables if self.is_discrete(var.vtype)]
+        discrete = []
+        for var in variables:
+            if self.is_discrete(var.vtype()):
+                discrete.append(var.getIndex())
 
-        # discrete = []
-        # for var in variables:
-        #     if self.is_discrete(var.vtype()):
-        #         discrete.append(var.getIndex())
+        self.discrete_indexes = discrete
+        print(discrete)
+
+        # Set binary indexes MODIFIED
+        binary = []
+        for var in variables:
+            if self.is_binary(var.vtype()):
+                binary.append(var.getIndex())
+
+        self.binary_indexes = binary
+        print(binary)
+
+        # Set discrete indexes MODIFIED
+        # %TODO with list comprehension Done!
+
+        # self.discrete_indexes = [var.getIndex() for var in variables if self.is_discrete(var.vtype)]
 
 
         # Set binary indexes MODIFIED
         # %TODO replace  with list comprehension Done!
-        self.binary_indexes = [var.getIndex() for var in variables if self.is_binary(var.vtype)]
+        # self.binary_indexes = [var.getIndex() for var in variables if self.is_binary(var.vtype)]
 
-        # binary = []
-        # for var in variables:
-        #     if self.is_binary(var.vtype()):
-        #         binary.append(var.getIndex())
 
 
         # Feature df with types and bounds
@@ -223,17 +231,15 @@ class _Instance:
 
         return var_to_val, obj_value
 
-
-
-  # # If not in destroy AND discrete
-                    # if var.getIndex() not in destroy_set and \
-                    # #         var.getIndex() in self.discrete_indexes:
-                    # #     # Fix discrete vars that are not in destroy
-                    # #     model.addCons(var == var_to_val[var.getIndex()])
-                    #
-                    # # ONLY FOR DINS
-                    # if dins_set:
-                    #     if var.getIndex() in destroy_set:
-                    #         if var.getIndex() in self.discrete_indexes:
-                    #             model.addCons(abs(var - self.lp_var_to_val[var.getIndex()]) <= abs(
-                    #                 self.lp_var_to_val[var.getIndex()] - var_to_val[var.getIndex()]))
+# # If not in destroy AND discrete
+# if var.getIndex() not in destroy_set and \
+# #         var.getIndex() in self.discrete_indexes:
+# #     # Fix discrete vars that are not in destroy
+# #     model.addCons(var == var_to_val[var.getIndex()])
+#
+# # ONLY FOR DINS
+# if dins_set:
+#     if var.getIndex() in destroy_set:
+#         if var.getIndex() in self.discrete_indexes:
+#             model.addCons(abs(var - self.lp_var_to_val[var.getIndex()]) <= abs(
+#                 self.lp_var_to_val[var.getIndex()] - var_to_val[var.getIndex()]))

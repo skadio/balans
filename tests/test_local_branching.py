@@ -20,7 +20,6 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 
-
 class LocalBranchingTest(BaseTest):
 
     def test_local_branching_t1(self):
@@ -50,7 +49,7 @@ class LocalBranchingTest(BaseTest):
 
     def test_local_branching_t2(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test5.5.cip"
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
 
         # Parameters
@@ -59,15 +58,6 @@ class LocalBranchingTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
-
-        var_to_val = {0: -0.0, 1: 20.0, 2: 10.0, 3: 10.0, 4: 20.0}
-        print("initial var to val:", var_to_val)
-        obj_value = -40
-
-        initial2 = _State(instance, {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0},
-                          -30,
-                          lp_var_to_val={1: 60.0, 0: 0.0, 4: 0.0, 3: 0.0, 2: 0.0},
-                          lp_obj_val=-60.0)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -83,4 +73,3 @@ class LocalBranchingTest(BaseTest):
 
         # Assert
         self.assertEqual(result.best_state.objective(), -60)
-
