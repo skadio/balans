@@ -38,10 +38,10 @@ class ProximityTest(BaseTest):
         instance = _Instance(instance_path)
 
         # Initial solution
-        initial_var_to_val, initial_obj_val = instance.solve(gap=0.50, time=30)
+        initial_index_to_val, initial_obj_val = instance.solve(gap=0.50, time=30)
 
         # Initial state with the initial solution
-        initial_state = _State(instance, initial_var_to_val, initial_obj_val)
+        initial_state = _State(instance, initial_index_to_val, initial_obj_val)
 
         # Bandit selector
         select = MABSelector(scores=[5, 2, 1, 0.5],

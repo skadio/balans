@@ -15,16 +15,16 @@ def rins(current: _State, rnd_state) -> _State:
 
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
-    lp_var_to_val = current.instance.lp_var_to_val
+    lp_index_to_val = current.instance.lp_index_to_val
 
     #  If a variable x_inc = x_lp, do not change it.
-    indexes_with_same_value = [i for i in discrete_indexes if np.isclose(lp_var_to_val[i], next_state.var_to_val[i])]
+    indexes_with_same_value = [i for i in discrete_indexes if np.isclose(lp_index_to_val[i], next_state.index_to_val[i])]
 
     # Else potentially change it
     destroy_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
 
     print("\t Destroy set:", destroy_set)
     return _State(next_state.instance,
-                  next_state.var_to_val,
+                  next_state.index_to_val,
                   next_state.obj_val,
                   destroy_set=destroy_set)

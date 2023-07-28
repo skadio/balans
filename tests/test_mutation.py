@@ -114,16 +114,16 @@ class MutationTest(BaseTest):
         instance = _Instance(instance_path)
 
         # Initial solution
-        initial_var_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
 
         # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
         # With this seed, in the firs iteration index=1 is destroy
         # Hence var0 and var2 must remain fixed and only the other variables can change
         # Objective in the next iteration is 50 (minus since sense is minimization)
-        initial_var_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
-        print("initial var to val:", initial_var_to_val)
+        initial_index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
+        print("initial index to val:", initial_index_to_val)
 
-        initial2 = _State(instance, initial_var_to_val, -30)
+        initial2 = _State(instance, initial_index_to_val, -30)
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
@@ -157,16 +157,16 @@ class MutationTest(BaseTest):
         instance = _Instance(instance_path)
 
         # Initial solution
-        initial_var_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
 
         # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
         # With this seed, in the firs iteration index=1 is destroy
         # Hence var0 and var2 must remain fixed and only the other variables can change
         # Objective in the next iteration is 50 (minus since sense is minimization)
-        initial_var_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
-        print("initial var to val:", initial_var_to_val)
+        initial_index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
+        print("initial index to val:", initial_index_to_val)
 
-        initial2 = _State(instance, initial_var_to_val, -30)
+        initial2 = _State(instance, initial_index_to_val, -30)
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
@@ -184,11 +184,54 @@ class MutationTest(BaseTest):
         # Retrieve the final solution
         best_state = result.best_state
         best_objective = best_state.objective()
+        best_solution = best_state.solution()
 
-        # best_var_to_val = None # best.var_to_val
+        # best.index_to_val = None # best.index_to_val
         #
         # # First variable must remain fixed
-        # self.assertEqual(initial_var_to_val[0], best_var_to_val[0])
+        # self.assertEqual(initial_index_to_val[0], best_index_to_val[0])
 
         print(f"Best heuristic solution objective is {best_objective}.")
         self.assertEqual(best_objective, -50.0)
+
+    def test_mutation_t4_with_warm_start(self):
+        # Input
+        instance = "test2.5.cip"
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+
+        # Parameters
+        seed = 123456
+        destroy_ops = [DestroyOperators.Mutation2]
+        repair_ops = [RepairOperators.Repair]
+        selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
+                               learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
+        accept = HillClimbing()
+        stop = MaxIterations(1)
+
+        # Solver
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
+
+        # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
+        # With this seed, in the firs iteration index=1 is destroy
+        # Hence var0 and var2 must remain fixed and only the other variables can change
+        # Objective in the next iteration is 50 (minus since sense is minimization)
+        initial_index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
+        print("initial index to val:", initial_index_to_val)
+
+        # Run
+        result = balans.solve(instance_path, initial_index_to_val)
+
+        # Retrieve the final solution
+        best_state = result.best_state
+        best_objective = best_state.objective()
+        best_solution = best_state.solution()
+
+        print("Best solution:", result.best_state.solution())
+        print("Best solution value:", result.best_state.objective())
+
+        # Assert solution
+        best_solution_expected = {0: 0.0, 1: 10.0, 2: -0.0, 3: 0.0, 4: 50.0}
+        self.assertDictEqual(best_solution_expected, best_solution)
+
+        # Assert objective
+        self.assertEqual(best_objective, -60.0)

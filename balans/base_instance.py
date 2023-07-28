@@ -26,20 +26,22 @@ class _Instance:
         self.discrete_indexes = None  # static, set once and for all in solve()
         self.binary_indexes = None  # static, set once and for all in solve()
         self.sense = None  # static, set once and for all in solve()
-        self.lp_var_to_val = None  # static, set once and for in solve()
+        self.lp_index_to_val = None  # static, set once and for in solve()
         self.lp_obj_value = None  # static, set once and for in solve()
 
     def solve(self,
               is_initial_solve=False,
-              var_to_val=None,
+              index_to_val=None,
               destroy_set=None,
               dins_binary_set=None,
               proximity_set=None,
               rens_float_set=None,
               is_zero_obj=None) -> Tuple[Dict[Any, float], float]:
 
+        print("\t Solve")
+
         if is_initial_solve:
-            return self.initial_solve()
+            return self.initial_solve(index_to_val)
         else:
             # Model
             model = scip.Model()
@@ -60,19 +62,19 @@ class _Instance:
                     if var.getIndex() in self.discrete_indexes:
                         # IF not in destroy, fix it
                         if var.getIndex() not in destroy_set:
-                            model.addCons(var == var_to_val[var.getIndex()])
+                            model.addCons(var == index_to_val[var.getIndex()])
                         else:
                             # IF in destroy, and DINS is active, don't fix but add bounding constraint
                             if dins_binary_set:
-                                current_lp_diff = abs(var_to_val[var.getIndex()] - self.lp_var_to_val[var.getIndex()])
-                                model.addCons(abs(var - self.lp_var_to_val[var.getIndex()]) <= current_lp_diff)
+                                current_lp_diff = abs(index_to_val[var.getIndex()] - self.lp_index_to_val[var.getIndex()])
+                                model.addCons(abs(var - self.lp_index_to_val[var.getIndex()]) <= current_lp_diff)
 
             # DINS: binary variables have more strict condition to be fixed
             if dins_binary_set:
                 for var in variables:
                     if var.getIndex() in dins_binary_set:
                         # Fix all binary vars in dins_binary
-                        model.addCons(var == var_to_val[var.getIndex()])
+                        model.addCons(var == index_to_val[var.getIndex()])
 
             # if proximity_set:
             # TODO -proximity needs modification of constraints.
@@ -81,10 +83,10 @@ class _Instance:
             #         # BINARY VARS
             #         if var.getIndex() in proximity_set:
             #
-            #             if var_to_val[var.getIndex()] == 0:
+            #             if index_to_val[var.getIndex()] == 0:
             #                 model.addVar("var" + str(currentNumVar), vtype="B", obj=1.0)
             #
-            #             if var_to_val[var.getIndex()] == 1:
+            #             if index_to_val[var.getIndex()] == 1:
             #                 model.addVar("var" + str(currentNumVar), vtype="B", obj=-1.0)
             #
             #         currentNumVar = currentNumVar+1
@@ -99,8 +101,8 @@ class _Instance:
                 for var in variables:
                     if var.getIndex() in rens_float_set:
                         # Restrict discrete vars to round up and down integer version of it
-                        model.addCons(var <= math.floor(var_to_val[var.getIndex()]))
-                        model.addCons(var >= math.ceil(var_to_val[var.getIndex()]))
+                        model.addCons(var <= math.floor(index_to_val[var.getIndex()]))
+                        model.addCons(var >= math.ceil(index_to_val[var.getIndex()]))
 
             # Zero Objective
             if is_zero_obj:
@@ -109,24 +111,21 @@ class _Instance:
             # Solve
             model.optimize()
 
-            # Solution
-            var_to_val = self.get_var_to_val(model)
-
-            # To keep track of zero objective solution.
-            if is_zero_obj:
-                print("var_to_val:", var_to_val)
-
-            # Objective
+            # Solution and objective
+            index_to_val = self.get_index_to_val(model)
             obj_value = model.getObjVal()
-            print("Var to Val Current:", var_to_val)
-            return var_to_val, obj_value
+
+            print("\t Solve DONE!")
+            print("\tindex_to_val: ", index_to_val)
+
+            return index_to_val, obj_value
 
     def extract_features(self, model, variables):
 
         # Variable types
         var_types = [v.vtype() for v in variables]
 
-        # Set discrete indexes MODIFIED
+        # Set discrete indexes
         discrete = []
         for var in variables:
             if self.is_discrete(var.vtype()):
@@ -135,7 +134,7 @@ class _Instance:
         self.discrete_indexes = discrete
         print(discrete)
 
-        # Set binary indexes MODIFIED
+        # Set binary indexes
         binary = []
         for var in variables:
             if self.is_binary(var.vtype()):
@@ -154,6 +153,7 @@ class _Instance:
         # self.binary_indexes = [var.getIndex() for var in variables if self.is_binary(var.vtype)]
 
         # Feature df with types and bounds
+        # %TODO where is this used at all??
         self.features_df = pd.DataFrame({Constants.var_type: var_types,
                                          Constants.var_lb: [v.getLbGlobal() for v in variables],
                                          Constants.var_ub: [v.getUbGlobal() for v in variables]})
@@ -161,7 +161,7 @@ class _Instance:
         # Optimization direction
         self.sense = model.getObjectiveSense()
 
-    def initial_solve(self) -> Tuple[Dict[Any, float], float]:
+    def initial_solve(self, index_to_val) -> Tuple[Dict[Any, float], float]:
 
         # Model with verbosity level 0
         model = scip.Model()
@@ -177,6 +177,12 @@ class _Instance:
         # Variables
         variables = model.getVars()
 
+        # If a solution is given fix it. Can be partial (denoted by None value)
+        if index_to_val is not None:
+            for var in variables:
+                if index_to_val[var.getIndex()] is not None:
+                    model.addCons(var == index_to_val[var.getIndex()])
+
         # Initial solve extracts static instance features
         self.extract_features(model, variables)
 
@@ -184,17 +190,17 @@ class _Instance:
         model.optimize()
 
         # Initial solution and objective
-        var_to_val = self.get_var_to_val(model)
+        index_to_val = self.get_index_to_val(model)
         obj_value = model.getObjVal()
 
         # Reset problem
         model.freeProb()
 
         # Solve LP relaxation and save it
-        self.lp_var_to_val, self.lp_obj_value = self.lp_solve()
+        self.lp_index_to_val, self.lp_obj_value = self.lp_solve()
 
         # Return solution
-        return var_to_val, obj_value
+        return index_to_val, obj_value
 
     def lp_solve(self) -> Tuple[Dict[Any, float], float]:
 
@@ -216,11 +222,11 @@ class _Instance:
         model.optimize()
 
         # Solution and objective
-        var_to_val = self.get_var_to_val(model)
+        index_to_val = self.get_index_to_val(model)
         obj_value = model.getObjVal()
 
         # Return solution and objective
-        return var_to_val, obj_value
+        return index_to_val, obj_value
 
     @staticmethod
     def is_discrete(var_type) -> bool:
@@ -231,5 +237,5 @@ class _Instance:
         return var_type in Constants.binary
 
     @staticmethod
-    def get_var_to_val(model) -> Dict[Any, float]:
+    def get_index_to_val(model) -> Dict[Any, float]:
         return dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])

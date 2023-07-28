@@ -22,14 +22,14 @@ ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 class NoObjectiveTest(BaseTest):
 
-    def test_no_objective_t1(self):
+    def test_zero_objective_t1(self):
         # Input
         instance = "model.cip"
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.No_Objective]
+        destroy_ops = [DestroyOperators.Zero_Objective]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -47,20 +47,20 @@ class NoObjectiveTest(BaseTest):
 
         self.assertEqual(result.best_state.objective(), 0)
 
-    def test_no_objective_t2(self):
+    def test_zero_objective_t2(self):
         # Input
         instance = "test2.5.cip"
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.No_Objective]
+        destroy_ops = [DestroyOperators.Zero_Objective]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
 
-        var_to_val = {0: -0.0, 1: 20.0, 2: 10.0, 3: 10.0, 4: 20.0}
-        print("initial var to val:", var_to_val)
+        index_to_val = {0: -0.0, 1: 20.0, 2: 10.0, 3: 10.0, 4: 20.0}
+        print("initial index to val:", index_to_val)
         obj_value = -40
 
         initial2 = _State(instance, {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0},-30)
@@ -79,6 +79,3 @@ class NoObjectiveTest(BaseTest):
 
         # Assert
         self.assertEqual(result.best_state.objective(), -60)
-
-
-

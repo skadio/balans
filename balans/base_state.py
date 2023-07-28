@@ -9,7 +9,7 @@ class _State:
 
     def __init__(self,
                  instance: _Instance,
-                 var_to_val: Dict[Any, float],
+                 index_to_val: Dict[Any, float],
                  obj_val: float,
                  destroy_set=None,
                  dins_binary_set=None,
@@ -19,8 +19,8 @@ class _State:
 
         self.instance = instance
 
-        # Var is not a scip object but variable index returned by scip via var.getIndex()
-        self.var_to_val = var_to_val
+        # Var index is defined by SCIP as var.getIndex()
+        self.index_to_val = index_to_val
         self.obj_val = obj_val
 
         # Instance variables
@@ -29,6 +29,9 @@ class _State:
         self.proximity_set = proximity_set
         self.rens_float_set = rens_float_set
         self.is_zero_obj = is_zero_obj
+
+    def solution(self):
+        return self.index_to_val
 
     def objective(self):
         return self.obj_val
@@ -42,10 +45,10 @@ class _State:
 
     def solve_and_update(self):
         # Solve the current state with the destroyed variables and update
-        self.var_to_val, self.obj_val = self.instance.solve(is_initial_solve=False,
-                                                            var_to_val=self.var_to_val,
-                                                            destroy_set=self.destroy_set,
-                                                            dins_binary_set=self.dins_binary_set,
-                                                            proximity_set=self.proximity_set,
-                                                            rens_float_set=self.rens_float_set,
-                                                            is_zero_obj=self.is_zero_obj)
+        self.index_to_val, self.obj_val = self.instance.solve(is_initial_solve=False,
+                                                              index_to_val=self.index_to_val,
+                                                              destroy_set=self.destroy_set,
+                                                              dins_binary_set=self.dins_binary_set,
+                                                              proximity_set=self.proximity_set,
+                                                              rens_float_set=self.rens_float_set,
+                                                              is_zero_obj=self.is_zero_obj)

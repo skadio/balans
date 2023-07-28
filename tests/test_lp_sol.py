@@ -19,7 +19,6 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 
-
 class LPSolTest(BaseTest):
 
     def test_lp_t1(self):
@@ -32,6 +31,6 @@ class LPSolTest(BaseTest):
         instance = _Instance(instance_path)
 
         # LP solution
-        lp_var_to_val, lp_obj_val = instance.lp_solve()
+        lp_index_to_val, lp_obj_val = instance.lp_solve()
 
         self.assertEqual(lp_obj_val, 2.666666666666667)

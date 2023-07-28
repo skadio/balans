@@ -28,8 +28,8 @@ class SolverTest(BaseTest):
         seed = 123456
         destroy_ops = [DestroyOperators.Mutation2]
         repair_ops = [RepairOperators.Repair]
-        best, better, accepted, worse = 5, 2, 1, 0.5
-        selector = MABSelector(scores=[best, better, accepted, worse], num_destroy=1, num_repair=1,
+        best, better, accept, reject = 5, 2, 1, 0.5
+        selector = MABSelector(scores=[best, better, accept, reject], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
         accept = HillClimbing()
         stop = MaxIterations(100)
@@ -39,7 +39,8 @@ class SolverTest(BaseTest):
 
         # Run
         result = balans.solve(instance_path)
-        print("Best solution:", result.best_state.objective())
+        print("Best solution:", result.best_state.solution())
+        print("Best solution value:", result.best_state.objective())
 
         # Assert
         self.assertIsBetter(balans.initial_obj_val, result.best_state.objective(), balans.instance.sense)

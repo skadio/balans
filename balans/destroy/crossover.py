@@ -23,6 +23,6 @@ def crossover(current: _State, rnd_state) -> _State:
 
     print("\t Destroy set:", next_state.destroy_set)
     return _State(next_state.instance,
-                  next_state.var_to_val,
+                  next_state.index_to_val,
                   next_state.obj_val,
                   destroy_set=crossover_destroy_set)

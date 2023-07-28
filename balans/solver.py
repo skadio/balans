@@ -29,10 +29,10 @@ DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Mutation2),
                type(DestroyOperators.Mutation3),
                type(DestroyOperators.Mutation4),
-               type(DestroyOperators.No_Objective),
                type(DestroyOperators.Proximity),
                type(DestroyOperators.Rens),
-               type(DestroyOperators.Rins))
+               type(DestroyOperators.Rins),
+               type(DestroyOperators.Zero_Objective))
 
 RepairType = (type(RepairOperators.Repair))
 
@@ -99,7 +99,7 @@ class Balans:
 
         # Instance and the first solution
         self._instance: Optional[_Instance] = None
-        self._initial_var_to_val: Optional[Dict[int, float]] = None
+        self._initial_index_to_val: Optional[Dict[int, float]] = None
         self._initial_obj_val: Optional[float] = None
 
     @property
@@ -107,26 +107,29 @@ class Balans:
         return self._instance
 
     @property
-    def initial_var_to_val(self) -> Dict[int, float]:
-        return self._initial_var_to_val
+    def initial_index_to_val(self) -> Dict[int, float]:
+        return self._initial_index_to_val
 
     @property
     def initial_obj_val(self) -> float:
         return self._initial_obj_val
 
-    def solve(self, instance_path) -> Result:
-
+    def solve(self, instance_path, index_to_val=None) -> Result:
+        """
+        instance_path: the path to the MIP instance file
+        index_to_val: initial (partial) solution to warm start the variables
+        """
         self._validate_solve_args(instance_path)
 
         # Create instance from mip file
         self._instance = _Instance(instance_path)
 
         # Initial solution
-        self._initial_var_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True)
+        self._initial_index_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True, index_to_val=index_to_val)
         print(">>> START objective:", self._initial_obj_val)
 
         # Initial state and solution
-        initial_state = _State(self._instance, self.initial_var_to_val, self.initial_obj_val)
+        initial_state = _State(self._instance, self.initial_index_to_val, self.initial_obj_val)
 
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
 

@@ -21,7 +21,7 @@ class DestroyOperators(NamedTuple):
     Mutation2 = mutation_50
     Mutation3 = mutation_75
     Mutation4 = mutation_100
-    No_Objective = zero_objective
     Proximity = proximity
     Rens = rens
     Rins = rins
+    Zero_Objective = zero_objective

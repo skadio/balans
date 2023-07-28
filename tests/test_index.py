@@ -82,10 +82,10 @@ class IndexTest(BaseTest):
 
         _instance = _Instance(instance_path)
         # Initial solution
-        initial_var_to_val, initial_obj_val = _instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = _instance.solve(is_initial_solve=True)
 
         # Initial state and solution
-        initial_state = _State(_instance, initial_var_to_val, initial_obj_val)
+        initial_state = _State(_instance, initial_index_to_val, initial_obj_val)
         # Assert
         self.assertEqual(initial_obj_val, 2.999979654947926)
 
@@ -102,10 +102,10 @@ class IndexTest(BaseTest):
 
         _instance = _Instance(instance_path)
         # Initial solution
-        initial_var_to_val, initial_obj_val = _instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = _instance.solve(is_initial_solve=True)
 
         # Initial state and solution
-        initial_state = _State(_instance, initial_var_to_val, initial_obj_val)
+        initial_state = _State(_instance, initial_index_to_val, initial_obj_val)
 
         # Assert
         self.assertEqual(initial_state.destroy_set, None)

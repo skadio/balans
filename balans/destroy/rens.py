@@ -15,15 +15,15 @@ def rens(current: _State, rnd_state) -> _State:
 
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
-    lp_var_to_val = current.instance.lp_var_to_val
+    lp_index_to_val = current.instance.lp_index_to_val
 
     # Discrete variables, where the lp relaxation is not integral
-    rens_float_set = [i for i in discrete_indexes if not lp_var_to_val[i].is_integer()]
+    rens_float_set = [i for i in discrete_indexes if not lp_index_to_val[i].is_integer()]
 
     print("\t Float set:", rens_float_set)
     print("\t Destroy set:", next_state.destroy_set)
 
     return _State(next_state.instance,
-                  next_state.var_to_val,
+                  next_state.index_to_val,
                   next_state.obj_val,
                   rens_float_set=rens_float_set)

@@ -21,7 +21,7 @@ def proximity(current: _State, rnd_state) -> _State:
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
     binary_indexes = current.instance.binary_indexes
-    lp_var_to_val = current.instance.lp_var_to_val
+    lp_index_to_val = current.instance.lp_index_to_val
 
     # for binary variable condition
     proximity_set = set(rnd_state.choice(binary_indexes, int(len(binary_indexes))))
@@ -31,7 +31,7 @@ def proximity(current: _State, rnd_state) -> _State:
     print("\t Destroy set:", proximity_destroy_set)
     print("\t Binary set:", proximity_set)
 
-    return _State(next_state.instance, next_state.var_to_val,
+    return _State(next_state.instance, next_state.index_to_val,
                   next_state.obj_val,
                   destroy_set=proximity_destroy_set,
                   proximity_set=proximity_set)

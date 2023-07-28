@@ -17,14 +17,14 @@ def dins(current: _State, rnd_state, delta) -> _State:
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
     binary_indexes = current.instance.binary_indexes
-    lp_var_to_val = current.instance.lp_var_to_val
+    lp_index_to_val = current.instance.lp_index_to_val
 
-    print("\t discrete indexes:", discrete_indexes)
-    print("lp var to val:", lp_var_to_val)
+    print("\t discrete_indexes:", discrete_indexes)
+    print("\t lp_index_to_val: ", lp_index_to_val)
 
     # By considering only discrete variables, form a set_j where |x_lp - x_inc| >= 0.5
     set_j = set([i for i in discrete_indexes
-                 if abs(lp_var_to_val[i] - current.var_to_val[i]) >= 0.5])
+                 if abs(lp_index_to_val[i] - current.index_to_val[i]) >= 0.5])
 
     # DINS for binary: hard constraint to change at most half of the binary variables
     dins_binary_set = set(rnd_state.choice(binary_indexes, int(delta * len(binary_indexes))))
@@ -33,7 +33,7 @@ def dins(current: _State, rnd_state, delta) -> _State:
     print("\t DINS Binary set:", dins_binary_set)
 
     return _State(next_state.instance,
-                  next_state.var_to_val,
+                  next_state.index_to_val,
                   next_state.obj_val,
                   destroy_set=set_j,
                   dins_binary_set=dins_binary_set)

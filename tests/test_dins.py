@@ -84,13 +84,13 @@ class DinsTest(BaseTest):
 
         instance = _Instance(instance_path)
 
-        var_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
-        print("initial var to val:", var_to_val)
+        index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
+        print("initial index to val:", index_to_val)
 
-        initial2 = _State(instance, var_to_val,  -30)
+        initial2 = _State(instance, index_to_val,  -30)
 
         # Initial solution
-        initial_var_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
@@ -124,12 +124,12 @@ class DinsTest(BaseTest):
         instance = _Instance(instance_path)
 
         # Initial solution
-        initial_var_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
 
-        initial_var_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
-        print("initial var to val:", initial_var_to_val)
+        initial_index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
+        print("initial index to val:", initial_index_to_val)
 
-        initial2 = _State(instance, initial_var_to_val, -30)
+        initial2 = _State(instance, initial_index_to_val, -30)
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
@@ -148,10 +148,10 @@ class DinsTest(BaseTest):
         best_state = result.best_state
         best_objective = best_state.objective()
 
-        # best_var_to_val = None # best.var_to_val
+        # best_index_to_val = None # best.index_to_val
         #
         # # First variable must remain fixed
-        # self.assertEqual(initial_var_to_val[0], best_var_to_val[0])
+        # self.assertEqual(initial_index_to_val[0], best_index_to_val[0])
 
         print(f"Best heuristic solution objective is {best_objective}.")
         self.assertEqual(best_objective, -60.0)
@@ -166,13 +166,13 @@ class DinsTest(BaseTest):
 
         instance = _Instance(instance_path)
 
-        var_to_val = {0: 1.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
-        print("initial var to val:", var_to_val)
+        index_to_val = {0: 1.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
+        print("initial index to val:", index_to_val)
 
-        initial2 = _State(instance, var_to_val, -40)
+        initial2 = _State(instance, index_to_val, -40)
 
         # Initial solution
-        initial_var_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))

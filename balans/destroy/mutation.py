@@ -22,7 +22,7 @@ def _mutation(current: _State, rnd_state, delta) -> _State:
     print("\t Destroy set:", mutation_set)
 
     return _State(next_state.instance,
-                  next_state.var_to_val,
+                  next_state.index_to_val,
                   next_state.obj_val,
                   destroy_set=mutation_set)
 

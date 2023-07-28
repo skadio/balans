@@ -25,20 +25,24 @@ from balans.destroy import DestroyOperators
 from balans.repair import RepairOperators
 
 # Balans
-balans = Balans(destroy_ops=[DestroyOperators.Mutation,DestroyOperators.Dins,DestroyOperators.Local_Branching,
-                             DestroyOperators.Rens,DestroyOperators.Rins,DestroyOperators.No_Objective],
+balans = Balans(destroy_ops=[DestroyOperators.Dins, 
+                             DestroyOperators.Mutation, 
+                             DestroyOperators.Local_Branching,
+                             DestroyOperators.Rens, 
+                             DestroyOperators.Rins,
+                             DestroyOperators.Zero_Objective],
                 repair_ops=[RepairOperators.Repair],
-                selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=6, num_repair=1,
-                                       learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15)),
+                selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=6, num_repair=1,
+                                     learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15)),
                 accept=HillClimbing(),
                 stop=MaxIterations(100))
 
-
 # Run
-result=balans.solve("noswot.mps.gz")
+result = balans.solve("noswot.mps.gz")
 
 # Result
-print("Best solution:", result.best_state.objective())
+print("Best solution:", result.best_state.solution())
+print("Best solution objective:", result.best_state.objective())
 ```
 
 ## Available Destroy Operators
