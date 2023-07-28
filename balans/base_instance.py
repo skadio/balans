@@ -29,8 +29,14 @@ class _Instance:
         self.lp_var_to_val = None  # static, set once and for in solve()
         self.lp_obj_value = None  # static, set once and for in solve()
 
-    def solve(self, is_initial_solve=False, destroy_set=None, var_to_val=None, rens_float_set=None,
-              is_zero_obj=None, dins_binary_set=None, proximity_set=None) -> Tuple[Dict[Any, float], float]:
+    def solve(self,
+              is_initial_solve=False,
+              var_to_val=None,
+              destroy_set=None,
+              dins_binary_set=None,
+              proximity_set=None,
+              rens_float_set=None,
+              is_zero_obj=None) -> Tuple[Dict[Any, float], float]:
 
         if is_initial_solve:
             return self.initial_solve()
@@ -68,18 +74,6 @@ class _Instance:
                         # Fix all binary vars in dins_binary
                         model.addCons(var == var_to_val[var.getIndex()])
 
-            # RENS: Discrete variables, where the lp relaxation is not integral
-            if rens_float_set:
-                for var in variables:
-                    if var.getIndex() in rens_float_set:
-                        # Restrict discrete vars to round up and down integer version of it
-                        model.addCons(var <= math.floor(var_to_val[var.getIndex()]))
-                        model.addCons(var >= math.ceil(var_to_val[var.getIndex()]))
-
-            # Zero Objective
-            if is_zero_obj:
-                model.setObjective(0, self.sense)
-
             # if proximity_set:
             # TODO -proximity needs modification of constraints.
             #     currentNumVar=1
@@ -99,6 +93,18 @@ class _Instance:
             # # DROP ALL NON-BINARY VARIABLES
             # if var.getIndex() not in proximity_set:
             #     model.delVar(var)
+
+            # RENS: Discrete variables, where the lp relaxation is not integral
+            if rens_float_set:
+                for var in variables:
+                    if var.getIndex() in rens_float_set:
+                        # Restrict discrete vars to round up and down integer version of it
+                        model.addCons(var <= math.floor(var_to_val[var.getIndex()]))
+                        model.addCons(var >= math.ceil(var_to_val[var.getIndex()]))
+
+            # Zero Objective
+            if is_zero_obj:
+                model.setObjective(0, self.sense)
 
             # Solve
             model.optimize()
