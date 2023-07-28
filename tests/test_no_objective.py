@@ -63,10 +63,7 @@ class NoObjectiveTest(BaseTest):
         print("initial var to val:", var_to_val)
         obj_value = -40
 
-        initial2 = _State(instance, {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0},
-                          -30,
-                          lp_var_to_val={1: 60.0, 0: 0.0, 4: 0.0, 3: 0.0, 2: 0.0},
-                          lp_obj_val=-60.0)
+        initial2 = _State(instance, {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0},-30)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))

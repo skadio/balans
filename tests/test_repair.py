@@ -25,13 +25,13 @@ class RepairTest(BaseTest):
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
 
         # Parameters
-        seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Mutation]
+        seed = 123456
+        destroy_ops = [DestroyOperators.Mutation2]
         repair_ops = [RepairOperators.Repair]
-        selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
+        selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
         accept = HillClimbing()
-        stop = MaxIterations(5)
+        stop = MaxIterations(100)
 
         # Solver
         balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
