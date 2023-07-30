@@ -20,15 +20,15 @@ np.random.seed(SEED)
 rnd_state = np.random.RandomState(SEED)
 
 # Balans
-balans = Balans(destroy_ops=[DestroyOperators.Mutation2],
+balans = Balans(destroy_ops=[DestroyOperators.Crossover3],
                 repair_ops=[RepairOperators.Repair],
                 selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                      learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15)),
                 accept=HillClimbing(),
-                stop=MaxIterations(50))
+                stop=MaxIterations(2))
 
 # Input
-instance = "neos-5140963-mincio.mps.gz"
+instance = "noswot.mps.gz"
 #instance = "test2.5.cip"
 #instance = "test5.5.cip"
 instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)

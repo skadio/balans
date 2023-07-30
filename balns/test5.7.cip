@@ -1,0 +1,18 @@
+dSTATISTICS
+  Problem name     : model
+  Variables        : 7 (2 binary, 3 integer, 0 implicit integer, 2 continuous)
+  Constraints      : 2 initial, 2 maximal
+OBJECTIVE
+  Sense            : minimize
+VARIABLES
+  [binary] <x1>: obj=-1, original bounds=[0,1]
+  [binary] <x2>: obj=0, original bounds=[0,1]
+  [integer] <x3>: obj=-1, original bounds=[0,+inf]
+  [integer] <x4>: obj=-1, original bounds=[0,+inf]
+  [integer] <x5>: obj=0, original bounds=[0,+inf]
+  [continuous] <x6>: obj=-1, original bounds=[0,+inf]
+  [continuous] <x7>: obj=0, original bounds=[0,+inf]
+CONSTRAINTS
+  [linear] <c1>: <x3>[I] +<x4>[I] +<x5>[I] +<x6>[C] +<x7>[C] == 60;
+  [nonlinear] <c2>: abs(<x1>) == 2;
+END

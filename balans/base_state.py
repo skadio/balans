@@ -15,7 +15,9 @@ class _State:
                  dins_binary_set=None,
                  proximity_set=None,
                  rens_float_set=None,
-                 is_zero_obj=None):
+                 is_zero_obj=None,
+                 previous_index_to_val=None,
+                 is_local_branching=None):
 
         self.instance = instance
 
@@ -29,6 +31,8 @@ class _State:
         self.proximity_set = proximity_set
         self.rens_float_set = rens_float_set
         self.is_zero_obj = is_zero_obj
+        self.previous_index_to_val= previous_index_to_val
+        self.is_local_branching=is_local_branching
 
     def solution(self):
         return self.index_to_val
@@ -51,4 +55,5 @@ class _State:
                                                               dins_binary_set=self.dins_binary_set,
                                                               proximity_set=self.proximity_set,
                                                               rens_float_set=self.rens_float_set,
-                                                              is_zero_obj=self.is_zero_obj)
+                                                              is_zero_obj=self.is_zero_obj,
+                                                              is_local_branching=self.is_local_branching)

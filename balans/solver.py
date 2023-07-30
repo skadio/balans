@@ -123,11 +123,13 @@ class Balans:
         self._instance = _Instance(instance_path)
 
         # Initial solution
-        self._initial_index_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True, index_to_val=index_to_val)
+        self._initial_index_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True,
+                                                                                 index_to_val=index_to_val)
         print(">>> START objective:", self._initial_obj_val)
 
         # Initial state and solution
-        initial_state = _State(self._instance, self.initial_index_to_val, self.initial_obj_val)
+        initial_state = _State(self._instance, self.initial_index_to_val,
+                               self.initial_obj_val, previous_index_to_val=self._initial_index_to_val)
 
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
 

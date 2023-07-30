@@ -3,7 +3,7 @@ import pyscipopt as scip
 from balans.utils import Constants
 from typing import Tuple, Dict, Any
 import math
-from pyscipopt import Model
+from pyscipopt import Model, quicksum
 
 
 class _Instance:
@@ -28,6 +28,8 @@ class _Instance:
         self.sense = None  # static, set once and for all in solve()
         self.lp_index_to_val = None  # static, set once and for in solve()
         self.lp_obj_value = None  # static, set once and for in solve()
+        self.random_index_to_val = None  # static, second random solution
+        self.random_obj_value = None  # static, second random solution
 
     def solve(self,
               is_initial_solve=False,
@@ -36,7 +38,8 @@ class _Instance:
               dins_binary_set=None,
               proximity_set=None,
               rens_float_set=None,
-              is_zero_obj=None) -> Tuple[Dict[Any, float], float]:
+              is_zero_obj=None,
+              is_local_branching=None) -> Tuple[Dict[Any, float], float]:
 
         print("\t Solve")
 
@@ -66,7 +69,8 @@ class _Instance:
                         else:
                             # IF in destroy, and DINS is active, don't fix but add bounding constraint
                             if dins_binary_set:
-                                current_lp_diff = abs(index_to_val[var.getIndex()] - self.lp_index_to_val[var.getIndex()])
+                                current_lp_diff = abs(
+                                    index_to_val[var.getIndex()] - self.lp_index_to_val[var.getIndex()])
                                 model.addCons(abs(var - self.lp_index_to_val[var.getIndex()]) <= current_lp_diff)
 
             # DINS: binary variables have more strict condition to be fixed
@@ -75,6 +79,21 @@ class _Instance:
                     if var.getIndex() in dins_binary_set:
                         # Fix all binary vars in dins_binary
                         model.addCons(var == index_to_val[var.getIndex()])
+
+            # #Local Branching V2
+            #
+            # if is_local_branching:
+            #     currently_zero = []
+            #     currently_one = []
+            #     for var in variables:
+            #         if var.getIndex() in self.binary_indexes:
+            #             if index_to_val[var.getIndex()] == 0:
+            #                 currently_zero.append(var.getIndex())
+            #             else:
+            #                 currently_one.append(var.getIndex())
+            #
+            #     model.addCons(quicksum((var[r] + 1- var[i]) for r in currently_zero for i in currently_one)
+            #                     <= int(0.5 * len(self.binary_indexes)) )
 
             # if proximity_set:
             # TODO -proximity needs modification of constraints.
@@ -113,6 +132,7 @@ class _Instance:
 
             # Solution and objective
             index_to_val = self.get_index_to_val(model)
+            print("index_to_val: ", index_to_val)
             obj_value = model.getObjVal()
 
             print("\t Solve DONE!")
@@ -199,6 +219,9 @@ class _Instance:
         # Solve LP relaxation and save it
         self.lp_index_to_val, self.lp_obj_value = self.lp_solve()
 
+        # Create two more random solutions for crossover heuristics** Only needed for Crossover
+        self.random_index_to_val, self.random_obj_value = self.get_random_solution(0.80, 20)
+
         # Return solution
         return index_to_val, obj_value
 
@@ -227,6 +250,36 @@ class _Instance:
 
         # Return solution and objective
         return index_to_val, obj_value
+
+    def get_random_solution(self, gap=0.80, time=30) -> Tuple[Dict[Any, float], float]:
+
+        # Model with verbosity level 0
+        model = scip.Model()
+        model.hideOutput()
+
+        # Instance
+        model.readProblem(self.path)
+        # model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
+
+        # Search only for the first incumbent
+        model.setParam("limits/gap", gap)
+        model.setParam("limits/time", time)
+
+        # Variables
+        variables = model.getVars()
+
+        # Solve
+        model.optimize()
+
+        # Initial solution and objective
+        random_index_to_val = self.get_index_to_val(model)
+        random_obj_value = model.getObjVal()
+
+        # Reset problem
+        model.freeProb()
+
+        # Return solution
+        return random_index_to_val, random_obj_value
 
     @staticmethod
     def is_discrete(var_type) -> bool:

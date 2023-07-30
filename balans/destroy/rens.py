@@ -21,7 +21,6 @@ def rens(current: _State, rnd_state) -> _State:
     rens_float_set = [i for i in discrete_indexes if not lp_index_to_val[i].is_integer()]
 
     print("\t Float set:", rens_float_set)
-    print("\t Destroy set:", next_state.destroy_set)
 
     return _State(next_state.instance,
                   next_state.index_to_val,

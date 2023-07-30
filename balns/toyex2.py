@@ -16,14 +16,18 @@ x6 = model.addVar(vtype="C")
 
 
 model.addCons(x2 + x3 + x4 + x5 + x6 == 60)
-model.addCons(x0 + x1 == 1)
+
+model.addCons(abs(x0) == 2)
 #max problem = 32, when x3=0
 #for exmaple x1=20, x3=20, x4=20
 
 # Set objective function
-model.setObjective(-x2 -x3 - x5, "minimize")
+model.setObjective(-x2 -x3 - x5-x0, "minimize")
+
 
 model.hideOutput()
 model.optimize()
 
-model.writeProblem("test5.5.cip")
+
+
+model.writeProblem("test5.7.cip")
