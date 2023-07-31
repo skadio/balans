@@ -7,8 +7,7 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
     #  here we say change at most half of them (delta=0.5).
     #  Other possible delta values are 0.25 and 0.75.
     #  Send the destroy set to base_instance.
-    # TODO for FUTURE NOTE:
-    #  Here we ourselves give (FORCE) free indexes to the solver
+    # TODO for FUTURE NOTE: here we give/force free indexes to the solver
     # TODO These indexes can also be determined by the solver.
 
     print("\t Destroy current objective:", current.obj_val)
@@ -30,17 +29,6 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
                   destroy_set=local_branching_destroy_set)
 
 
-def local_branching_v2(current: _State, rnd_state) -> _State:
-    print("\t Destroy current objective:", current.obj_val)
-    next_state = copy.deepcopy(current)
-    next_state.reset_solve_settings()
-
-    return _State(next_state.instance,
-                  next_state.index_to_val,
-                  next_state.obj_val,
-                  is_local_branching=True)
-
-
 def local_branching_25(current: _State, rnd_state) -> _State:
     return _local_branching(current, rnd_state, delta=0.25)
 
@@ -51,3 +39,15 @@ def local_branching_50(current: _State, rnd_state) -> _State:
 
 def local_branching_75(current: _State, rnd_state) -> _State:
     return _local_branching(current, rnd_state, delta=0.75)
+
+
+# def local_branching_v2(current: _State, rnd_state) -> _State:
+#     print("\t Destroy current objective:", current.obj_val)
+#     next_state = copy.deepcopy(current)
+#     next_state.reset_solve_settings()
+#
+#     return _State(next_state.instance,
+#                   next_state.index_to_val,
+#                   next_state.obj_val,
+#                   is_local_branching=True)
+

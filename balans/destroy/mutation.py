@@ -3,9 +3,9 @@ from balans.base_state import _State
 
 
 def _mutation(current: _State, rnd_state, delta) -> _State:
-    #  Take the discrete variables of the original problem
+    # Take the discrete variables of the original problem
     # Then, depending on delta parameter, choose a random subset of discrete variables to destroy.
-    #  Send the destroy set to base_instance.
+    # Send the destroy set to base_instance.
 
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)

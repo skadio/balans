@@ -25,14 +25,14 @@ def crossover(current: _State, rnd_state) -> _State:
                                np.isclose(current.previous_index_to_val[i], next_state.index_to_val[i])]
 
     # Else potentially change it
-    crossover_destroy_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
+    crossover_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
     print("\t Previous Index to val:", next_state.index_to_val)
 
-    print("\t Destroy set:", crossover_destroy_set)
+    print("\t Destroy set:", crossover_set)
     return _State(next_state.instance,
                   next_state.index_to_val,
                   next_state.obj_val,
-                  destroy_set=crossover_destroy_set,
+                  destroy_set=crossover_set,
                   previous_index_to_val=current.index_to_val)
 
 
@@ -56,14 +56,14 @@ def crossover2(current: _State, rnd_state) -> _State:
                                np.isclose(random_sol[i], next_state.index_to_val[i])]
 
     # Else potentially change it
-    crossover_destroy_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
+    crossover_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
     print("\tIndex to val:", next_state.index_to_val)
 
-    print("\t Destroy set:", crossover_destroy_set)
+    print("\t Destroy set:", crossover_set)
     return _State(next_state.instance,
                   next_state.index_to_val,
                   next_state.obj_val,
-                  destroy_set=crossover_destroy_set)
+                  destroy_set=crossover_set)
 
 
 def crossover3(current: _State, rnd_state) -> _State:
@@ -94,15 +94,15 @@ def crossover3(current: _State, rnd_state) -> _State:
                                np.isclose(random_index_to_val[i], random2_index_to_val[i])]
 
     # Else potentially change it
-    crossover_destroy_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
+    crossover_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
 
     # Update the next index
     next_state.index_to_val = random_index_to_val
 
     print("\tIndex to val:", next_state.index_to_val)
 
-    print("\t Destroy set:", crossover_destroy_set)
+    print("\t Destroy set:", crossover_set)
     return _State(next_state.instance,
                   next_state.index_to_val,
                   next_state.obj_val,
-                  destroy_set=crossover_destroy_set)
+                  destroy_set=crossover_set)

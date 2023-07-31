@@ -36,10 +36,8 @@ class _Instance:
               index_to_val=None,
               destroy_set=None,
               dins_binary_set=None,
-              proximity_set=None,
               rens_float_set=None,
-              is_zero_obj=None,
-              is_local_branching=None) -> Tuple[Dict[Any, float], float]:
+              is_zero_obj=False) -> Tuple[Dict[Any, float], float]:
 
         print("\t Solve")
 
@@ -69,9 +67,9 @@ class _Instance:
                         else:
                             # IF in destroy, and DINS is active, don't fix but add bounding constraint
                             if dins_binary_set:
-                                current_lp_diff = abs(
-                                    index_to_val[var.getIndex()] - self.lp_index_to_val[var.getIndex()])
-                                model.addCons(abs(var - self.lp_index_to_val[var.getIndex()]) <= current_lp_diff)
+                                index = var.getIndex()
+                                current_lp_diff = abs(index_to_val[index] - self.lp_index_to_val[index])
+                                model.addCons(abs(var - self.lp_index_to_val[index]) <= current_lp_diff)
 
             # DINS: binary variables have more strict condition to be fixed
             if dins_binary_set:
@@ -79,41 +77,6 @@ class _Instance:
                     if var.getIndex() in dins_binary_set:
                         # Fix all binary vars in dins_binary
                         model.addCons(var == index_to_val[var.getIndex()])
-
-            # #Local Branching V2
-            #
-            # if is_local_branching:
-            #     currently_zero = []
-            #     currently_one = []
-            #     for var in variables:
-            #         if var.getIndex() in self.binary_indexes:
-            #             if index_to_val[var.getIndex()] == 0:
-            #                 currently_zero.append(var.getIndex())
-            #             else:
-            #                 currently_one.append(var.getIndex())
-            #
-            #     model.addCons(quicksum((var[r] + 1- var[i]) for r in currently_zero for i in currently_one)
-            #                     <= int(0.5 * len(self.binary_indexes)) )
-
-            # if proximity_set:
-            # TODO -proximity needs modification of constraints.
-            #     currentNumVar=1
-            #     for var in variables:
-            #         # BINARY VARS
-            #         if var.getIndex() in proximity_set:
-            #
-            #             if index_to_val[var.getIndex()] == 0:
-            #                 model.addVar("var" + str(currentNumVar), vtype="B", obj=1.0)
-            #
-            #             if index_to_val[var.getIndex()] == 1:
-            #                 model.addVar("var" + str(currentNumVar), vtype="B", obj=-1.0)
-            #
-            #         currentNumVar = currentNumVar+1
-            #         model.delVar(var)
-
-            # # DROP ALL NON-BINARY VARIABLES
-            # if var.getIndex() not in proximity_set:
-            #     model.delVar(var)
 
             # RENS: Discrete variables, where the lp relaxation is not integral
             if rens_float_set:
@@ -132,11 +95,10 @@ class _Instance:
 
             # Solution and objective
             index_to_val = self.get_index_to_val(model)
-            print("index_to_val: ", index_to_val)
             obj_value = model.getObjVal()
 
             print("\t Solve DONE!")
-            print("\tindex_to_val: ", index_to_val)
+            print("\t index_to_val: ", index_to_val)
 
             return index_to_val, obj_value
 
@@ -162,15 +124,6 @@ class _Instance:
 
         self.binary_indexes = binary
         print(binary)
-
-        # Set discrete indexes MODIFIED
-        # %TODO with list comprehension Done!
-
-        # self.discrete_indexes = [var.getIndex() for var in variables if self.is_discrete(var.vtype)]
-
-        # Set binary indexes MODIFIED
-        # %TODO replace  with list comprehension Done!
-        # self.binary_indexes = [var.getIndex() for var in variables if self.is_binary(var.vtype)]
 
         # Feature df with types and bounds
         # %TODO where is this used at all??
@@ -292,3 +245,39 @@ class _Instance:
     @staticmethod
     def get_index_to_val(model) -> Dict[Any, float]:
         return dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
+
+
+# #Local Branching V2
+# if is_local_branching:
+#     currently_zero = []
+#     currently_one = []
+#     for var in variables:
+#         if var.getIndex() in self.binary_indexes:
+#             if index_to_val[var.getIndex()] == 0:
+#                 currently_zero.append(var.getIndex())
+#             else:
+#                 currently_one.append(var.getIndex())
+#
+#     model.addCons(quicksum((var[r] + 1- var[i]) for r in currently_zero for i in currently_one)
+#                     <= int(0.5 * len(self.binary_indexes)) )
+
+
+# if proximity_set:
+# TODO -proximity needs modification of constraints.
+#     currentNumVar=1
+#     for var in variables:
+#         # BINARY VARS
+#         if var.getIndex() in proximity_set:
+#
+#             if index_to_val[var.getIndex()] == 0:
+#                 model.addVar("var" + str(currentNumVar), vtype="B", obj=1.0)
+#
+#             if index_to_val[var.getIndex()] == 1:
+#                 model.addVar("var" + str(currentNumVar), vtype="B", obj=-1.0)
+#
+#         currentNumVar = currentNumVar+1
+#         model.delVar(var)
+
+# # DROP ALL NON-BINARY VARIABLES
+# if var.getIndex() not in proximity_set:
+#     model.delVar(var)

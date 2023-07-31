@@ -20,5 +20,4 @@ def proximity(current: _State, rnd_state) -> _State:
 
     return _State(next_state.instance,
                   next_state.index_to_val,
-                  next_state.obj_val,
-                  proximity_set=True)
+                  next_state.obj_val)

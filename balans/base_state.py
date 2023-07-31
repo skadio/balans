@@ -13,26 +13,18 @@ class _State:
                  obj_val: float,
                  destroy_set=None,
                  dins_binary_set=None,
-                 proximity_set=None,
                  rens_float_set=None,
-                 is_zero_obj=None,
-                 previous_index_to_val=None,
-                 is_local_branching=None):
+                 is_zero_obj=False,
+                 previous_index_to_val=None):
 
         self.instance = instance
-
-        # Var index is defined by SCIP as var.getIndex()
-        self.index_to_val = index_to_val
+        self.index_to_val = index_to_val    # index defined by SCIP var.getIndex()
         self.obj_val = obj_val
-
-        # Instance variables
         self.destroy_set = destroy_set
         self.dins_binary_set = dins_binary_set
-        self.proximity_set = proximity_set
         self.rens_float_set = rens_float_set
         self.is_zero_obj = is_zero_obj
-        self.previous_index_to_val= previous_index_to_val
-        self.is_local_branching=is_local_branching
+        self.previous_index_to_val = previous_index_to_val
 
     def solution(self):
         return self.index_to_val
@@ -43,9 +35,8 @@ class _State:
     def reset_solve_settings(self):
         self.destroy_set = None
         self.dins_binary_set = None
-        self.proximity_set = None
         self.rens_float_set = None
-        self.is_zero_obj = None
+        self.is_zero_obj = False
 
     def solve_and_update(self):
         # Solve the current state with the destroyed variables and update
@@ -53,7 +44,5 @@ class _State:
                                                               index_to_val=self.index_to_val,
                                                               destroy_set=self.destroy_set,
                                                               dins_binary_set=self.dins_binary_set,
-                                                              proximity_set=self.proximity_set,
                                                               rens_float_set=self.rens_float_set,
-                                                              is_zero_obj=self.is_zero_obj,
-                                                              is_local_branching=self.is_local_branching)
+                                                              is_zero_obj=self.is_zero_obj)
