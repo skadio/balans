@@ -6,7 +6,6 @@ from balans.base_state import _State
 
 # 3 DIFFERENT VERSIONS OF CROSS OVER IMPLEMENTED, ORIGINAL ONE IS CROSSOVER3.
 def crossover(current: _State, rnd_state) -> _State:
-    # TODO THE HEURISTIC DO NOT PROPERLY ITERATE YET.
     #  Take two random*** (CURRENTLY LAST TWO SOLUTION) solutions.
     #  If a DISCRETE variable x_inc = x_inc2, do not change it.
     #  Otherwise, put it to the destroy set.

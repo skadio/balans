@@ -1,5 +1,6 @@
 import pandas as pd
 import pyscipopt as scip
+from pyscipopt import Model, Heur, SCIP_RESULT, SCIP_PARAMSETTING, SCIP_HEURTIMING
 from balans.utils import Constants
 from typing import Tuple, Dict, Any
 import math
@@ -37,7 +38,8 @@ class _Instance:
               destroy_set=None,
               dins_binary_set=None,
               rens_float_set=None,
-              is_zero_obj=False) -> Tuple[Dict[Any, float], float]:
+              is_zero_obj=False,
+              is_local_branching=False) -> Tuple[Dict[Any, float], float]:
 
         print("\t Solve")
 
@@ -90,6 +92,25 @@ class _Instance:
             if is_zero_obj:
                 model.setObjective(0, self.sense)
 
+            # Local Branching V2 (Classic Version)
+            if is_local_branching:
+                currently_zero = []
+                currently_one = []
+                for var in variables:
+                    if var.getIndex() in self.binary_indexes:
+                        if index_to_val[var.getIndex()] == 0:
+                            currently_zero.append(var)
+
+                        else:
+                            currently_one.append(var)
+
+                # Only change half of the variables, keep others fixed. e.g.,
+                # if current value of binary var is 0, changing it to 1 consumes 1 unit of budget
+                # if current value of binary var is 1, changing it to 0 consumes 1 unit of budget by (1-x)
+                expr = quicksum(var for var in currently_zero) + quicksum(1 - var2 for var2 in currently_one)
+                # delta =0.5 fixed for local branching v2 (classic version)
+                model.addCons(expr <= int(0.5 * len(self.binary_indexes)))
+
             # Solve
             model.optimize()
 
@@ -114,7 +135,6 @@ class _Instance:
                 discrete.append(var.getIndex())
 
         self.discrete_indexes = discrete
-        print(discrete)
 
         # Set binary indexes
         binary = []
@@ -123,7 +143,6 @@ class _Instance:
                 binary.append(var.getIndex())
 
         self.binary_indexes = binary
-        print(binary)
 
         # Feature df with types and bounds
         # %TODO where is this used at all??
@@ -245,21 +264,6 @@ class _Instance:
     @staticmethod
     def get_index_to_val(model) -> Dict[Any, float]:
         return dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
-
-
-# #Local Branching V2
-# if is_local_branching:
-#     currently_zero = []
-#     currently_one = []
-#     for var in variables:
-#         if var.getIndex() in self.binary_indexes:
-#             if index_to_val[var.getIndex()] == 0:
-#                 currently_zero.append(var.getIndex())
-#             else:
-#                 currently_one.append(var.getIndex())
-#
-#     model.addCons(quicksum((var[r] + 1- var[i]) for r in currently_zero for i in currently_one)
-#                     <= int(0.5 * len(self.binary_indexes)) )
 
 
 # if proximity_set:

@@ -15,7 +15,8 @@ class _State:
                  dins_binary_set=None,
                  rens_float_set=None,
                  is_zero_obj=False,
-                 previous_index_to_val=None):
+                 previous_index_to_val=None,
+                 is_local_branching=None):
 
         self.instance = instance
         self.index_to_val = index_to_val    # index defined by SCIP var.getIndex()
@@ -25,6 +26,7 @@ class _State:
         self.rens_float_set = rens_float_set
         self.is_zero_obj = is_zero_obj
         self.previous_index_to_val = previous_index_to_val
+        self.is_local_branching =is_local_branching
 
     def solution(self):
         return self.index_to_val
@@ -45,4 +47,6 @@ class _State:
                                                               destroy_set=self.destroy_set,
                                                               dins_binary_set=self.dins_binary_set,
                                                               rens_float_set=self.rens_float_set,
-                                                              is_zero_obj=self.is_zero_obj)
+                                                              is_zero_obj=self.is_zero_obj,
+                                                              is_local_branching=self.is_local_branching)
+

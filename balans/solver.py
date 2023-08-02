@@ -126,6 +126,7 @@ class Balans:
         self._initial_index_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True,
                                                                                  index_to_val=index_to_val)
         print(">>> START objective:", self._initial_obj_val)
+        print(">>> START objective index:",self._initial_index_to_val )
 
         # Initial state and solution
         initial_state = _State(self._instance, self.initial_index_to_val,

@@ -2,6 +2,19 @@ import copy
 from balans.base_state import _State
 
 
+# (Classic Version)
+# Implemented new
+def local_branching_v2(current: _State, rnd_state) -> _State:
+    print("\t Destroy current objective:", current.obj_val)
+    next_state = copy.deepcopy(current)
+    next_state.reset_solve_settings()
+
+    return _State(next_state.instance,
+                  next_state.index_to_val,
+                  next_state.obj_val,
+                  is_local_branching=True)
+
+
 def _local_branching(current: _State, rnd_state, delta) -> _State:
     #  For discrete variables we have a hard constraint,
     #  here we say change at most half of them (delta=0.5).
@@ -39,15 +52,3 @@ def local_branching_50(current: _State, rnd_state) -> _State:
 
 def local_branching_75(current: _State, rnd_state) -> _State:
     return _local_branching(current, rnd_state, delta=0.75)
-
-
-# def local_branching_v2(current: _State, rnd_state) -> _State:
-#     print("\t Destroy current objective:", current.obj_val)
-#     next_state = copy.deepcopy(current)
-#     next_state.reset_solve_settings()
-#
-#     return _State(next_state.instance,
-#                   next_state.index_to_val,
-#                   next_state.obj_val,
-#                   is_local_branching=True)
-
