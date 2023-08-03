@@ -20,12 +20,13 @@ np.random.seed(SEED)
 rnd_state = np.random.RandomState(SEED)
 
 # Balans
-balans = Balans(destroy_ops=[DestroyOperators.Local_Branching4],
+balans = Balans(destroy_ops=[DestroyOperators.Proximity],
                 repair_ops=[RepairOperators.Repair],
                 selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                      learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15)),
                 accept=HillClimbing(),
                 stop=MaxIterations(1))
+
 
 # Input
 instance = "test5.5.cip"

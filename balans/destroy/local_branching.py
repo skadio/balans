@@ -4,7 +4,14 @@ from balans.base_state import _State
 
 # (Classic Version)
 # Implemented new
-def local_branching_v2(current: _State, rnd_state) -> _State:
+def local_branching_classic(current: _State, rnd_state) -> _State:
+
+    #  For discrete variables we have a hard constraint,
+    #  here we say change at most half of them (delta=0.5).
+    #  Other possible delta values are 0.25 and 0.75.
+    #  Send the destroy set to base_instance.
+    #  Note: These indexes are determined by the solver in this implementation.
+    # Please see the base_instance is_local_branching part. Operations are implemented inside that.
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
@@ -15,13 +22,12 @@ def local_branching_v2(current: _State, rnd_state) -> _State:
                   is_local_branching=True)
 
 
-def _local_branching(current: _State, rnd_state, delta) -> _State:
+def _local_branching_randomized(current: _State, rnd_state, delta) -> _State:
     #  For discrete variables we have a hard constraint,
     #  here we say change at most half of them (delta=0.5).
     #  Other possible delta values are 0.25 and 0.75.
     #  Send the destroy set to base_instance.
-    # TODO for FUTURE NOTE: here we give/force free indexes to the solver
-    # TODO These indexes can also be determined by the solver.
+
 
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
@@ -43,12 +49,12 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
 
 
 def local_branching_25(current: _State, rnd_state) -> _State:
-    return _local_branching(current, rnd_state, delta=0.25)
+    return _local_branching_randomized(current, rnd_state, delta=0.25)
 
 
 def local_branching_50(current: _State, rnd_state) -> _State:
-    return _local_branching(current, rnd_state, delta=0.50)
+    return _local_branching_randomized(current, rnd_state, delta=0.50)
 
 
 def local_branching_75(current: _State, rnd_state) -> _State:
-    return _local_branching(current, rnd_state, delta=0.75)
+    return _local_branching_randomized(current, rnd_state, delta=0.75)

@@ -3,7 +3,6 @@ from balans.base_state import _State
 
 
 def proximity(current: _State, rnd_state) -> _State:
-    # TODO THE HEURISTIC DO NOT PROPERLY ITERATE YET.
     # For discrete variables we have a hard constraint,
     # Change the objective coefficients of the original
     # problem based on the current solution value.
@@ -20,4 +19,6 @@ def proximity(current: _State, rnd_state) -> _State:
 
     return _State(next_state.instance,
                   next_state.index_to_val,
-                  next_state.obj_val)
+                  next_state.obj_val,
+                  is_proximity=True)
+

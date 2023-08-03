@@ -39,7 +39,8 @@ class _Instance:
               dins_binary_set=None,
               rens_float_set=None,
               is_zero_obj=False,
-              is_local_branching=False) -> Tuple[Dict[Any, float], float]:
+              is_local_branching=False,
+              is_proximity=False) -> Tuple[Dict[Any, float], float]:
 
         print("\t Solve")
 
@@ -110,6 +111,25 @@ class _Instance:
                 expr = quicksum(var for var in currently_zero) + quicksum(1 - var2 for var2 in currently_one)
                 # delta =0.5 fixed for local branching v2 (classic version)
                 model.addCons(expr <= int(0.5 * len(self.binary_indexes)))
+
+            if is_proximity:
+                # if x_inc =0, update its objective coefficient to 1.
+                # if x_inc =1, update its objective coefficient to -1.
+                # Drop all other variables by making their coefficient 0.
+                currently_zero = []
+                currently_one = []
+                non_binary_vars = []
+                for var in variables:
+                    if var.getIndex() in self.binary_indexes:
+                        if index_to_val[var.getIndex()] == 0:
+                            currently_zero.append(var)
+                        else:
+                            currently_one.append(var)
+                    else:
+                        non_binary_vars.append(var)
+
+                expr_obj = quicksum(var for var in currently_zero) + quicksum(-var2 for var2 in currently_one)
+                model.setObjective(expr_obj, self.sense)
 
             # Solve
             model.optimize()
@@ -264,24 +284,3 @@ class _Instance:
     @staticmethod
     def get_index_to_val(model) -> Dict[Any, float]:
         return dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
-
-
-# if proximity_set:
-# TODO -proximity needs modification of constraints.
-#     currentNumVar=1
-#     for var in variables:
-#         # BINARY VARS
-#         if var.getIndex() in proximity_set:
-#
-#             if index_to_val[var.getIndex()] == 0:
-#                 model.addVar("var" + str(currentNumVar), vtype="B", obj=1.0)
-#
-#             if index_to_val[var.getIndex()] == 1:
-#                 model.addVar("var" + str(currentNumVar), vtype="B", obj=-1.0)
-#
-#         currentNumVar = currentNumVar+1
-#         model.delVar(var)
-
-# # DROP ALL NON-BINARY VARIABLES
-# if var.getIndex() not in proximity_set:
-#     model.delVar(var)

@@ -22,7 +22,7 @@ ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 class LocalBranchingTest(BaseTest):
 
-    def test_local_branching_v2_t1(self):
+    def test_local_branching_classic_t1(self):
         # Input
         instance = "test5.13.cip"
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
@@ -57,7 +57,7 @@ class LocalBranchingTest(BaseTest):
         print(f"Best heuristic solution objective is {best.objective()}.")
         self.assertEqual(result.best_state.objective(), -61.0)
 
-    def test_local_branching_v2_t2(self):
+    def test_local_branching_classic_t2(self):
         # Input
         instance = "test5.13.cip"
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
@@ -91,7 +91,6 @@ class LocalBranchingTest(BaseTest):
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
         self.assertEqual(result.best_state.objective(), -63.0)
-
 
     def test_local_branching_v2_t3(self):
         # Input
