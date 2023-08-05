@@ -28,8 +28,9 @@ class Constants(NamedTuple):
 
     # Data folder name
     DATA_DIR = "data"
-    DATA_DIR_TOY = DATA_DIR + os.sep + "toy"
     DATA_DIR_MIP = DATA_DIR + os.sep + "miplib"
+    TEST_DIR = "tests"
+    DATA_DIR_TOY = TEST_DIR + os.sep + "data"
 
     # Random solution stopping criteria
     random_gap = 0.80
