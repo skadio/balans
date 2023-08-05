@@ -1,6 +1,2 @@
 alns[mabwiser]
-mabwiser
-numpy
-pandas
 pyscipopt
-scikit-learn
