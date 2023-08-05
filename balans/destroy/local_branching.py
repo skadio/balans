@@ -1,14 +1,31 @@
+import copy
 from balans.base_state import _State
 
 
-def local_branching(state: _State, rnd_state):
-    sub_vars = state.model.getVars()
-    same_vars = []
-    for var in sub_vars:
-        if init_sol.x[var] == init_sol2.x[var]:
-            same_vars.append(var)
+# (Classic Version)
+def local_branching(current: _State, rnd_state, delta) -> _State:
+    #  For binary variables we have a hard constraint,
+    #  here we say change at most half of them (delta=0.5).
+    #  Other possible delta values are 0.25 and 0.75.
+    #  Send the destroy set to base_instance.
+    #  Note: These indexes are determined by the solver in this implementation.
+    # Please see the base_instance is_local_branching part. Operations are implemented inside that.
 
-    for var in same_vars:
-        state.x[var] = 0
+    print("\t Destroy current objective:", current.obj_val)
+    next_state = copy.deepcopy(current)
+    next_state.reset_solve_settings()
 
-    return _State(state.x, state.model)
+    # Static features from the instance
+    binary_indexes = current.instance.binary_indexes
+
+    # <= k in local branching
+    local_branching_size = int(delta * len(binary_indexes))
+
+    return _State(next_state.instance,
+                  next_state.index_to_val,
+                  next_state.obj_val,
+                  local_branching_size=local_branching_size)
+
+
+def local_branching_50(current: _State, rnd_state) -> _State:
+    return local_branching(current, rnd_state, delta=0.50)

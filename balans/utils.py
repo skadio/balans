@@ -18,6 +18,7 @@ class Constants(NamedTuple):
     # Scip variable types
     binary = "BINARY"
     integer = "INTEGER"
+    continuous = "CONTINUOUS"
 
     # Column names for features df
     var_type = "var_type"
@@ -26,6 +27,8 @@ class Constants(NamedTuple):
 
     # Data folder name
     DATA_DIR = "data"
+    DATA_DIR_TOY = "data\model_data"
+    DATA_DIR_MIP = "data\mip_data"
 
 
 def create_rng(seed):

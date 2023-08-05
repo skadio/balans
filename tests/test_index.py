@@ -1,0 +1,137 @@
+import os
+from alns.accept import *
+from alns.select import *
+from alns.stop import *
+from pyscipopt import Model
+import numpy as np
+
+from balans.destroy import DestroyOperators
+from balans.repair import RepairOperators
+from balans.solver import Balans
+from balans.utils import Constants
+from tests.test_base import BaseTest
+from balans.base_state import _State
+from balans.base_instance import _Instance
+
+from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
+
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
+SEED = 42
+np.random.seed(SEED)
+rnd_state = np.random.RandomState(SEED)
+
+
+class IndexTest(BaseTest):
+
+    def test_cont_index_t1(self):
+        # Testing whether we get the correct index set
+
+        # Input
+        instance = "neos-5140963-mincio.mps.gz"
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
+
+        model = Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        variables = model.getVars()
+        # Set discrete indexes MODIFIED
+        discrete = []
+        for var in variables:
+            if var.vtype() == 'CONTINUOUS':
+                discrete.append(var.getIndex())
+
+        non_destroy_size = int(0.5 * len(discrete))
+
+        non_destroy_set = set(rnd_state.choice(discrete, non_destroy_size))
+
+        self.assertEqual(non_destroy_set, {0, 4, 7, 8, 11})
+
+    def test_disc_index_t2(self):
+        # Testing whether we get the correct index set
+        # Input
+        instance = "neos-5140963-mincio.mps.gz"
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
+
+        model = Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        variables = model.getVars()
+
+        discrete = []
+        for var in variables:
+            if var.vtype() == 'INTEGER' or var.vtype() == 'BINARY':
+                discrete.append(var.getIndex())
+
+        destroy_size = int(0.05 * len(discrete))
+
+        destroy_set = set(rnd_state.choice(discrete, destroy_size))
+
+        self.assertEqual(destroy_set, {32, 128, 99, 163, 133, 111, 114, 115, 86})
+
+    def test_disc_index_t3(self):
+        # Testing whether we get the correct index set
+        # Input
+        instance = "model2.cip"
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+
+        # Parameters
+        seed = 123456
+        destroy_ops = [DestroyOperators.Mutation]
+        repair_ops = [RepairOperators.Repair]
+
+        _instance = _Instance(instance_path)
+        # Initial solution
+        initial_index_to_val, initial_obj_val = _instance.solve(is_initial_solve=True)
+
+        # Initial state and solution
+        initial_state = _State(_instance, initial_index_to_val, initial_obj_val)
+        # Assert
+        self.assertEqual(initial_obj_val, 2.999979654947926)
+
+    def test_initial_destroy_t4(self):
+        # Testing whether we get the correct index set
+        # Input
+        instance = "model.cip"
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+
+        # Parameters
+        seed = 123456
+        destroy_ops = [DestroyOperators.Mutation]
+        repair_ops = [RepairOperators.Repair]
+
+        _instance = _Instance(instance_path)
+        # Initial solution
+        initial_index_to_val, initial_obj_val = _instance.solve(is_initial_solve=True)
+
+        # Initial state and solution
+        initial_state = _State(_instance, initial_index_to_val, initial_obj_val)
+
+        # Assert
+        self.assertEqual(initial_state.destroy_set, None)
+
+    def test_one_iteration_obj_t5(self):
+
+        # Input
+        instance = "model.cip"
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+
+        # Parameters
+        seed = 123456
+        destroy_ops = [DestroyOperators.Mutation]
+        repair_ops = [RepairOperators.Repair]
+
+        selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
+                               learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
+        accept = HillClimbing()
+        stop = MaxIterations(1)
+
+        # Solver
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
+
+        # Run
+        result = balans.solve(instance_path)
+        print("Best solution:", result.best_state.objective())
+
+        # Assert
+        self.assertEqual(result.best_state.objective(), 4)

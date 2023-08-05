@@ -1,0 +1,389 @@
+STATISTICS
+  Problem name     : neos-5140963-mincio
+  Variables        : 196 (183 binary, 0 integer, 0 implicit integer, 13 continuous)
+  Constraints      : 0 initial, 184 maximal
+OBJECTIVE
+  Sense            : minimize
+VARIABLES
+  [binary] <C0195>: obj=1149, original bounds=[0,1]
+  [binary] <C0014>: obj=99999, original bounds=[0,1]
+  [binary] <C0015>: obj=2373, original bounds=[0,1]
+  [binary] <C0016>: obj=3792, original bounds=[0,1]
+  [binary] <C0017>: obj=4660, original bounds=[0,1]
+  [binary] <C0018>: obj=5847, original bounds=[0,1]
+  [binary] <C0019>: obj=5806, original bounds=[0,1]
+  [binary] <C0020>: obj=5655, original bounds=[0,1]
+  [binary] <C0021>: obj=5680, original bounds=[0,1]
+  [binary] <C0022>: obj=5742, original bounds=[0,1]
+  [binary] <C0023>: obj=5804, original bounds=[0,1]
+  [binary] <C0024>: obj=5172, original bounds=[0,1]
+  [binary] <C0025>: obj=4471, original bounds=[0,1]
+  [binary] <C0026>: obj=4672, original bounds=[0,1]
+  [binary] <C0027>: obj=5573, original bounds=[0,1]
+  [binary] <C0028>: obj=2373, original bounds=[0,1]
+  [binary] <C0029>: obj=2079, original bounds=[0,1]
+  [binary] <C0030>: obj=2947, original bounds=[0,1]
+  [binary] <C0031>: obj=4134, original bounds=[0,1]
+  [binary] <C0032>: obj=4093, original bounds=[0,1]
+  [binary] <C0033>: obj=3942, original bounds=[0,1]
+  [binary] <C0034>: obj=3967, original bounds=[0,1]
+  [binary] <C0035>: obj=4029, original bounds=[0,1]
+  [binary] <C0036>: obj=4091, original bounds=[0,1]
+  [binary] <C0037>: obj=3459, original bounds=[0,1]
+  [binary] <C0038>: obj=2758, original bounds=[0,1]
+  [binary] <C0039>: obj=2973, original bounds=[0,1]
+  [binary] <C0040>: obj=3860, original bounds=[0,1]
+  [binary] <C0041>: obj=3792, original bounds=[0,1]
+  [binary] <C0042>: obj=2079, original bounds=[0,1]
+  [binary] <C0043>: obj=868, original bounds=[0,1]
+  [binary] <C0044>: obj=2037, original bounds=[0,1]
+  [binary] <C0045>: obj=1995, original bounds=[0,1]
+  [binary] <C0046>: obj=1844, original bounds=[0,1]
+  [binary] <C0047>: obj=1869, original bounds=[0,1]
+  [binary] <C0048>: obj=1931, original bounds=[0,1]
+  [binary] <C0049>: obj=1994, original bounds=[0,1]
+  [binary] <C0050>: obj=1361, original bounds=[0,1]
+  [binary] <C0051>: obj=660, original bounds=[0,1]
+  [binary] <C0052>: obj=922, original bounds=[0,1]
+  [binary] <C0053>: obj=1762, original bounds=[0,1]
+  [binary] <C0054>: obj=4660, original bounds=[0,1]
+  [binary] <C0055>: obj=2947, original bounds=[0,1]
+  [binary] <C0056>: obj=868, original bounds=[0,1]
+  [binary] <C0057>: obj=1437, original bounds=[0,1]
+  [binary] <C0058>: obj=1395, original bounds=[0,1]
+  [binary] <C0059>: obj=1237, original bounds=[0,1]
+  [binary] <C0060>: obj=1269, original bounds=[0,1]
+  [binary] <C0061>: obj=1331, original bounds=[0,1]
+  [binary] <C0062>: obj=1394, original bounds=[0,1]
+  [binary] <C0063>: obj=1164, original bounds=[0,1]
+  [binary] <C0064>: obj=459, original bounds=[0,1]
+  [binary] <C0065>: obj=761, original bounds=[0,1]
+  [binary] <C0066>: obj=1551, original bounds=[0,1]
+  [binary] <C0067>: obj=5847, original bounds=[0,1]
+  [binary] <C0068>: obj=4134, original bounds=[0,1]
+  [binary] <C0069>: obj=2037, original bounds=[0,1]
+  [binary] <C0070>: obj=1437, original bounds=[0,1]
+  [binary] <C0071>: obj=42, original bounds=[0,1]
+  [binary] <C0072>: obj=276, original bounds=[0,1]
+  [binary] <C0073>: obj=490, original bounds=[0,1]
+  [binary] <C0074>: obj=552, original bounds=[0,1]
+  [binary] <C0075>: obj=615, original bounds=[0,1]
+  [binary] <C0076>: obj=1340, original bounds=[0,1]
+  [binary] <C0077>: obj=1423, original bounds=[0,1]
+  [binary] <C0078>: obj=1492, original bounds=[0,1]
+  [binary] <C0079>: obj=1426, original bounds=[0,1]
+  [binary] <C0080>: obj=5806, original bounds=[0,1]
+  [binary] <C0081>: obj=4093, original bounds=[0,1]
+  [binary] <C0082>: obj=1995, original bounds=[0,1]
+  [binary] <C0083>: obj=1395, original bounds=[0,1]
+  [binary] <C0084>: obj=42, original bounds=[0,1]
+  [binary] <C0085>: obj=234, original bounds=[0,1]
+  [binary] <C0086>: obj=449, original bounds=[0,1]
+  [binary] <C0087>: obj=511, original bounds=[0,1]
+  [binary] <C0088>: obj=573, original bounds=[0,1]
+  [binary] <C0089>: obj=1299, original bounds=[0,1]
+  [binary] <C0090>: obj=1382, original bounds=[0,1]
+  [binary] <C0091>: obj=1451, original bounds=[0,1]
+  [binary] <C0092>: obj=1385, original bounds=[0,1]
+  [binary] <C0093>: obj=5655, original bounds=[0,1]
+  [binary] <C0094>: obj=3942, original bounds=[0,1]
+  [binary] <C0095>: obj=1844, original bounds=[0,1]
+  [binary] <C0096>: obj=1237, original bounds=[0,1]
+  [binary] <C0097>: obj=276, original bounds=[0,1]
+  [binary] <C0098>: obj=234, original bounds=[0,1]
+  [binary] <C0099>: obj=307, original bounds=[0,1]
+  [binary] <C0100>: obj=369, original bounds=[0,1]
+  [binary] <C0101>: obj=432, original bounds=[0,1]
+  [binary] <C0102>: obj=1148, original bounds=[0,1]
+  [binary] <C0103>: obj=1231, original bounds=[0,1]
+  [binary] <C0104>: obj=1300, original bounds=[0,1]
+  [binary] <C0105>: obj=1244, original bounds=[0,1]
+  [binary] <C0106>: obj=5680, original bounds=[0,1]
+  [binary] <C0107>: obj=3967, original bounds=[0,1]
+  [binary] <C0108>: obj=1869, original bounds=[0,1]
+  [binary] <C0109>: obj=1269, original bounds=[0,1]
+  [binary] <C0110>: obj=490, original bounds=[0,1]
+  [binary] <C0111>: obj=449, original bounds=[0,1]
+  [binary] <C0112>: obj=307, original bounds=[0,1]
+  [binary] <C0113>: obj=57, original bounds=[0,1]
+  [binary] <C0114>: obj=120, original bounds=[0,1]
+  [binary] <C0115>: obj=881, original bounds=[0,1]
+  [binary] <C0116>: obj=1256, original bounds=[0,1]
+  [binary] <C0117>: obj=1325, original bounds=[0,1]
+  [binary] <C0118>: obj=934, original bounds=[0,1]
+  [binary] <C0119>: obj=5742, original bounds=[0,1]
+  [binary] <C0120>: obj=4029, original bounds=[0,1]
+  [binary] <C0121>: obj=1931, original bounds=[0,1]
+  [binary] <C0122>: obj=1331, original bounds=[0,1]
+  [binary] <C0123>: obj=552, original bounds=[0,1]
+  [binary] <C0124>: obj=511, original bounds=[0,1]
+  [binary] <C0125>: obj=369, original bounds=[0,1]
+  [binary] <C0126>: obj=57, original bounds=[0,1]
+  [binary] <C0127>: obj=63, original bounds=[0,1]
+  [binary] <C0128>: obj=884, original bounds=[0,1]
+  [binary] <C0129>: obj=1317, original bounds=[0,1]
+  [binary] <C0130>: obj=1387, original bounds=[0,1]
+  [binary] <C0131>: obj=937, original bounds=[0,1]
+  [binary] <C0132>: obj=5804, original bounds=[0,1]
+  [binary] <C0133>: obj=4091, original bounds=[0,1]
+  [binary] <C0134>: obj=1994, original bounds=[0,1]
+  [binary] <C0135>: obj=1394, original bounds=[0,1]
+  [binary] <C0136>: obj=615, original bounds=[0,1]
+  [binary] <C0137>: obj=573, original bounds=[0,1]
+  [binary] <C0138>: obj=432, original bounds=[0,1]
+  [binary] <C0139>: obj=120, original bounds=[0,1]
+  [binary] <C0140>: obj=63, original bounds=[0,1]
+  [binary] <C0141>: obj=924, original bounds=[0,1]
+  [binary] <C0142>: obj=1380, original bounds=[0,1]
+  [binary] <C0143>: obj=1449, original bounds=[0,1]
+  [binary] <C0144>: obj=977, original bounds=[0,1]
+  [binary] <C0145>: obj=5172, original bounds=[0,1]
+  [binary] <C0146>: obj=3459, original bounds=[0,1]
+  [binary] <C0147>: obj=1361, original bounds=[0,1]
+  [binary] <C0148>: obj=1164, original bounds=[0,1]
+  [binary] <C0149>: obj=1340, original bounds=[0,1]
+  [binary] <C0150>: obj=1299, original bounds=[0,1]
+  [binary] <C0151>: obj=1148, original bounds=[0,1]
+  [binary] <C0152>: obj=881, original bounds=[0,1]
+  [binary] <C0153>: obj=884, original bounds=[0,1]
+  [binary] <C0154>: obj=924, original bounds=[0,1]
+  [binary] <C0155>: obj=736, original bounds=[0,1]
+  [binary] <C0156>: obj=805, original bounds=[0,1]
+  [binary] <C0157>: obj=414, original bounds=[0,1]
+  [binary] <C0158>: obj=4471, original bounds=[0,1]
+  [binary] <C0159>: obj=2758, original bounds=[0,1]
+  [binary] <C0160>: obj=660, original bounds=[0,1]
+  [binary] <C0161>: obj=459, original bounds=[0,1]
+  [binary] <C0162>: obj=1423, original bounds=[0,1]
+  [binary] <C0163>: obj=1382, original bounds=[0,1]
+  [binary] <C0164>: obj=1231, original bounds=[0,1]
+  [binary] <C0165>: obj=1256, original bounds=[0,1]
+  [binary] <C0166>: obj=1317, original bounds=[0,1]
+  [binary] <C0167>: obj=1380, original bounds=[0,1]
+  [binary] <C0168>: obj=736, original bounds=[0,1]
+  [binary] <C0169>: obj=302, original bounds=[0,1]
+  [binary] <C0170>: obj=1149, original bounds=[0,1]
+  [binary] <C0171>: obj=4672, original bounds=[0,1]
+  [binary] <C0172>: obj=2973, original bounds=[0,1]
+  [binary] <C0173>: obj=922, original bounds=[0,1]
+  [binary] <C0174>: obj=761, original bounds=[0,1]
+  [binary] <C0175>: obj=1492, original bounds=[0,1]
+  [binary] <C0176>: obj=1451, original bounds=[0,1]
+  [binary] <C0177>: obj=1300, original bounds=[0,1]
+  [binary] <C0178>: obj=1325, original bounds=[0,1]
+  [binary] <C0179>: obj=1387, original bounds=[0,1]
+  [binary] <C0180>: obj=1449, original bounds=[0,1]
+  [binary] <C0181>: obj=805, original bounds=[0,1]
+  [binary] <C0182>: obj=302, original bounds=[0,1]
+  [binary] <C0183>: obj=1218, original bounds=[0,1]
+  [binary] <C0184>: obj=5573, original bounds=[0,1]
+  [binary] <C0185>: obj=3860, original bounds=[0,1]
+  [binary] <C0186>: obj=1762, original bounds=[0,1]
+  [binary] <C0187>: obj=1551, original bounds=[0,1]
+  [binary] <C0188>: obj=1426, original bounds=[0,1]
+  [binary] <C0189>: obj=1385, original bounds=[0,1]
+  [binary] <C0190>: obj=1244, original bounds=[0,1]
+  [binary] <C0191>: obj=934, original bounds=[0,1]
+  [binary] <C0192>: obj=937, original bounds=[0,1]
+  [binary] <C0193>: obj=977, original bounds=[0,1]
+  [binary] <C0194>: obj=414, original bounds=[0,1]
+  [binary] <C0196>: obj=1218, original bounds=[0,1]
+  [continuous] <C0002>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0003>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0004>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0005>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0006>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0007>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0008>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0009>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0010>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0011>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0012>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0013>: obj=0, original bounds=[0,+inf]
+  [continuous] <C0001>: obj=0, original bounds=[0,+inf]
+CONSTRAINTS
+  [linear] <R0001>: <C0014>[B] +<C0015>[B] +<C0016>[B] +<C0017>[B] +<C0018>[B] +<C0019>[B] +<C0020>[B] +<C0021>[B] +<C0022>[B] +<C0023>[B] +<C0024>[B] +<C0025>[B] +<C0026>[B] +<C0027>[B] == 1;
+  [linear] <R0002>: <C0028>[B] +<C0029>[B] +<C0030>[B] +<C0031>[B] +<C0032>[B] +<C0033>[B] +<C0034>[B] +<C0035>[B] +<C0036>[B] +<C0037>[B] +<C0038>[B] +<C0039>[B] +<C0040>[B] == 1;
+  [linear] <R0003>: <C0041>[B] +<C0042>[B] +<C0043>[B] +<C0044>[B] +<C0045>[B] +<C0046>[B] +<C0047>[B] +<C0048>[B] +<C0049>[B] +<C0050>[B] +<C0051>[B] +<C0052>[B] +<C0053>[B] == 1;
+  [linear] <R0004>: <C0054>[B] +<C0055>[B] +<C0056>[B] +<C0057>[B] +<C0058>[B] +<C0059>[B] +<C0060>[B] +<C0061>[B] +<C0062>[B] +<C0063>[B] +<C0064>[B] +<C0065>[B] +<C0066>[B] == 1;
+  [linear] <R0005>: <C0067>[B] +<C0068>[B] +<C0069>[B] +<C0070>[B] +<C0071>[B] +<C0072>[B] +<C0073>[B] +<C0074>[B] +<C0075>[B] +<C0076>[B] +<C0077>[B] +<C0078>[B] +<C0079>[B] == 1;
+  [linear] <R0006>: <C0080>[B] +<C0081>[B] +<C0082>[B] +<C0083>[B] +<C0084>[B] +<C0085>[B] +<C0086>[B] +<C0087>[B] +<C0088>[B] +<C0089>[B] +<C0090>[B] +<C0091>[B] +<C0092>[B] == 1;
+  [linear] <R0007>: <C0093>[B] +<C0094>[B] +<C0095>[B] +<C0096>[B] +<C0097>[B] +<C0098>[B] +<C0099>[B] +<C0100>[B] +<C0101>[B] +<C0102>[B] +<C0103>[B] +<C0104>[B] +<C0105>[B] == 1;
+  [linear] <R0008>: <C0106>[B] +<C0107>[B] +<C0108>[B] +<C0109>[B] +<C0110>[B] +<C0111>[B] +<C0112>[B] +<C0113>[B] +<C0114>[B] +<C0115>[B] +<C0116>[B] +<C0117>[B] +<C0118>[B] == 1;
+  [linear] <R0009>: <C0119>[B] +<C0120>[B] +<C0121>[B] +<C0122>[B] +<C0123>[B] +<C0124>[B] +<C0125>[B] +<C0126>[B] +<C0127>[B] +<C0128>[B] +<C0129>[B] +<C0130>[B] +<C0131>[B] == 1;
+  [linear] <R0010>: <C0132>[B] +<C0133>[B] +<C0134>[B] +<C0135>[B] +<C0136>[B] +<C0137>[B] +<C0138>[B] +<C0139>[B] +<C0140>[B] +<C0141>[B] +<C0142>[B] +<C0143>[B] +<C0144>[B] == 1;
+  [linear] <R0011>: <C0145>[B] +<C0146>[B] +<C0147>[B] +<C0148>[B] +<C0149>[B] +<C0150>[B] +<C0151>[B] +<C0152>[B] +<C0153>[B] +<C0154>[B] +<C0155>[B] +<C0156>[B] +<C0157>[B] == 1;
+  [linear] <R0012>: <C0158>[B] +<C0159>[B] +<C0160>[B] +<C0161>[B] +<C0162>[B] +<C0163>[B] +<C0164>[B] +<C0165>[B] +<C0166>[B] +<C0167>[B] +<C0168>[B] +<C0169>[B] +<C0170>[B] == 1;
+  [linear] <R0013>: <C0171>[B] +<C0172>[B] +<C0173>[B] +<C0174>[B] +<C0175>[B] +<C0176>[B] +<C0177>[B] +<C0178>[B] +<C0179>[B] +<C0180>[B] +<C0181>[B] +<C0182>[B] +<C0183>[B] == 1;
+  [linear] <R0014>: <C0184>[B] +<C0185>[B] +<C0186>[B] +<C0187>[B] +<C0188>[B] +<C0189>[B] +<C0190>[B] +<C0191>[B] +<C0192>[B] +<C0193>[B] +<C0194>[B] +<C0195>[B] +<C0196>[B] == 1;
+  [linear] <R0015>: <C0014>[B] +<C0028>[B] +<C0041>[B] +<C0054>[B] +<C0067>[B] +<C0080>[B] +<C0093>[B] +<C0106>[B] +<C0119>[B] +<C0132>[B] +<C0145>[B] +<C0158>[B] +<C0171>[B] +<C0184>[B] == 1;
+  [linear] <R0016>: <C0015>[B] +<C0042>[B] +<C0055>[B] +<C0068>[B] +<C0081>[B] +<C0094>[B] +<C0107>[B] +<C0120>[B] +<C0133>[B] +<C0146>[B] +<C0159>[B] +<C0172>[B] +<C0185>[B] == 1;
+  [linear] <R0017>: <C0016>[B] +<C0029>[B] +<C0056>[B] +<C0069>[B] +<C0082>[B] +<C0095>[B] +<C0108>[B] +<C0121>[B] +<C0134>[B] +<C0147>[B] +<C0160>[B] +<C0173>[B] +<C0186>[B] == 1;
+  [linear] <R0018>: <C0017>[B] +<C0030>[B] +<C0043>[B] +<C0070>[B] +<C0083>[B] +<C0096>[B] +<C0109>[B] +<C0122>[B] +<C0135>[B] +<C0148>[B] +<C0161>[B] +<C0174>[B] +<C0187>[B] == 1;
+  [linear] <R0019>: <C0018>[B] +<C0031>[B] +<C0044>[B] +<C0057>[B] +<C0084>[B] +<C0097>[B] +<C0110>[B] +<C0123>[B] +<C0136>[B] +<C0149>[B] +<C0162>[B] +<C0175>[B] +<C0188>[B] == 1;
+  [linear] <R0020>: <C0019>[B] +<C0032>[B] +<C0045>[B] +<C0058>[B] +<C0071>[B] +<C0098>[B] +<C0111>[B] +<C0124>[B] +<C0137>[B] +<C0150>[B] +<C0163>[B] +<C0176>[B] +<C0189>[B] == 1;
+  [linear] <R0021>: <C0020>[B] +<C0033>[B] +<C0046>[B] +<C0059>[B] +<C0072>[B] +<C0085>[B] +<C0112>[B] +<C0125>[B] +<C0138>[B] +<C0151>[B] +<C0164>[B] +<C0177>[B] +<C0190>[B] == 1;
+  [linear] <R0022>: <C0021>[B] +<C0034>[B] +<C0047>[B] +<C0060>[B] +<C0073>[B] +<C0086>[B] +<C0099>[B] +<C0126>[B] +<C0139>[B] +<C0152>[B] +<C0165>[B] +<C0178>[B] +<C0191>[B] == 1;
+  [linear] <R0023>: <C0022>[B] +<C0035>[B] +<C0048>[B] +<C0061>[B] +<C0074>[B] +<C0087>[B] +<C0100>[B] +<C0113>[B] +<C0140>[B] +<C0153>[B] +<C0166>[B] +<C0179>[B] +<C0192>[B] == 1;
+  [linear] <R0024>: <C0023>[B] +<C0036>[B] +<C0049>[B] +<C0062>[B] +<C0075>[B] +<C0088>[B] +<C0101>[B] +<C0114>[B] +<C0127>[B] +<C0154>[B] +<C0167>[B] +<C0180>[B] +<C0193>[B] == 1;
+  [linear] <R0025>: <C0024>[B] +<C0037>[B] +<C0050>[B] +<C0063>[B] +<C0076>[B] +<C0089>[B] +<C0102>[B] +<C0115>[B] +<C0128>[B] +<C0141>[B] +<C0168>[B] +<C0181>[B] +<C0194>[B] == 1;
+  [linear] <R0026>: <C0025>[B] +<C0038>[B] +<C0051>[B] +<C0064>[B] +<C0077>[B] +<C0090>[B] +<C0103>[B] +<C0116>[B] +<C0129>[B] +<C0142>[B] +<C0155>[B] +<C0182>[B] +<C0195>[B] == 1;
+  [linear] <R0027>: <C0026>[B] +<C0039>[B] +<C0052>[B] +<C0065>[B] +<C0078>[B] +<C0091>[B] +<C0104>[B] +<C0117>[B] +<C0130>[B] +<C0143>[B] +<C0156>[B] +<C0169>[B] +<C0196>[B] == 1;
+  [linear] <R0028>: <C0027>[B] +<C0040>[B] +<C0053>[B] +<C0066>[B] +<C0079>[B] +<C0092>[B] +<C0105>[B] +<C0118>[B] +<C0131>[B] +<C0144>[B] +<C0157>[B] +<C0170>[B] +<C0183>[B] == 1;
+  [linear] <R0029>: <C0001>[C] -<C0002>[C] +14<C0029>[B] <= 13;
+  [linear] <R0030>: <C0001>[C] -<C0003>[C] +14<C0030>[B] <= 13;
+  [linear] <R0031>: <C0001>[C] -<C0004>[C] +14<C0031>[B] <= 13;
+  [linear] <R0032>: <C0001>[C] -<C0005>[C] +14<C0032>[B] <= 13;
+  [linear] <R0033>: <C0001>[C] -<C0006>[C] +14<C0033>[B] <= 13;
+  [linear] <R0034>: <C0001>[C] -<C0007>[C] +14<C0034>[B] <= 13;
+  [linear] <R0035>: <C0001>[C] -<C0008>[C] +14<C0035>[B] <= 13;
+  [linear] <R0036>: <C0001>[C] -<C0009>[C] +14<C0036>[B] <= 13;
+  [linear] <R0037>: <C0001>[C] -<C0010>[C] +14<C0037>[B] <= 13;
+  [linear] <R0038>: <C0001>[C] -<C0011>[C] +14<C0038>[B] <= 13;
+  [linear] <R0039>: <C0001>[C] -<C0012>[C] +14<C0039>[B] <= 13;
+  [linear] <R0040>: <C0001>[C] -<C0013>[C] +14<C0040>[B] <= 13;
+  [linear] <R0041>:  -<C0001>[C] +<C0002>[C] +14<C0042>[B] <= 13;
+  [linear] <R0042>: <C0002>[C] -<C0003>[C] +14<C0043>[B] <= 13;
+  [linear] <R0043>: <C0002>[C] -<C0004>[C] +14<C0044>[B] <= 13;
+  [linear] <R0044>: <C0002>[C] -<C0005>[C] +14<C0045>[B] <= 13;
+  [linear] <R0045>: <C0002>[C] -<C0006>[C] +14<C0046>[B] <= 13;
+  [linear] <R0046>: <C0002>[C] -<C0007>[C] +14<C0047>[B] <= 13;
+  [linear] <R0047>: <C0002>[C] -<C0008>[C] +14<C0048>[B] <= 13;
+  [linear] <R0048>: <C0002>[C] -<C0009>[C] +14<C0049>[B] <= 13;
+  [linear] <R0049>: <C0002>[C] -<C0010>[C] +14<C0050>[B] <= 13;
+  [linear] <R0050>: <C0002>[C] -<C0011>[C] +14<C0051>[B] <= 13;
+  [linear] <R0051>: <C0002>[C] -<C0012>[C] +14<C0052>[B] <= 13;
+  [linear] <R0052>: <C0002>[C] -<C0013>[C] +14<C0053>[B] <= 13;
+  [linear] <R0053>:  -<C0001>[C] +<C0003>[C] +14<C0055>[B] <= 13;
+  [linear] <R0054>:  -<C0002>[C] +<C0003>[C] +14<C0056>[B] <= 13;
+  [linear] <R0055>: <C0003>[C] -<C0004>[C] +14<C0057>[B] <= 13;
+  [linear] <R0056>: <C0003>[C] -<C0005>[C] +14<C0058>[B] <= 13;
+  [linear] <R0057>: <C0003>[C] -<C0006>[C] +14<C0059>[B] <= 13;
+  [linear] <R0058>: <C0003>[C] -<C0007>[C] +14<C0060>[B] <= 13;
+  [linear] <R0059>: <C0003>[C] -<C0008>[C] +14<C0061>[B] <= 13;
+  [linear] <R0060>: <C0003>[C] -<C0009>[C] +14<C0062>[B] <= 13;
+  [linear] <R0061>: <C0003>[C] -<C0010>[C] +14<C0063>[B] <= 13;
+  [linear] <R0062>: <C0003>[C] -<C0011>[C] +14<C0064>[B] <= 13;
+  [linear] <R0063>: <C0003>[C] -<C0012>[C] +14<C0065>[B] <= 13;
+  [linear] <R0064>: <C0003>[C] -<C0013>[C] +14<C0066>[B] <= 13;
+  [linear] <R0065>:  -<C0001>[C] +<C0004>[C] +14<C0068>[B] <= 13;
+  [linear] <R0066>:  -<C0002>[C] +<C0004>[C] +14<C0069>[B] <= 13;
+  [linear] <R0067>:  -<C0003>[C] +<C0004>[C] +14<C0070>[B] <= 13;
+  [linear] <R0068>: <C0004>[C] -<C0005>[C] +14<C0071>[B] <= 13;
+  [linear] <R0069>: <C0004>[C] -<C0006>[C] +14<C0072>[B] <= 13;
+  [linear] <R0070>: <C0004>[C] -<C0007>[C] +14<C0073>[B] <= 13;
+  [linear] <R0071>: <C0004>[C] -<C0008>[C] +14<C0074>[B] <= 13;
+  [linear] <R0072>: <C0004>[C] -<C0009>[C] +14<C0075>[B] <= 13;
+  [linear] <R0073>: <C0004>[C] -<C0010>[C] +14<C0076>[B] <= 13;
+  [linear] <R0074>: <C0004>[C] -<C0011>[C] +14<C0077>[B] <= 13;
+  [linear] <R0075>: <C0004>[C] -<C0012>[C] +14<C0078>[B] <= 13;
+  [linear] <R0076>: <C0004>[C] -<C0013>[C] +14<C0079>[B] <= 13;
+  [linear] <R0077>:  -<C0001>[C] +<C0005>[C] +14<C0081>[B] <= 13;
+  [linear] <R0078>:  -<C0002>[C] +<C0005>[C] +14<C0082>[B] <= 13;
+  [linear] <R0079>:  -<C0003>[C] +<C0005>[C] +14<C0083>[B] <= 13;
+  [linear] <R0080>:  -<C0004>[C] +<C0005>[C] +14<C0084>[B] <= 13;
+  [linear] <R0081>: <C0005>[C] -<C0006>[C] +14<C0085>[B] <= 13;
+  [linear] <R0082>: <C0005>[C] -<C0007>[C] +14<C0086>[B] <= 13;
+  [linear] <R0083>: <C0005>[C] -<C0008>[C] +14<C0087>[B] <= 13;
+  [linear] <R0084>: <C0005>[C] -<C0009>[C] +14<C0088>[B] <= 13;
+  [linear] <R0085>: <C0005>[C] -<C0010>[C] +14<C0089>[B] <= 13;
+  [linear] <R0086>: <C0005>[C] -<C0011>[C] +14<C0090>[B] <= 13;
+  [linear] <R0087>: <C0005>[C] -<C0012>[C] +14<C0091>[B] <= 13;
+  [linear] <R0088>: <C0005>[C] -<C0013>[C] +14<C0092>[B] <= 13;
+  [linear] <R0089>:  -<C0001>[C] +<C0006>[C] +14<C0094>[B] <= 13;
+  [linear] <R0090>:  -<C0002>[C] +<C0006>[C] +14<C0095>[B] <= 13;
+  [linear] <R0091>:  -<C0003>[C] +<C0006>[C] +14<C0096>[B] <= 13;
+  [linear] <R0092>:  -<C0004>[C] +<C0006>[C] +14<C0097>[B] <= 13;
+  [linear] <R0093>:  -<C0005>[C] +<C0006>[C] +14<C0098>[B] <= 13;
+  [linear] <R0094>: <C0006>[C] -<C0007>[C] +14<C0099>[B] <= 13;
+  [linear] <R0095>: <C0006>[C] -<C0008>[C] +14<C0100>[B] <= 13;
+  [linear] <R0096>: <C0006>[C] -<C0009>[C] +14<C0101>[B] <= 13;
+  [linear] <R0097>: <C0006>[C] -<C0010>[C] +14<C0102>[B] <= 13;
+  [linear] <R0098>: <C0006>[C] -<C0011>[C] +14<C0103>[B] <= 13;
+  [linear] <R0099>: <C0006>[C] -<C0012>[C] +14<C0104>[B] <= 13;
+  [linear] <R0100>: <C0006>[C] -<C0013>[C] +14<C0105>[B] <= 13;
+  [linear] <R0101>:  -<C0001>[C] +<C0007>[C] +14<C0107>[B] <= 13;
+  [linear] <R0102>:  -<C0002>[C] +<C0007>[C] +14<C0108>[B] <= 13;
+  [linear] <R0103>:  -<C0003>[C] +<C0007>[C] +14<C0109>[B] <= 13;
+  [linear] <R0104>:  -<C0004>[C] +<C0007>[C] +14<C0110>[B] <= 13;
+  [linear] <R0105>:  -<C0005>[C] +<C0007>[C] +14<C0111>[B] <= 13;
+  [linear] <R0106>:  -<C0006>[C] +<C0007>[C] +14<C0112>[B] <= 13;
+  [linear] <R0107>: <C0007>[C] -<C0008>[C] +14<C0113>[B] <= 13;
+  [linear] <R0108>: <C0007>[C] -<C0009>[C] +14<C0114>[B] <= 13;
+  [linear] <R0109>: <C0007>[C] -<C0010>[C] +14<C0115>[B] <= 13;
+  [linear] <R0110>: <C0007>[C] -<C0011>[C] +14<C0116>[B] <= 13;
+  [linear] <R0111>: <C0007>[C] -<C0012>[C] +14<C0117>[B] <= 13;
+  [linear] <R0112>: <C0007>[C] -<C0013>[C] +14<C0118>[B] <= 13;
+  [linear] <R0113>:  -<C0001>[C] +<C0008>[C] +14<C0120>[B] <= 13;
+  [linear] <R0114>:  -<C0002>[C] +<C0008>[C] +14<C0121>[B] <= 13;
+  [linear] <R0115>:  -<C0003>[C] +<C0008>[C] +14<C0122>[B] <= 13;
+  [linear] <R0116>:  -<C0004>[C] +<C0008>[C] +14<C0123>[B] <= 13;
+  [linear] <R0117>:  -<C0005>[C] +<C0008>[C] +14<C0124>[B] <= 13;
+  [linear] <R0118>:  -<C0006>[C] +<C0008>[C] +14<C0125>[B] <= 13;
+  [linear] <R0119>:  -<C0007>[C] +<C0008>[C] +14<C0126>[B] <= 13;
+  [linear] <R0120>: <C0008>[C] -<C0009>[C] +14<C0127>[B] <= 13;
+  [linear] <R0121>: <C0008>[C] -<C0010>[C] +14<C0128>[B] <= 13;
+  [linear] <R0122>: <C0008>[C] -<C0011>[C] +14<C0129>[B] <= 13;
+  [linear] <R0123>: <C0008>[C] -<C0012>[C] +14<C0130>[B] <= 13;
+  [linear] <R0124>: <C0008>[C] -<C0013>[C] +14<C0131>[B] <= 13;
+  [linear] <R0125>:  -<C0001>[C] +<C0009>[C] +14<C0133>[B] <= 13;
+  [linear] <R0126>:  -<C0002>[C] +<C0009>[C] +14<C0134>[B] <= 13;
+  [linear] <R0127>:  -<C0003>[C] +<C0009>[C] +14<C0135>[B] <= 13;
+  [linear] <R0128>:  -<C0004>[C] +<C0009>[C] +14<C0136>[B] <= 13;
+  [linear] <R0129>:  -<C0005>[C] +<C0009>[C] +14<C0137>[B] <= 13;
+  [linear] <R0130>:  -<C0006>[C] +<C0009>[C] +14<C0138>[B] <= 13;
+  [linear] <R0131>:  -<C0007>[C] +<C0009>[C] +14<C0139>[B] <= 13;
+  [linear] <R0132>:  -<C0008>[C] +<C0009>[C] +14<C0140>[B] <= 13;
+  [linear] <R0133>: <C0009>[C] -<C0010>[C] +14<C0141>[B] <= 13;
+  [linear] <R0134>: <C0009>[C] -<C0011>[C] +14<C0142>[B] <= 13;
+  [linear] <R0135>: <C0009>[C] -<C0012>[C] +14<C0143>[B] <= 13;
+  [linear] <R0136>: <C0009>[C] -<C0013>[C] +14<C0144>[B] <= 13;
+  [linear] <R0137>:  -<C0001>[C] +<C0010>[C] +14<C0146>[B] <= 13;
+  [linear] <R0138>:  -<C0002>[C] +<C0010>[C] +14<C0147>[B] <= 13;
+  [linear] <R0139>:  -<C0003>[C] +<C0010>[C] +14<C0148>[B] <= 13;
+  [linear] <R0140>:  -<C0004>[C] +<C0010>[C] +14<C0149>[B] <= 13;
+  [linear] <R0141>:  -<C0005>[C] +<C0010>[C] +14<C0150>[B] <= 13;
+  [linear] <R0142>:  -<C0006>[C] +<C0010>[C] +14<C0151>[B] <= 13;
+  [linear] <R0143>:  -<C0007>[C] +<C0010>[C] +14<C0152>[B] <= 13;
+  [linear] <R0144>:  -<C0008>[C] +<C0010>[C] +14<C0153>[B] <= 13;
+  [linear] <R0145>:  -<C0009>[C] +<C0010>[C] +14<C0154>[B] <= 13;
+  [linear] <R0146>: <C0010>[C] -<C0011>[C] +14<C0155>[B] <= 13;
+  [linear] <R0147>: <C0010>[C] -<C0012>[C] +14<C0156>[B] <= 13;
+  [linear] <R0148>: <C0010>[C] -<C0013>[C] +14<C0157>[B] <= 13;
+  [linear] <R0149>:  -<C0001>[C] +<C0011>[C] +14<C0159>[B] <= 13;
+  [linear] <R0150>:  -<C0002>[C] +<C0011>[C] +14<C0160>[B] <= 13;
+  [linear] <R0151>:  -<C0003>[C] +<C0011>[C] +14<C0161>[B] <= 13;
+  [linear] <R0152>:  -<C0004>[C] +<C0011>[C] +14<C0162>[B] <= 13;
+  [linear] <R0153>:  -<C0005>[C] +<C0011>[C] +14<C0163>[B] <= 13;
+  [linear] <R0154>:  -<C0006>[C] +<C0011>[C] +14<C0164>[B] <= 13;
+  [linear] <R0155>:  -<C0007>[C] +<C0011>[C] +14<C0165>[B] <= 13;
+  [linear] <R0156>:  -<C0008>[C] +<C0011>[C] +14<C0166>[B] <= 13;
+  [linear] <R0157>:  -<C0009>[C] +<C0011>[C] +14<C0167>[B] <= 13;
+  [linear] <R0158>:  -<C0010>[C] +<C0011>[C] +14<C0168>[B] <= 13;
+  [linear] <R0159>: <C0011>[C] -<C0012>[C] +14<C0169>[B] <= 13;
+  [linear] <R0160>: <C0011>[C] -<C0013>[C] +14<C0170>[B] <= 13;
+  [linear] <R0161>:  -<C0001>[C] +<C0012>[C] +14<C0172>[B] <= 13;
+  [linear] <R0162>:  -<C0002>[C] +<C0012>[C] +14<C0173>[B] <= 13;
+  [linear] <R0163>:  -<C0003>[C] +<C0012>[C] +14<C0174>[B] <= 13;
+  [linear] <R0164>:  -<C0004>[C] +<C0012>[C] +14<C0175>[B] <= 13;
+  [linear] <R0165>:  -<C0005>[C] +<C0012>[C] +14<C0176>[B] <= 13;
+  [linear] <R0166>:  -<C0006>[C] +<C0012>[C] +14<C0177>[B] <= 13;
+  [linear] <R0167>:  -<C0007>[C] +<C0012>[C] +14<C0178>[B] <= 13;
+  [linear] <R0168>:  -<C0008>[C] +<C0012>[C] +14<C0179>[B] <= 13;
+  [linear] <R0169>:  -<C0009>[C] +<C0012>[C] +14<C0180>[B] <= 13;
+  [linear] <R0170>:  -<C0010>[C] +<C0012>[C] +14<C0181>[B] <= 13;
+  [linear] <R0171>:  -<C0011>[C] +<C0012>[C] +14<C0182>[B] <= 13;
+  [linear] <R0172>: <C0012>[C] -<C0013>[C] +14<C0183>[B] <= 13;
+  [linear] <R0173>:  -<C0001>[C] +<C0013>[C] +14<C0185>[B] <= 13;
+  [linear] <R0174>:  -<C0002>[C] +<C0013>[C] +14<C0186>[B] <= 13;
+  [linear] <R0175>:  -<C0003>[C] +<C0013>[C] +14<C0187>[B] <= 13;
+  [linear] <R0176>:  -<C0004>[C] +<C0013>[C] +14<C0188>[B] <= 13;
+  [linear] <R0177>:  -<C0005>[C] +<C0013>[C] +14<C0189>[B] <= 13;
+  [linear] <R0178>:  -<C0006>[C] +<C0013>[C] +14<C0190>[B] <= 13;
+  [linear] <R0179>:  -<C0007>[C] +<C0013>[C] +14<C0191>[B] <= 13;
+  [linear] <R0180>:  -<C0008>[C] +<C0013>[C] +14<C0192>[B] <= 13;
+  [linear] <R0181>:  -<C0009>[C] +<C0013>[C] +14<C0193>[B] <= 13;
+  [linear] <R0182>:  -<C0010>[C] +<C0013>[C] +14<C0194>[B] <= 13;
+  [linear] <R0183>:  -<C0011>[C] +<C0013>[C] +14<C0195>[B] <= 13;
+  [linear] <R0184>:  -<C0012>[C] +<C0013>[C] +14<C0196>[B] <= 13;
+END

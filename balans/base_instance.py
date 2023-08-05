@@ -1,93 +1,302 @@
 import pandas as pd
 import pyscipopt as scip
+from pyscipopt import Model, Heur, SCIP_RESULT, SCIP_PARAMSETTING, SCIP_HEURTIMING
 from balans.utils import Constants
 from typing import Tuple, Dict, Any
+import math
+from pyscipopt import Model, quicksum
 
 
 class _Instance:
     """
     Instance from a given MIP file
+
+    instance.solve() operates as a main body of the operators, depending on which operator
+    is used its solution procedure changes.
+
+    initial solve > lp solve only for the first iteration.
+
+    non-initial solve > for the rest of the remaining iterations.
     """
 
     def __init__(self, path):
         self.path = path
 
         # Instance variables
-        self.has_features = False  # Flag to denote if features extracted
-        self.features_df = None  # static, set once and for all in solve()
         self.discrete_indexes = None  # static, set once and for all in solve()
+        self.binary_indexes = None  # static, set once and for all in solve()
         self.sense = None  # static, set once and for all in solve()
+        self.lp_index_to_val = None  # static, set once and for in solve()
+        self.lp_obj_value = None  # static, set once and for in solve()
+        self.random_index_to_val = None  # static, second random solution
+        self.random_obj_value = None  # static, second random solution
 
-    def solve(self, is_initial_solve=False, destroy_set=None, var_to_val=None) -> Tuple[Dict[Any, float], float]:
+    def solve(self,
+              is_initial_solve=False,
+              index_to_val=None,
+              destroy_set=None,
+              dins_random_set=None,
+              is_dins=False,
+              rens_float_set=None,
+              is_zero_obj=False,
+              local_branching_size=0,
+              is_proximity=False) -> Tuple[Dict[Any, float], float]:
 
-        # Model
+        print("\t Solve")
+
+        if is_initial_solve:
+            return self.initial_solve(index_to_val)
+        else:
+            # Model
+            model = scip.Model()
+
+            # Setting the verbosity level to 0
+            model.hideOutput()
+
+            # # Instance
+            model.readProblem(self.path)
+
+            # Variables
+            variables = model.getVars()
+
+            # DESTROY used for DINS, Mutation, RINS
+            if destroy_set:
+                for var in variables:
+                    # Only consider discrete vars (binary and integer)
+                    if var.getIndex() in self.discrete_indexes:
+                        # IF not in destroy, fix it
+                        if var.getIndex() not in destroy_set:
+                            # constraint = var == index_to_val[var.getIndex()]
+                            # model.addCons(constraint)
+                            model.addCons(var == index_to_val[var.getIndex()])
+                        else:
+                            # IF in destroy, and DINS is active, don't fix but add bounding constraint
+                            if is_dins or dins_random_set:
+                                index = var.getIndex()
+                                current_lp_diff = abs(index_to_val[index] - self.lp_index_to_val[index])
+                                model.addCons(abs(var - self.lp_index_to_val[index]) <= current_lp_diff)
+
+            # RANDOM DINS: binary variables have more strict condition to be fixed
+            if dins_random_set:
+                for var in variables:
+                    if var.getIndex() in dins_random_set:
+                        # Fix all binary vars in dins_binary
+                        model.addCons(var == index_to_val[var.getIndex()])
+
+            # RENS: Discrete variables, where the lp relaxation is not integral
+            if rens_float_set:
+                for var in variables:
+                    if var.getIndex() in rens_float_set:
+                        # Restrict discrete vars to round up and down integer version of it
+                        model.addCons(var <= math.floor(index_to_val[var.getIndex()]))
+                        model.addCons(var >= math.ceil(index_to_val[var.getIndex()]))
+
+            # Zero Objective
+            if is_zero_obj:
+                model.setObjective(0, self.sense)
+
+            # Local Branching V2 (Classic Version)
+            if local_branching_size > 0:
+                zero_vars = []
+                one_vars = []
+                for var in variables:
+                    if var.getIndex() in self.binary_indexes:
+                        if index_to_val[var.getIndex()] == 0:
+                            zero_vars.append(var)
+                        else:
+                            one_vars.append(var)
+
+                # Only change half of the variables, keep others fixed. e.g.,
+                # if current value of binary var is 0, changing it to 1 consumes 1 unit of budget
+                # if current value of binary var is 1, changing it to 0 consumes 1 unit of budget by (1-x)
+                expr = quicksum(zero_var for zero_var in zero_vars) + quicksum(1 - one_var for one_var in one_vars)
+                # delta =0.5 fixed for local branching v2 (classic version)
+                model.addCons(expr <= local_branching_size)
+
+            if is_proximity:
+                zero_vars = []
+                one_vars = []
+                non_binary_vars = []  # All other variables
+                for var in variables:
+                    if var.getIndex() in self.binary_indexes:
+                        if index_to_val[var.getIndex()] == 0:
+                            zero_vars.append(var)
+                        else:
+                            one_vars.append(var)
+                    else:
+                        non_binary_vars.append(var)
+
+                # if x_inc =0, update its objective coefficient to 1. if x_inc =1, update its objective coefficient
+                # to -1. Drop all other variables by making their coefficient 0.(All non-binary variables are
+                # dropped, not given.)
+                expr_obj = quicksum(zero_var for zero_var in zero_vars) + quicksum(-1 * one_var for one_var in one_vars)
+                model.setObjective(expr_obj, self.sense)
+
+            # Solve
+            model.optimize()
+
+            # Solution and objective
+            index_to_val = self.get_index_to_val(model)
+            obj_value = model.getObjVal()
+
+
+            # Update Objective for transformed objectives
+            if is_proximity or is_zero_obj:
+
+                # Model
+                model = scip.Model()
+                model.hideOutput()
+                model.readProblem(self.path)
+
+                # Variables
+                variables = model.getVars()
+
+                # Solution of transformed problem
+                var_to_val = model.createSol()
+                for i in range(model.getNVars()):
+                    var_to_val[variables[i]] = index_to_val[i]
+
+                # Update objective value
+                obj_value = model.getSolObjVal(var_to_val)
+
+
+            print("\t Solve DONE!")
+            print("\t index_to_val: ", index_to_val)
+
+            return index_to_val, obj_value
+
+    def extract_features(self, model, variables):
+
+        # Variable types
+        var_types = [v.vtype() for v in variables]
+
+        # Set discrete indexes
+        discrete = []
+        for var in variables:
+            if self.is_discrete(var.vtype()):
+                discrete.append(var.getIndex())
+
+        self.discrete_indexes = discrete
+
+        # Set binary indexes
+        binary = []
+        for var in variables:
+            if self.is_binary(var.vtype()):
+                binary.append(var.getIndex())
+
+        self.binary_indexes = binary
+
+        # Optimization direction
+        self.sense = model.getObjectiveSense()
+
+    def initial_solve(self, index_to_val) -> Tuple[Dict[Any, float], float]:
+
+        # Model with verbosity level 0
+        model = scip.Model()
+        model.hideOutput()
+
+        # Instance
+        model.readProblem(self.path)
+        # model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
+
+        # Search only for the first incumbent
+        model.setParam("limits/bestsol", 1)
+
+        # Variables
+        variables = model.getVars()
+
+        # If a solution is given fix it. Can be partial (denoted by None value)
+        if index_to_val is not None:
+            for var in variables:
+                if index_to_val[var.getIndex()] is not None:
+                    model.addCons(var == index_to_val[var.getIndex()])
+
+        # Initial solve extracts static instance features
+        self.extract_features(model, variables)
+
+        # Solve
+        model.optimize()
+
+        # Initial solution and objective
+        index_to_val = self.get_index_to_val(model)
+        obj_value = model.getObjVal()
+
+        # Reset problem
+        model.freeProb()
+
+        # Solve LP relaxation and save it
+        self.lp_index_to_val, self.lp_obj_value = self.lp_solve()
+
+        # Create two more random solutions for crossover heuristics** Only needed for Crossover
+        self.random_index_to_val, self.random_obj_value = self.get_random_solution(0.80, 20)
+
+        # Return solution
+        return index_to_val, obj_value
+
+    def lp_solve(self) -> Tuple[Dict[Any, float], float]:
+
+        # Model with verbosity level 0
         model = scip.Model()
         model.hideOutput()
 
         # Instance
         model.readProblem(self.path)
 
-        # Parameters
-        # model.setPresolve(scip.SCIP_PARAMSETTING.OFF) ## we should use presolve, no?
-        if is_initial_solve:
-            model.setParam("limits/bestsol", 1)
-        # if gap:
-        #     model.setParam("limits/gap", gap)
-        # if time:
-        #     model.setParam('limits/time', time)
+        # Variables
+        variables = model.getVars()
+
+        # Continuous relaxation of the problem
+        for var in variables:
+            model.chgVarType(var, Constants.continuous)
+
+        # Solve
+        model.optimize()
+
+        # Solution and objective
+        index_to_val = self.get_index_to_val(model)
+        obj_value = model.getObjVal()
+
+        # Return solution and objective
+        return index_to_val, obj_value
+
+    def get_random_solution(self, gap=0.80, time=30) -> Tuple[Dict[Any, float], float]:
+
+        # Model with verbosity level 0
+        model = scip.Model()
+        model.hideOutput()
+
+        # Instance
+        model.readProblem(self.path)
+        # model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
+
+        # Search only for the first incumbent
+        model.setParam("limits/gap", gap)
+        model.setParam("limits/time", time)
 
         # Variables
         variables = model.getVars()
 
-        # Features, set once and for all
-        if not self.has_features:
-            self.extract_features(model, variables)
-
-        # Fix non-destroy variables
-        if destroy_set:
-            for var in variables:
-                index = var.getIndex()
-                if index not in destroy_set:
-                    model.addCons(var == var_to_val[index])
-
-        # Solve, potentially with fixed variables
+        # Solve
         model.optimize()
 
-        # Solution
-        var_to_val = dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
+        # Initial solution and objective
+        random_index_to_val = self.get_index_to_val(model)
+        random_obj_value = model.getObjVal()
 
-        # Objective
-        obj_value = model.getObjVal()
+        # Reset problem
+        model.freeProb()
 
-        # Return solution and objective
-        return var_to_val, obj_value
+        # Return solution
+        return random_index_to_val, random_obj_value
 
     @staticmethod
     def is_discrete(var_type) -> bool:
         return var_type in (Constants.binary, Constants.integer)
 
-    def extract_features(self, model, variables):
+    @staticmethod
+    def is_binary(var_type) -> bool:
+        return var_type in Constants.binary
 
-        # Set features to true
-        self.has_features = True
-
-        # Variable types
-        var_types = [v.vtype() for v in variables]
-
-        # Set discrete indexes
-        self.discrete_indexes = [i for i, var_type in enumerate(var_types) if self.is_discrete(var_type)]
-
-        # Feature df with types and bounds
-        self.features_df = pd.DataFrame({Constants.var_type: var_types,
-                                         Constants.var_lb: [v.getLbGlobal() for v in variables],
-                                         Constants.var_ub: [v.getUbGlobal() for v in variables]})
-
-        # # Change df types
-        # self.features_df = self.features_df.astype({Constants.var_type: int,
-        #                                             Constants.var_lb: float,
-        #                                             Constants.var_ub: float})
-
-        # Optimization direction
-        self.sense = model.getObjectiveSense()
-
-        # Other possible features can be LP relaxation?
+    @staticmethod
+    def get_index_to_val(model) -> Dict[Any, float]:
+        return dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])

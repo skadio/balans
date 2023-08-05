@@ -9,7 +9,6 @@ from balans.base_instance import _Instance
 from balans.base_state import _State
 from balans.utils import Constants, check_false, check_true, create_rng
 
-
 from balans.destroy import DestroyOperators
 from balans.repair import RepairOperators
 
@@ -19,15 +18,18 @@ from alns.accept import RecordToRecordTravel, SimulatedAnnealing, WorseAccept
 from alns.select import AlphaUCB, MABSelector, RandomSelect, RouletteWheel, SegmentedRouletteWheel
 from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterion
 
-
 # Type Declarations
 DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Dins),
+               type(DestroyOperators.Dins_Random),
                type(DestroyOperators.Local_Branching),
                type(DestroyOperators.Mutation),
-               type(DestroyOperators.No_Objective),
+               type(DestroyOperators.Mutation2),
+               type(DestroyOperators.Mutation3),
                type(DestroyOperators.Proximity),
-               type(DestroyOperators.Rens))
+               type(DestroyOperators.Rens),
+               type(DestroyOperators.Rins),
+               type(DestroyOperators.Zero_Objective))
 
 RepairType = (type(RepairOperators.Repair))
 
@@ -83,7 +85,7 @@ class Balans:
         self._rng = create_rng(self.seed)
 
         # ALNS
-        alns_seed = self._rng.randint(0, Constants.default_seed)
+        alns_seed = self._rng.randint(0, self.seed)
         self.alns = ALNS(np.random.RandomState(alns_seed))
         for op in destroy_ops:
             self.alns.add_destroy_operator(op)
@@ -92,7 +94,7 @@ class Balans:
 
         # Instance and the first solution
         self._instance: Optional[_Instance] = None
-        self._initial_var_to_val: Optional[Dict[int, float]] = None
+        self._initial_index_to_val: Optional[Dict[int, float]] = None
         self._initial_obj_val: Optional[float] = None
 
     @property
@@ -100,29 +102,35 @@ class Balans:
         return self._instance
 
     @property
-    def initial_var_to_val(self) -> Dict[int, float]:
-        return self._initial_var_to_val
+    def initial_index_to_val(self) -> Dict[int, float]:
+        return self._initial_index_to_val
 
     @property
     def initial_obj_val(self) -> float:
         return self._initial_obj_val
 
-    def solve(self, instance_path) -> Result:
-
+    def solve(self, instance_path, index_to_val=None) -> Result:
+        """
+        instance_path: the path to the MIP instance file
+        index_to_val: initial (partial) solution to warm start the variables
+        """
         self._validate_solve_args(instance_path)
 
         # Create instance from mip file
         self._instance = _Instance(instance_path)
 
         # Initial solution
-        self._initial_var_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True)
+        self._initial_index_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True,
+                                                                                 index_to_val=index_to_val)
         print(">>> START objective:", self._initial_obj_val)
+        print(">>> START objective index:",self._initial_index_to_val )
 
         # Initial state and solution
-        initial_state = _State(self._instance, self.initial_var_to_val, self.initial_obj_val)
+        initial_state = _State(self._instance, self.initial_index_to_val,
+                               self.initial_obj_val, previous_index_to_val=self._initial_index_to_val)
 
-        # Run
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
+
         print(">>> FINISH objective:", result.best_state.objective())
 
         # Result run
@@ -172,4 +180,3 @@ class Balans:
         # if time is not None:
         #     check_true(isinstance(time, int), TypeError("Time must be an integer." + str(time)))
         #     check_true(time >= 0, ValueError("Time must be non-negative" + str(gap)))
-
