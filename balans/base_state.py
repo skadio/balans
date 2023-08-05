@@ -4,7 +4,9 @@ from typing import Any, Dict
 
 class _State:
     """
-    State of an instance with solution and objective
+    State of an instance with its solution and objective
+    Operators sets the solve settings of the state
+    State calls instance.solve() with settings dictated by the operators
     """
 
     def __init__(self,
@@ -19,10 +21,15 @@ class _State:
                  previous_index_to_val=None,
                  local_branching_size=0,
                  is_proximity=None):
+
+        # State holds an instance and its solution and objective
+        # Instance holds features and the solve() logic dictated by operators
         self.instance = instance
         self.index_to_val = index_to_val  # index defined by SCIP var.getIndex()
         self.obj_val = obj_val
 
+        # State receives the solve settings from the operators
+        # and passes to instance.solve() and updates its solution and objective
         self.destroy_set = destroy_set
         self.dins_random_set = dins_random_set
         self.is_dins = is_dins

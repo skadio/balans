@@ -11,6 +11,7 @@ class _Instance:
     """
 
     def __init__(self, path):
+        # Instance holds the given path
         self.path = path
 
         # Static, set once and for all
@@ -135,7 +136,7 @@ class _Instance:
                 # Update objective value
                 obj_value = model.getSolObjVal(var_to_val)
 
-            print("\t Solve DONE!")
+            print("\t Solve DONE!", obj_value)
             print("\t index_to_val: ", index_to_val)
 
             return index_to_val, obj_value
