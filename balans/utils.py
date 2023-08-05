@@ -28,8 +28,8 @@ class Constants(NamedTuple):
 
     # Data folder name
     DATA_DIR = "data"
-    DATA_DIR_TOY = "data" + os.sep + "model_data"
-    DATA_DIR_MIP = "data" + os.sep + "mip_data"
+    DATA_DIR_TOY = "data" + os.sep + "toy"
+    DATA_DIR_MIP = "data" + os.sep + "miplib"
 
 
 def create_rng(seed):
