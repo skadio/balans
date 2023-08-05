@@ -1,10 +1,8 @@
-import pandas as pd
 import pyscipopt as scip
-from pyscipopt import Model, Heur, SCIP_RESULT, SCIP_PARAMSETTING, SCIP_HEURTIMING
 from balans.utils import Constants
 from typing import Tuple, Dict, Any
 import math
-from pyscipopt import Model, quicksum
+from pyscipopt import quicksum
 
 
 class _Instance:
@@ -47,19 +45,10 @@ class _Instance:
         if is_initial_solve:
             return self.initial_solve(index_to_val)
         else:
-            # Model
-            model = scip.Model()
+            # Build model and variables
+            model, variables = _Instance.get_model_and_vars(path=self.path)
 
-            # Setting the verbosity level to 0
-            model.hideOutput()
-
-            # # Instance
-            model.readProblem(self.path)
-
-            # Variables
-            variables = model.getVars()
-
-            # DESTROY used for DINS, Mutation, RINS
+            # DESTROY used for Crossover, DINS, Mutation, RINS
             if destroy_set:
                 for var in variables:
                     # Only consider discrete vars (binary and integer)
@@ -83,6 +72,41 @@ class _Instance:
                         # Fix all binary vars in dins_binary
                         model.addCons(var == index_to_val[var.getIndex()])
 
+            # Local Branching: Binary variables, flip a limited subset
+            if local_branching_size > 0:
+                zero_binary_vars = []
+                one_binary_vars = []
+                for var in variables:
+                    if var.getIndex() in self.binary_indexes:
+                        if index_to_val[var.getIndex()] == 0:
+                            zero_binary_vars.append(var)
+                        else:
+                            one_binary_vars.append(var)
+
+                # Only change a subset of the variables, keep others fixed. e.g.,
+                # if current binary var is 0, flip to 1 consumes 1 unit of budget
+                # if current binary var is 1, flip to 0 consumes 1 unit of budget by (1-x)
+                expr = quicksum(zero_var for zero_var in zero_binary_vars) + quicksum(1 - one_var for one_var in one_binary_vars)
+                model.addCons(expr <= local_branching_size)
+
+            # Proximity: Binary variables, flip their objective
+            if is_proximity:
+                zero_binary_vars = []
+                one_binary_vars = []
+                for var in variables:
+                    if var.getIndex() in self.binary_indexes:
+                        if index_to_val[var.getIndex()] == 0:
+                            zero_binary_vars.append(var)
+                        else:
+                            one_binary_vars.append(var)
+
+                # if x_inc=0, update its objective coefficient to 1.
+                # if x_inc=1, update its objective coefficient to -1.
+                # Drop all other vars (when not in the expr it is set to 0 by default)
+                zero_obj = quicksum(zero_var for zero_var in zero_binary_vars)
+                one_obj = quicksum(-1 * one_var for one_var in one_binary_vars)
+                model.setObjective(zero_obj + one_obj, self.sense)
+
             # RENS: Discrete variables, where the lp relaxation is not integral
             if rens_float_set:
                 for var in variables:
@@ -95,62 +119,20 @@ class _Instance:
             if is_zero_obj:
                 model.setObjective(0, self.sense)
 
-            # Local Branching V2 (Classic Version)
-            if local_branching_size > 0:
-                zero_vars = []
-                one_vars = []
-                for var in variables:
-                    if var.getIndex() in self.binary_indexes:
-                        if index_to_val[var.getIndex()] == 0:
-                            zero_vars.append(var)
-                        else:
-                            one_vars.append(var)
-
-                # Only change half of the variables, keep others fixed. e.g.,
-                # if current value of binary var is 0, changing it to 1 consumes 1 unit of budget
-                # if current value of binary var is 1, changing it to 0 consumes 1 unit of budget by (1-x)
-                expr = quicksum(zero_var for zero_var in zero_vars) + quicksum(1 - one_var for one_var in one_vars)
-                # delta =0.5 fixed for local branching v2 (classic version)
-                model.addCons(expr <= local_branching_size)
-
-            if is_proximity:
-                zero_vars = []
-                one_vars = []
-                non_binary_vars = []  # All other variables
-                for var in variables:
-                    if var.getIndex() in self.binary_indexes:
-                        if index_to_val[var.getIndex()] == 0:
-                            zero_vars.append(var)
-                        else:
-                            one_vars.append(var)
-                    else:
-                        non_binary_vars.append(var)
-
-                # if x_inc =0, update its objective coefficient to 1. if x_inc =1, update its objective coefficient
-                # to -1. Drop all other variables by making their coefficient 0.(All non-binary variables are
-                # dropped, not given.)
-                expr_obj = quicksum(zero_var for zero_var in zero_vars) + quicksum(-1 * one_var for one_var in one_vars)
-                model.setObjective(expr_obj, self.sense)
-
             # Solve
             model.optimize()
-
-            # Solution and objective
             index_to_val = self.get_index_to_val(model)
             obj_value = model.getObjVal()
 
             # Update Objective for transformed objectives
             if is_proximity or is_zero_obj:
 
-                # Model
-                model = scip.Model()
-                model.hideOutput()
-                model.readProblem(self.path)
-
-                # Variables
-                variables = model.getVars()
+                # Build model and variables
+                # TODO why build again?
+                model, variables = _Instance.get_model_and_vars(path=self.path)
 
                 # Solution of transformed problem
+                # TODO do we have unit test to test this solution switch
                 var_to_val = model.createSol()
                 for i in range(model.getNVars()):
                     var_to_val[variables[i]] = index_to_val[i]
@@ -165,43 +147,25 @@ class _Instance:
 
     def extract_features(self, model, variables):
 
-        # Variable types
-        var_types = [v.vtype() for v in variables]
-
         # Set discrete indexes
-        discrete = []
+        self.discrete_indexes = []
         for var in variables:
             if self.is_discrete(var.vtype()):
-                discrete.append(var.getIndex())
-
-        self.discrete_indexes = discrete
+                self.discrete_indexes.append(var.getIndex())
 
         # Set binary indexes
-        binary = []
+        self.binary_indexes = []
         for var in variables:
             if self.is_binary(var.vtype()):
-                binary.append(var.getIndex())
-
-        self.binary_indexes = binary
+                self.binary_indexes.append(var.getIndex())
 
         # Optimization direction
         self.sense = model.getObjectiveSense()
 
     def initial_solve(self, index_to_val) -> Tuple[Dict[Any, float], float]:
 
-        # Model with verbosity level 0
-        model = scip.Model()
-        model.hideOutput()
-
-        # Instance
-        model.readProblem(self.path)
-        # model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
-
-        # Search only for the first incumbent
-        model.setParam("limits/bestsol", 1)
-
-        # Variables
-        variables = model.getVars()
+        # Build model and variables
+        model, variables = _Instance.get_model_and_vars(path=self.path, solution_count=1)
 
         # If a solution is given fix it. Can be partial (denoted by None value)
         if index_to_val is not None:
@@ -214,74 +178,48 @@ class _Instance:
 
         # Solve
         model.optimize()
-
-        # Initial solution and objective
         index_to_val = self.get_index_to_val(model)
         obj_value = model.getObjVal()
 
         # Reset problem
+        # TODO Why is this needed?
         model.freeProb()
 
         # Solve LP relaxation and save it
         self.lp_index_to_val, self.lp_obj_value = self.lp_solve()
 
         # Create two more random solutions for crossover heuristics** Only needed for Crossover
-        self.random_index_to_val, self.random_obj_value = self.get_random_solution(0.80, 20)
+        self.random_index_to_val, self.random_obj_value = self.random_solve(0.80, 20)
 
         # Return solution
         return index_to_val, obj_value
 
     def lp_solve(self) -> Tuple[Dict[Any, float], float]:
 
-        # Model with verbosity level 0
-        model = scip.Model()
-        model.hideOutput()
-
-        # Instance
-        model.readProblem(self.path)
-
-        # Variables
-        variables = model.getVars()
-
-        # Continuous relaxation of the problem
-        for var in variables:
-            model.chgVarType(var, Constants.continuous)
+        # Build model and variables
+        model, variables = _Instance.get_model_and_vars(path=self.path,
+                                                        is_lp_relaxation=True)
 
         # Solve
         model.optimize()
-
-        # Solution and objective
         index_to_val = self.get_index_to_val(model)
         obj_value = model.getObjVal()
 
         # Return solution and objective
         return index_to_val, obj_value
 
-    def get_random_solution(self, gap=0.80, time=30) -> Tuple[Dict[Any, float], float]:
+    def random_solve(self, gap=Constants.random_gap, time=Constants.random_time) -> Tuple[Dict[Any, float], float]:
 
-        # Model with verbosity level 0
-        model = scip.Model()
-        model.hideOutput()
-
-        # Instance
-        model.readProblem(self.path)
-        # model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
-
-        # Search only for the first incumbent
-        model.setParam("limits/gap", gap)
-        model.setParam("limits/time", time)
-
-        # Variables
-        variables = model.getVars()
+        # Build model and variables
+        model, variables = _Instance.get_model_and_vars(path=self.path, gap=gap, time=time)
 
         # Solve
         model.optimize()
-
-        # Initial solution and objective
         random_index_to_val = self.get_index_to_val(model)
         random_obj_value = model.getObjVal()
 
         # Reset problem
+        # TODO Why is this needed?
         model.freeProb()
 
         # Return solution
@@ -298,3 +236,43 @@ class _Instance:
     @staticmethod
     def get_index_to_val(model) -> Dict[Any, float]:
         return dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
+
+    @staticmethod
+    def get_model_and_vars(path, is_verbose=False, has_pre_solve=True,
+                           solution_count=None, gap=None, time=None,
+                           is_lp_relaxation=False):
+
+        # Model
+        model = scip.Model()
+
+        # Verbosity
+        if not is_verbose:
+            model.hideOutput()
+
+        # Instance
+        model.readProblem(path)
+
+        if not has_pre_solve:
+            model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
+
+        # Search only for the first incumbent
+        if solution_count == 1:
+            model.setParam("limits/bestsol", 1)
+
+        # Search only for the first incumbent
+        if gap is not None:
+            model.setParam("limits/gap", gap)
+
+        if time is not None:
+            model.setParam("limits/time", time)
+
+        # Variables
+        variables = model.getVars()
+
+        # Continuous relaxation of the problem
+        if is_lp_relaxation:
+            for var in variables:
+                model.chgVarType(var, Constants.continuous)
+
+        # Return model and vars
+        return model, variables

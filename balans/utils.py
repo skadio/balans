@@ -31,6 +31,10 @@ class Constants(NamedTuple):
     DATA_DIR_TOY = DATA_DIR + os.sep + "toy"
     DATA_DIR_MIP = DATA_DIR + os.sep + "miplib"
 
+    # Random solution stopping criteria
+    random_gap = 0.80
+    random_time = 30
+
 
 def create_rng(seed):
     return mabwiser.utils.create_rng(seed)

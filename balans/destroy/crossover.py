@@ -82,8 +82,8 @@ def crossover3(current: _State, rnd_state) -> _State:
     b = np.random.uniform(low=0.11, high=0.90, size=1)
     print(a, "a")
     print(b, "b")
-    random_index_to_val, random_obj_value = current.instance.get_random_solution(gap=a[0])
-    random2_index_to_val, random2_obj_value = current.instance.get_random_solution(gap=b[0])
+    random_index_to_val, random_obj_value = current.instance.random_solve(gap=a[0])
+    random2_index_to_val, random2_obj_value = current.instance.random_solve(gap=b[0])
 
     print("Random Solution Crossover:", random_index_to_val)
     print("Second Random Solution Crossover:", random2_index_to_val)
