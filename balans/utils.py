@@ -1,4 +1,5 @@
-from typing import NamedTuple, NewType, Union
+from typing import NamedTuple
+import os
 
 import mabwiser.utils
 
@@ -27,8 +28,8 @@ class Constants(NamedTuple):
 
     # Data folder name
     DATA_DIR = "data"
-    DATA_DIR_TOY = "data\model_data"
-    DATA_DIR_MIP = "data\mip_data"
+    DATA_DIR_TOY = "data" + os.sep + "model_data"
+    DATA_DIR_MIP = "data" + os.sep + "mip_data"
 
 
 def create_rng(seed):
