@@ -22,10 +22,10 @@ ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 class LocalBranchingTest(BaseTest):
 
-    def test_local_branching_classic_t1(self):
+    def test_local_branching_t1(self):
         # Input
         instance = "test5.13.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -42,7 +42,7 @@ class LocalBranchingTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Local_Branching4)
+        alns.add_destroy_operator(DestroyOperators.Local_Branching)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -60,7 +60,8 @@ class LocalBranchingTest(BaseTest):
     def test_local_branching_classic_t2(self):
         # Input
         instance = "test5.13.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        print(instance_path)
 
         # Parameters
         seed = 123456
@@ -77,7 +78,7 @@ class LocalBranchingTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Local_Branching4)
+        alns.add_destroy_operator(DestroyOperators.Local_Branching)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -95,7 +96,7 @@ class LocalBranchingTest(BaseTest):
     def test_local_branching_v2_t3(self):
         # Input
         instance = "test5.13.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -112,7 +113,7 @@ class LocalBranchingTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Local_Branching4)
+        alns.add_destroy_operator(DestroyOperators.Local_Branching)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,

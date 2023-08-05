@@ -29,7 +29,7 @@ class IndexTest(BaseTest):
 
         # Input
         instance = "neos-5140963-mincio.mps.gz"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
 
         model = Model()
         model.hideOutput()
@@ -51,7 +51,7 @@ class IndexTest(BaseTest):
         # Testing whether we get the correct index set
         # Input
         instance = "neos-5140963-mincio.mps.gz"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
 
         model = Model()
         model.hideOutput()
@@ -73,7 +73,7 @@ class IndexTest(BaseTest):
         # Testing whether we get the correct index set
         # Input
         instance = "model2.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -93,7 +93,7 @@ class IndexTest(BaseTest):
         # Testing whether we get the correct index set
         # Input
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -114,7 +114,7 @@ class IndexTest(BaseTest):
 
         # Input
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456

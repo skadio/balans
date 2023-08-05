@@ -14,12 +14,10 @@ from tests.test_base import BaseTest
 from balans.base_state import _State
 from balans.base_instance import _Instance
 
-from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
+from mabwiser.mab import LearningPolicy
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
-
-
 
 
 class RinsTest(BaseTest):
@@ -27,7 +25,7 @@ class RinsTest(BaseTest):
     def test_rins_t1(self):
         # Input
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -52,7 +50,7 @@ class RinsTest(BaseTest):
     def test_rins_t2(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -60,7 +58,6 @@ class RinsTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
-
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -80,7 +77,7 @@ class RinsTest(BaseTest):
     def test_rins_t3(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -90,7 +87,7 @@ class RinsTest(BaseTest):
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
         print("initial index_to_val:", index_to_val)
 
-        initial2 = _State(instance, index_to_val,  -30)
+        initial2 = _State(instance, index_to_val, -30)
 
         # Initial solution
         initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
@@ -116,7 +113,7 @@ class RinsTest(BaseTest):
     def test_rins_t4(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -127,7 +124,7 @@ class RinsTest(BaseTest):
         print("initial index to val:", index_to_val)
 
         initial2 = _State(instance, {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0},
-                          -30,)
+                          -30, )
 
         # Initial solution
         initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
@@ -148,7 +145,3 @@ class RinsTest(BaseTest):
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
         self.assertEqual(result.best_state.objective(), -60.0)
-
-
-
-

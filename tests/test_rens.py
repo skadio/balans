@@ -27,7 +27,7 @@ class RensTest(BaseTest):
     def test_rens_t1(self):
         # Input
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -52,7 +52,7 @@ class RensTest(BaseTest):
     def test_rens_t2(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -80,7 +80,7 @@ class RensTest(BaseTest):
     def test_rens_t3(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -116,7 +116,7 @@ class RensTest(BaseTest):
     def test_rens_t4(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed

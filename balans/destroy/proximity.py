@@ -3,7 +3,7 @@ from balans.base_state import _State
 
 
 def proximity(current: _State, rnd_state) -> _State:
-    # For discrete variables we have a hard constraint,
+    # Objective function modification
     # Change the objective coefficients of the original
     # problem based on the current solution value.
     # For binary variables,

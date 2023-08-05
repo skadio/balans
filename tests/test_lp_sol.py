@@ -26,7 +26,7 @@ class LPSolTest(BaseTest):
 
         # 3 DISCRETE DECISION VARIABLES > model.cip
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         instance = _Instance(instance_path)
 

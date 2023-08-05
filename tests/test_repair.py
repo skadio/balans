@@ -22,7 +22,7 @@ class RepairTest(BaseTest):
 
         # Input
         instance = "neos-5140963-mincio.mps.gz"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
 
         # Parameters
         seed = 123456

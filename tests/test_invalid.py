@@ -9,10 +9,7 @@ from balans.solver import Balans
 from balans.utils import Constants
 from tests.test_base import BaseTest
 
-from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
-
-TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
+from mabwiser.mab import LearningPolicy
 
 
 class InvalidTest(BaseTest):

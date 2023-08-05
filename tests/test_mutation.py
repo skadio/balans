@@ -2,7 +2,6 @@ import os
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-from pyscipopt import Model
 import numpy as np
 from alns.ALNS import ALNS
 
@@ -14,11 +13,10 @@ from tests.test_base import BaseTest
 from balans.base_state import _State
 from balans.base_instance import _Instance
 
-from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
+from mabwiser.mab import LearningPolicy
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
-
 
 
 class MutationTest(BaseTest):
@@ -26,7 +24,7 @@ class MutationTest(BaseTest):
     def test_mutation(self):
         # Input
         instance = "noswot.mps.gz"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -51,7 +49,7 @@ class MutationTest(BaseTest):
     def test_mutation_t1(self):
         # Input
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -76,7 +74,7 @@ class MutationTest(BaseTest):
     def test_mutation_t2(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -103,7 +101,7 @@ class MutationTest(BaseTest):
     def test_mutation_t3(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -140,13 +138,13 @@ class MutationTest(BaseTest):
         # Retrieve the final solution
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
-        #self.assertEqual(result.best_state.objective(), -60)
+        # self.assertEqual(result.best_state.objective(), -60)
         self.assertIsBetter(-30, result.best_state.objective(), "minimize")
 
     def test_mutation_t4(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -184,12 +182,6 @@ class MutationTest(BaseTest):
         # Retrieve the final solution
         best_state = result.best_state
         best_objective = best_state.objective()
-        best_solution = best_state.solution()
-
-        # best.index_to_val = None # best.index_to_val
-        #
-        # # First variable must remain fixed
-        # self.assertEqual(initial_index_to_val[0], best_index_to_val[0])
 
         print(f"Best heuristic solution objective is {best_objective}.")
         self.assertEqual(best_objective, -50.0)
@@ -197,7 +189,7 @@ class MutationTest(BaseTest):
     def test_mutation_t4_with_warm_start(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456

@@ -25,7 +25,7 @@ class ProximityTest(BaseTest):
     def test_proximity_t1(self):
         # Input
         instance = "test5.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -51,8 +51,8 @@ class ProximityTest(BaseTest):
 
     def test_proximity_t2(self):
         # Input
-        instance = "test.7.0.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance = "test5.5.cip"
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -84,4 +84,4 @@ class ProximityTest(BaseTest):
         print(f"Best heuristic solution objective is {best.objective()}.")
 
         # REPAIR OBJECTIVE SUPPOSED TO BE =-2.
-        self.assertEqual(result.best_state.objective(), -40.0)
+        self.assertEqual(result.best_state.objective(), -60.0)

@@ -2,7 +2,6 @@ import os
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-from pyscipopt import Model
 import numpy as np
 from alns.ALNS import ALNS
 
@@ -25,7 +24,7 @@ class CrossoverTest(BaseTest):
     def test_crossover(self):
         # Input
         instance = "noswot.mps.gz"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -50,7 +49,7 @@ class CrossoverTest(BaseTest):
     def test_crossover_t1(self):
         # Input
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -75,7 +74,7 @@ class CrossoverTest(BaseTest):
     def test_crossover_t2(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -102,7 +101,7 @@ class CrossoverTest(BaseTest):
     def test_crossover_t3(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -145,7 +144,7 @@ class CrossoverTest(BaseTest):
     def test_crossover_t4(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -185,18 +184,13 @@ class CrossoverTest(BaseTest):
         best_objective = best_state.objective()
         best_solution = best_state.solution()
 
-        # best.index_to_val = None # best.index_to_val
-        #
-        # # First variable must remain fixed
-        # self.assertEqual(initial_index_to_val[0], best_index_to_val[0])
-
         print(f"Best heuristic solution objective is {best_objective}.")
         self.assertEqual(best_objective, -60.0)
 
     def test_crossover_t4_with_warm_start(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR, instance)
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
 
         # Parameters
         seed = 123456

@@ -23,7 +23,6 @@ class _Instance:
         self.path = path
 
         # Instance variables
-        self.features_df = None  # static, set once and for all in solve()
         self.discrete_indexes = None  # static, set once and for all in solve()
         self.binary_indexes = None  # static, set once and for all in solve()
         self.sense = None  # static, set once and for all in solve()
@@ -36,10 +35,11 @@ class _Instance:
               is_initial_solve=False,
               index_to_val=None,
               destroy_set=None,
-              dins_binary_set=None,
+              dins_random_set=None,
+              is_dins=False,
               rens_float_set=None,
               is_zero_obj=False,
-              is_local_branching=False,
+              local_branching_size=0,
               is_proximity=False) -> Tuple[Dict[Any, float], float]:
 
         print("\t Solve")
@@ -59,25 +59,27 @@ class _Instance:
             # Variables
             variables = model.getVars()
 
-            # DESTROY used for DINS, Local Branching, Mutation, RINS
+            # DESTROY used for DINS, Mutation, RINS
             if destroy_set:
                 for var in variables:
                     # Only consider discrete vars (binary and integer)
                     if var.getIndex() in self.discrete_indexes:
                         # IF not in destroy, fix it
                         if var.getIndex() not in destroy_set:
+                            # constraint = var == index_to_val[var.getIndex()]
+                            # model.addCons(constraint)
                             model.addCons(var == index_to_val[var.getIndex()])
                         else:
                             # IF in destroy, and DINS is active, don't fix but add bounding constraint
-                            if dins_binary_set:
+                            if is_dins or dins_random_set:
                                 index = var.getIndex()
                                 current_lp_diff = abs(index_to_val[index] - self.lp_index_to_val[index])
                                 model.addCons(abs(var - self.lp_index_to_val[index]) <= current_lp_diff)
 
-            # DINS: binary variables have more strict condition to be fixed
-            if dins_binary_set:
+            # RANDOM DINS: binary variables have more strict condition to be fixed
+            if dins_random_set:
                 for var in variables:
-                    if var.getIndex() in dins_binary_set:
+                    if var.getIndex() in dins_random_set:
                         # Fix all binary vars in dins_binary
                         model.addCons(var == index_to_val[var.getIndex()])
 
@@ -94,41 +96,40 @@ class _Instance:
                 model.setObjective(0, self.sense)
 
             # Local Branching V2 (Classic Version)
-            if is_local_branching:
-                currently_zero = []
-                currently_one = []
+            if local_branching_size > 0:
+                zero_vars = []
+                one_vars = []
                 for var in variables:
                     if var.getIndex() in self.binary_indexes:
                         if index_to_val[var.getIndex()] == 0:
-                            currently_zero.append(var)
-
+                            zero_vars.append(var)
                         else:
-                            currently_one.append(var)
+                            one_vars.append(var)
 
                 # Only change half of the variables, keep others fixed. e.g.,
                 # if current value of binary var is 0, changing it to 1 consumes 1 unit of budget
                 # if current value of binary var is 1, changing it to 0 consumes 1 unit of budget by (1-x)
-                expr = quicksum(var for var in currently_zero) + quicksum(1 - var2 for var2 in currently_one)
+                expr = quicksum(zero_var for zero_var in zero_vars) + quicksum(1 - one_var for one_var in one_vars)
                 # delta =0.5 fixed for local branching v2 (classic version)
-                model.addCons(expr <= int(0.5 * len(self.binary_indexes)))
+                model.addCons(expr <= local_branching_size)
 
             if is_proximity:
-                # if x_inc =0, update its objective coefficient to 1.
-                # if x_inc =1, update its objective coefficient to -1.
-                # Drop all other variables by making their coefficient 0.
-                currently_zero = []
-                currently_one = []
-                non_binary_vars = []
+                zero_vars = []
+                one_vars = []
+                non_binary_vars = []  # All other variables
                 for var in variables:
                     if var.getIndex() in self.binary_indexes:
                         if index_to_val[var.getIndex()] == 0:
-                            currently_zero.append(var)
+                            zero_vars.append(var)
                         else:
-                            currently_one.append(var)
+                            one_vars.append(var)
                     else:
                         non_binary_vars.append(var)
 
-                expr_obj = quicksum(var for var in currently_zero) + quicksum(-var2 for var2 in currently_one)
+                # if x_inc =0, update its objective coefficient to 1. if x_inc =1, update its objective coefficient
+                # to -1. Drop all other variables by making their coefficient 0.(All non-binary variables are
+                # dropped, not given.)
+                expr_obj = quicksum(zero_var for zero_var in zero_vars) + quicksum(-1 * one_var for one_var in one_vars)
                 model.setObjective(expr_obj, self.sense)
 
             # Solve
@@ -137,6 +138,27 @@ class _Instance:
             # Solution and objective
             index_to_val = self.get_index_to_val(model)
             obj_value = model.getObjVal()
+
+
+            # Update Objective for transformed objectives
+            if is_proximity or is_zero_obj:
+
+                # Model
+                model = scip.Model()
+                model.hideOutput()
+                model.readProblem(self.path)
+
+                # Variables
+                variables = model.getVars()
+
+                # Solution of transformed problem
+                var_to_val = model.createSol()
+                for i in range(model.getNVars()):
+                    var_to_val[variables[i]] = index_to_val[i]
+
+                # Update objective value
+                obj_value = model.getSolObjVal(var_to_val)
+
 
             print("\t Solve DONE!")
             print("\t index_to_val: ", index_to_val)
@@ -163,12 +185,6 @@ class _Instance:
                 binary.append(var.getIndex())
 
         self.binary_indexes = binary
-
-        # Feature df with types and bounds
-        # %TODO where is this used at all??
-        self.features_df = pd.DataFrame({Constants.var_type: var_types,
-                                         Constants.var_lb: [v.getLbGlobal() for v in variables],
-                                         Constants.var_ub: [v.getUbGlobal() for v in variables]})
 
         # Optimization direction
         self.sense = model.getObjectiveSense()
