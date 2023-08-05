@@ -1,8 +1,10 @@
-from typing import Tuple, Dict, Any
 import math
+from typing import Tuple, Dict, Any
+
 from pyscipopt import quicksum
+
 from balans.utils_scip import get_model_and_vars, random_solve, get_index_to_val
-from balans.utils_scip import lp_solve, is_binary, is_discrete
+from balans.utils_scip import lp_solve, is_binary, is_discrete, split_binary_vars
 
 
 class _Instance:
@@ -70,38 +72,25 @@ class _Instance:
 
             # Local Branching: Binary variables, flip a limited subset
             if local_branching_size > 0:
-                zero_binary_vars = []
-                one_binary_vars = []
-                for var in variables:
-                    if var.getIndex() in self.binary_indexes:
-                        if index_to_val[var.getIndex()] == 0:
-                            zero_binary_vars.append(var)
-                        else:
-                            one_binary_vars.append(var)
+                # Only change a subset of the binary variables, keep others fixed. e.g.,
+                zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
 
-                # Only change a subset of the variables, keep others fixed. e.g.,
                 # if current binary var is 0, flip to 1 consumes 1 unit of budget
                 # if current binary var is 1, flip to 0 consumes 1 unit of budget by (1-x)
-                expr = quicksum(zero_var for zero_var in zero_binary_vars) + quicksum(1 - one_var for one_var in one_binary_vars)
-                model.addCons(expr <= local_branching_size)
+                zero_expr = quicksum(zero_var for zero_var in zero_binary_vars)
+                one_expr = quicksum(1 - one_var for one_var in one_binary_vars)
+                model.addCons(zero_expr + one_expr <= local_branching_size)
 
             # Proximity: Binary variables, flip their objective
             if is_proximity:
-                zero_binary_vars = []
-                one_binary_vars = []
-                for var in variables:
-                    if var.getIndex() in self.binary_indexes:
-                        if index_to_val[var.getIndex()] == 0:
-                            zero_binary_vars.append(var)
-                        else:
-                            one_binary_vars.append(var)
+                zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
 
                 # if x_inc=0, update its objective coefficient to 1.
                 # if x_inc=1, update its objective coefficient to -1.
                 # Drop all other vars (when not in the expr it is set to 0 by default)
-                zero_obj = quicksum(zero_var for zero_var in zero_binary_vars)
-                one_obj = quicksum(-1 * one_var for one_var in one_binary_vars)
-                model.setObjective(zero_obj + one_obj, self.sense)
+                zero_expr = quicksum(zero_var for zero_var in zero_binary_vars)
+                one_expr = quicksum(-1 * one_var for one_var in one_binary_vars)
+                model.setObjective(zero_expr + one_expr, self.sense)
 
             # RENS: Discrete variables, where the lp relaxation is not integral
             if rens_float_set:

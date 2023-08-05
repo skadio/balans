@@ -2,7 +2,6 @@ import os
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-from pyscipopt import Model
 import numpy as np
 from alns.ALNS import ALNS
 

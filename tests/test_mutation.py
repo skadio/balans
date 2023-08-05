@@ -19,6 +19,7 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 
+# noinspection PyUnresolvedReferences
 class MutationTest(BaseTest):
 
     def test_mutation(self):

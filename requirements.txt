@@ -1,2 +1,4 @@
 alns[mabwiser]
+mabwiser
+numpy
 pyscipopt

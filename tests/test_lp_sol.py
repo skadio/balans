@@ -1,7 +1,6 @@
 import os
 from balans.utils import Constants
 from tests.test_base import BaseTest
-from balans.base_instance import _Instance
 from balans.utils_scip import lp_solve
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))

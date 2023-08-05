@@ -2,16 +2,12 @@ import os
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-from pyscipopt import Model
-import numpy as np
-from alns.ALNS import ALNS
 
 from balans.destroy import DestroyOperators
 from balans.repair import RepairOperators
 from balans.solver import Balans
 from balans.utils import Constants
 from tests.test_base import BaseTest
-from balans.base_state import _State
 from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy

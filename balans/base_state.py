@@ -1,7 +1,9 @@
-from balans.base_instance import _Instance
 from typing import Any, Dict
 
+from balans.base_instance import _Instance
 
+
+# noinspection GrazieInspection
 class _State:
     """
     State of an instance with its solution and objective

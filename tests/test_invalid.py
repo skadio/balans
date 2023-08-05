@@ -1,4 +1,3 @@
-import os
 from alns.accept import *
 from alns.select import *
 from alns.stop import *

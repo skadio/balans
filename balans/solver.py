@@ -1,22 +1,20 @@
 import os
-import numpy as np
 from typing import List, Optional, Dict
 
+import numpy as np
 from alns.ALNS import ALNS
 from alns.Result import Result
-
-from balans.base_instance import _Instance
-from balans.base_state import _State
-from balans.utils import Constants, check_false, check_true, create_rng
-
-from balans.destroy import DestroyOperators
-from balans.repair import RepairOperators
-
 from alns.accept import AdaptiveThreshold, GreatDeluge, HillClimbing
 from alns.accept import LateAcceptanceHillClimbing, NonLinearGreatDeluge, RandomWalk
 from alns.accept import RecordToRecordTravel, SimulatedAnnealing, WorseAccept
 from alns.select import AlphaUCB, MABSelector, RandomSelect, RouletteWheel, SegmentedRouletteWheel
 from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterion
+
+from balans.base_instance import _Instance
+from balans.base_state import _State
+from balans.destroy import DestroyOperators
+from balans.repair import RepairOperators
+from balans.utils import Constants, check_false, check_true, create_rng
 
 # Type Declarations
 DestroyType = (type(DestroyOperators.Crossover),
@@ -123,7 +121,7 @@ class Balans:
         self._initial_index_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True,
                                                                                  index_to_val=index_to_val)
         print(">>> START objective:", self._initial_obj_val)
-        print(">>> START objective index:",self._initial_index_to_val )
+        print(">>> START objective index:", self._initial_index_to_val)
 
         # Initial state and solution
         initial_state = _State(self._instance, self.initial_index_to_val,

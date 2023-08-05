@@ -1,4 +1,5 @@
 import copy
+
 from balans.base_state import _State
 
 
@@ -69,7 +70,7 @@ def _dins_random(current: _State, rnd_state, delta) -> _State:
     print("\t discrete_indexes:", discrete_indexes)
     print("\t lp_index_to_val: ", lp_index_to_val)
 
-    # By considering only discrete variables, form a set_j where |x_lp - x_inc| >= 0.5
+    # Consider only discrete variables, form a set_j where |x_lp - x_inc| >= 0.5
     set_j = set([i for i in discrete_indexes
                  if abs(lp_index_to_val[i] - current.index_to_val[i]) >= 0.5])
 

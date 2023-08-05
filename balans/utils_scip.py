@@ -1,6 +1,8 @@
-import pyscipopt as scip
-from balans.utils import Constants
 from typing import Tuple, Dict, Any
+
+import pyscipopt as scip
+
+from balans.utils import Constants
 
 
 def get_model_and_vars(path, is_verbose=False, has_pre_solve=True,
@@ -86,3 +88,16 @@ def is_binary(var_type) -> bool:
 
 def get_index_to_val(model) -> Dict[Any, float]:
     return dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
+
+
+def split_binary_vars(variables, binary_indexes, index_to_val):
+    zero_binary_vars = []
+    one_binary_vars = []
+    for var in variables:
+        if var.getIndex() in binary_indexes:
+            if index_to_val[var.getIndex()] == 0:
+                zero_binary_vars.append(var)
+            else:
+                one_binary_vars.append(var)
+
+    return zero_binary_vars, one_binary_vars

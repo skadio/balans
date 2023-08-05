@@ -13,8 +13,8 @@ with open(os.path.join('balans', '_version.py')) as f:
 
 # python setup.py bdist_wheel
 setuptools.setup(
-    name="BALNS",
-    description="BALNS: Bandit-based Adaptive Large Neighborhood Search",
+    name="Balans",
+    description="Balans: Bandit-based Adaptive Large Neighborhood Search",
     long_description=long_description,
     long_description_content_type="text/markdown",
     version=__version__,

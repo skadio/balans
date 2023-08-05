@@ -4,10 +4,10 @@ from .crossover import crossover, crossover2, crossover3
 from .dins import dins_50, dins_75, dins_random_50, dins_random_75
 from .local_branching import local_branching_50
 from .mutation import mutation_25, mutation_50, mutation_75, mutation_binary_50
-from .zero_objective import zero_objective
 from .proximity import proximity
 from .rens import rens
 from .rins import rins, rins_random_50
+from .zero_objective import zero_objective
 
 
 class DestroyOperators(NamedTuple):

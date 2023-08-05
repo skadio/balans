@@ -2,7 +2,6 @@ import os
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-from pyscipopt import Model
 import numpy as np
 from alns.ALNS import ALNS
 
@@ -14,12 +13,10 @@ from tests.test_base import BaseTest
 from balans.base_state import _State
 from balans.base_instance import _Instance
 
-from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
+from mabwiser.mab import LearningPolicy
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
-
-
 
 
 class RensTest(BaseTest):
@@ -60,7 +57,6 @@ class RensTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
-
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -147,8 +143,3 @@ class RensTest(BaseTest):
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
         self.assertEqual(result.best_state.objective(), -60.0)
-
-
-
-
-

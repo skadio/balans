@@ -2,9 +2,6 @@ import os
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-from pyscipopt import Model
-import numpy as np
-from alns.ALNS import ALNS
 
 from balans.destroy import DestroyOperators
 from balans.repair import RepairOperators
@@ -63,7 +60,7 @@ class NoObjectiveTest(BaseTest):
         print("initial index to val:", index_to_val)
         obj_value = -40
 
-        initial2 = _State(instance, index_to_val,-30)
+        initial2 = _State(instance, index_to_val, -30)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))

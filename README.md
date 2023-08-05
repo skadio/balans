@@ -74,7 +74,7 @@ Balans depends on [MABWiser](https://github.com/fidelity/mabwiser/) for multi-ar
 While MABWiser and ALNS are pip-installable as shown in [requirements.txt](https://github.com/skadio/balans/blob/main/requirements.txt), 
 SCIP needs to be installed: 
 
-1. Install a Python-compatible[^7] version of [SCIP Optimization Solver](https://www.scipopt.org/index.php#download) which requires prepackaged C++ libraries[^8].
+1. Install a Python-compatible[^7] version of [SCIP Optimization Solver](https://www.scipopt.org/index.php#download) which requires C++ prepackage libraries[^8].
 [^7]: The Python interface of SCIP only works with major versions, see [SCIP Compatibility Table](https://pypi.org/project/PySCIPOpt/) to pick the right solver version.
 [^8]: SCIP is written in C++ so it requires [Visual C++ Redistributable Packages](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170), check the link under precompiled packages section. Alternatively, here is the official [Visual Studio C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) to download and install C++ development tools (make sure to click on C++ tools in the installer). 
 2. Now that SCIP _and_ the required C++ backend are installed, set the environment variable for [SCIPOPTDIR](https://imada.sdu.dk/u/marco/DM871/PySCIPOpt/md_INSTALL.html).
@@ -98,7 +98,7 @@ $ python -m unittest discover tests
 
 ## License
 
-Balans is licensed under the [Apache License 2.0](LICENSE.md).
+Balans is licensed under the [Apache License 2.0](LICENSE).
 
 
 ## References

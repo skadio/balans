@@ -9,7 +9,7 @@ from balans.solver import Balans
 from balans.utils import Constants
 from tests.test_base import BaseTest
 
-from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
+from mabwiser.mab import LearningPolicy
 
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))

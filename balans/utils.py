@@ -1,5 +1,5 @@
-from typing import NamedTuple
 import os
+from typing import NamedTuple
 
 import mabwiser.utils
 

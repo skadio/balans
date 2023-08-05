@@ -1,6 +1,8 @@
 import copy
-from balans.base_state import _State
+
 import numpy as np
+
+from balans.base_state import _State
 
 
 def rins(current: _State, rnd_state) -> _State:

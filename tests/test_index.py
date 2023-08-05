@@ -13,7 +13,7 @@ from tests.test_base import BaseTest
 from balans.base_state import _State
 from balans.base_instance import _Instance
 
-from mabwiser.mab import LearningPolicy, NeighborhoodPolicy
+from mabwiser.mab import LearningPolicy
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
