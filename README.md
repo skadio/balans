@@ -112,7 +112,4 @@ Balans is licensed under the [Apache License 2.0](LICENSE.md).
 
 ## References
 
-1. xxx
-2. xx
-
 <br>
