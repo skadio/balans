@@ -49,7 +49,7 @@ def _mutation_binary(current: _State, rnd_state, delta) -> _State:
     next_state.reset_solve_settings()
 
     # Static features from the instance
-    binary_indexes = current.instance.binary_indexes
+    binary_indexes = current.instance.features.binary_indexes
 
     destroy_size = int(delta * len(binary_indexes))
 

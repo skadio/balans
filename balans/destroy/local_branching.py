@@ -2,7 +2,6 @@ import copy
 from balans.base_state import _State
 
 
-# (Classic Version)
 def _local_branching(current: _State, rnd_state, delta) -> _State:
     #  For binary variables we have a hard constraint,
     #  here we say change at most half of them (delta=0.5).

@@ -1,5 +1,5 @@
 import copy
-from balans.base_state import _State
+from balans.utils_scip import random_solve
 import numpy as np
 from balans.base_state import _State
 
@@ -82,8 +82,8 @@ def crossover3(current: _State, rnd_state) -> _State:
     b = np.random.uniform(low=0.11, high=0.90, size=1)
     print(a, "a")
     print(b, "b")
-    random_index_to_val, random_obj_value = current.instance.random_solve(gap=a[0])
-    random2_index_to_val, random2_obj_value = current.instance.random_solve(gap=b[0])
+    random_index_to_val, random_obj_value = random_solve(path=current.instance.path, gap=a[0])
+    random2_index_to_val, random2_obj_value = random_solve(path=current.instance.path, gap=b[0])
 
     print("Random Solution Crossover:", random_index_to_val)
     print("Second Random Solution Crossover:", random2_index_to_val)

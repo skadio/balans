@@ -47,6 +47,7 @@ class _State:
         self.local_branching_size = 0
         self.is_proximity = False
         # TODO previous_index_to_val is not reset, is this correct?
+        # TODO anything to clean up after random solves?
 
     def solve_and_update(self):
         # Solve the current state with the destroyed variables and update

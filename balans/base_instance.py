@@ -1,31 +1,26 @@
-import pyscipopt as scip
-from balans.utils import Constants
 from typing import Tuple, Dict, Any
 import math
 from pyscipopt import quicksum
+from balans.utils_scip import get_model_and_vars, random_solve, get_index_to_val
+from balans.utils_scip import lp_solve, is_binary, is_discrete
 
 
 class _Instance:
     """
-    Instance from a given MIP file
-
-    instance.solve() operates as a main body of the operators, depending on which operator
-    is used its solution procedure changes.
-
-    initial solve > lp solve only for the first iteration.
-
-    non-initial solve > for the rest of the remaining iterations.
+    Instance from a given MIP file with solve operations on top, subject to operator
     """
 
     def __init__(self, path):
         self.path = path
 
-        # Instance variables
-        self.discrete_indexes = None  # static, set once and for all in solve()
-        self.binary_indexes = None  # static, set once and for all in solve()
-        self.sense = None  # static, set once and for all in solve()
-        self.lp_index_to_val = None  # static, set once and for in solve()
-        self.lp_obj_value = None  # static, set once and for in solve()
+        # Static, set once and for all
+        self.discrete_indexes = None
+        self.binary_indexes = None
+        self.sense = None
+        self.lp_index_to_val = None
+        self.lp_obj_value = None
+
+        # TODO how come these are static?
         self.random_index_to_val = None  # static, second random solution
         self.random_obj_value = None  # static, second random solution
 
@@ -46,7 +41,7 @@ class _Instance:
             return self.initial_solve(index_to_val)
         else:
             # Build model and variables
-            model, variables = _Instance.get_model_and_vars(path=self.path)
+            model, variables = get_model_and_vars(path=self.path)
 
             # DESTROY used for Crossover, DINS, Mutation, RINS
             if destroy_set:
@@ -121,7 +116,7 @@ class _Instance:
 
             # Solve
             model.optimize()
-            index_to_val = self.get_index_to_val(model)
+            index_to_val = get_index_to_val(model)
             obj_value = model.getObjVal()
 
             # Update Objective for transformed objectives
@@ -129,7 +124,7 @@ class _Instance:
 
                 # Build model and variables
                 # TODO why build again?
-                model, variables = _Instance.get_model_and_vars(path=self.path)
+                model, variables = get_model_and_vars(path=self.path)
 
                 # Solution of transformed problem
                 # TODO do we have unit test to test this solution switch
@@ -145,27 +140,10 @@ class _Instance:
 
             return index_to_val, obj_value
 
-    def extract_features(self, model, variables):
-
-        # Set discrete indexes
-        self.discrete_indexes = []
-        for var in variables:
-            if self.is_discrete(var.vtype()):
-                self.discrete_indexes.append(var.getIndex())
-
-        # Set binary indexes
-        self.binary_indexes = []
-        for var in variables:
-            if self.is_binary(var.vtype()):
-                self.binary_indexes.append(var.getIndex())
-
-        # Optimization direction
-        self.sense = model.getObjectiveSense()
-
     def initial_solve(self, index_to_val) -> Tuple[Dict[Any, float], float]:
 
         # Build model and variables
-        model, variables = _Instance.get_model_and_vars(path=self.path, solution_count=1)
+        model, variables = get_model_and_vars(path=self.path, solution_count=1)
 
         # If a solution is given fix it. Can be partial (denoted by None value)
         if index_to_val is not None:
@@ -174,105 +152,46 @@ class _Instance:
                     model.addCons(var == index_to_val[var.getIndex()])
 
         # Initial solve extracts static instance features
-        self.extract_features(model, variables)
+        self.extract_base_features(model, variables)
 
         # Solve
         model.optimize()
-        index_to_val = self.get_index_to_val(model)
+        index_to_val = get_index_to_val(model)
         obj_value = model.getObjVal()
 
         # Reset problem
         # TODO Why is this needed?
         model.freeProb()
 
+        self.extract_lp_features(self.path)
+
+        # Create two more random solutions for crossover heuristics**
+        # Only needed for Crossover
+        # TODO Not sure about creating random with fixed gap (same bnd tree!)
+        self.random_index_to_val, self.random_obj_value = random_solve(path=self.path, gap=0.80, time=20)
+
+        # Return solution
+        return index_to_val, obj_value
+
+    def extract_base_features(self, model, variables):
+
+        # Set discrete indexes
+        self.discrete_indexes = []
+        for var in variables:
+            if is_discrete(var.vtype()):
+                self.discrete_indexes.append(var.getIndex())
+
+        # Set binary indexes
+        self.binary_indexes = []
+        for var in variables:
+            if is_binary(var.vtype()):
+                self.binary_indexes.append(var.getIndex())
+
+        # Optimization direction
+        self.sense = model.getObjectiveSense()
+
+    def extract_lp_features(self, path):
         # Solve LP relaxation and save it
-        self.lp_index_to_val, self.lp_obj_value = self.lp_solve()
+        self.lp_index_to_val, self.lp_obj_value = lp_solve(path)
 
-        # Create two more random solutions for crossover heuristics** Only needed for Crossover
-        self.random_index_to_val, self.random_obj_value = self.random_solve(0.80, 20)
 
-        # Return solution
-        return index_to_val, obj_value
-
-    def lp_solve(self) -> Tuple[Dict[Any, float], float]:
-
-        # Build model and variables
-        model, variables = _Instance.get_model_and_vars(path=self.path,
-                                                        is_lp_relaxation=True)
-
-        # Solve
-        model.optimize()
-        index_to_val = self.get_index_to_val(model)
-        obj_value = model.getObjVal()
-
-        # Return solution and objective
-        return index_to_val, obj_value
-
-    def random_solve(self, gap=Constants.random_gap, time=Constants.random_time) -> Tuple[Dict[Any, float], float]:
-
-        # Build model and variables
-        model, variables = _Instance.get_model_and_vars(path=self.path, gap=gap, time=time)
-
-        # Solve
-        model.optimize()
-        random_index_to_val = self.get_index_to_val(model)
-        random_obj_value = model.getObjVal()
-
-        # Reset problem
-        # TODO Why is this needed?
-        model.freeProb()
-
-        # Return solution
-        return random_index_to_val, random_obj_value
-
-    @staticmethod
-    def is_discrete(var_type) -> bool:
-        return var_type in (Constants.binary, Constants.integer)
-
-    @staticmethod
-    def is_binary(var_type) -> bool:
-        return var_type in Constants.binary
-
-    @staticmethod
-    def get_index_to_val(model) -> Dict[Any, float]:
-        return dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
-
-    @staticmethod
-    def get_model_and_vars(path, is_verbose=False, has_pre_solve=True,
-                           solution_count=None, gap=None, time=None,
-                           is_lp_relaxation=False):
-
-        # Model
-        model = scip.Model()
-
-        # Verbosity
-        if not is_verbose:
-            model.hideOutput()
-
-        # Instance
-        model.readProblem(path)
-
-        if not has_pre_solve:
-            model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
-
-        # Search only for the first incumbent
-        if solution_count == 1:
-            model.setParam("limits/bestsol", 1)
-
-        # Search only for the first incumbent
-        if gap is not None:
-            model.setParam("limits/gap", gap)
-
-        if time is not None:
-            model.setParam("limits/time", time)
-
-        # Variables
-        variables = model.getVars()
-
-        # Continuous relaxation of the problem
-        if is_lp_relaxation:
-            for var in variables:
-                model.chgVarType(var, Constants.continuous)
-
-        # Return model and vars
-        return model, variables
