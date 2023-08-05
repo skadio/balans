@@ -3,7 +3,7 @@ from balans.base_state import _State
 
 
 # (Classic Version)
-def local_branching(current: _State, rnd_state, delta) -> _State:
+def _local_branching(current: _State, rnd_state, delta) -> _State:
     #  For binary variables we have a hard constraint,
     #  here we say change at most half of them (delta=0.5).
     #  Other possible delta values are 0.25 and 0.75.
@@ -28,4 +28,4 @@ def local_branching(current: _State, rnd_state, delta) -> _State:
 
 
 def local_branching_50(current: _State, rnd_state) -> _State:
-    return local_branching(current, rnd_state, delta=0.50)
+    return _local_branching(current, rnd_state, delta=0.50)

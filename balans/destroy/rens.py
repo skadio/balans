@@ -26,4 +26,3 @@ def rens(current: _State, rnd_state) -> _State:
                   next_state.index_to_val,
                   next_state.obj_val,
                   rens_float_set=rens_float_set)
-

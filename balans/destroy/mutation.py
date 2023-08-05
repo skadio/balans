@@ -39,7 +39,7 @@ def mutation_75(current: _State, rnd_state) -> _State:
     return _mutation(current, rnd_state, delta=0.75)
 
 
-def mutation_binary(current: _State, rnd_state, delta) -> _State:
+def _mutation_binary(current: _State, rnd_state, delta) -> _State:
     # Take the BINARY variables of the original problem
     # Then, depending on delta parameter, choose a random subset of discrete variables to destroy.
     # Send the destroy set to base_instance.

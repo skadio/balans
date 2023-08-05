@@ -7,7 +7,7 @@ from .mutation import mutation_25, mutation_50, mutation_75, mutation_binary_50
 from .zero_objective import zero_objective
 from .proximity import proximity
 from .rens import rens
-from .rins import rins, rins_randomized
+from .rins import rins, rins_random_50
 
 
 class DestroyOperators(NamedTuple):
@@ -24,5 +24,5 @@ class DestroyOperators(NamedTuple):
     Proximity = proximity
     Rens = rens
     Rins = rins
-    Rins_Random = rins_randomized
+    Rins_Random = rins_random_50
     Zero_Objective = zero_objective

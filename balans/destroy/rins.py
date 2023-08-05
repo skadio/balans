@@ -31,7 +31,7 @@ def rins(current: _State, rnd_state) -> _State:
                   destroy_set=destroy_set)
 
 
-def _rins_randomized(current: _State, rnd_state, delta) -> _State:
+def _rins_random(current: _State, rnd_state, delta) -> _State:
     #  Take the LP relaxed solution of the original MIP and the current incumbent.
     #  If a DISCRETE variable x_inc = x_lp, then do not change it.
     #  Otherwise, put it to the destroy set.
@@ -63,5 +63,5 @@ def _rins_randomized(current: _State, rnd_state, delta) -> _State:
                   destroy_set=destroy_set)
 
 
-def rins_randomized(current: _State, rnd_state) -> _State:
-    return _rins_randomized(current, rnd_state, delta=0.50)
+def rins_random_50(current: _State, rnd_state) -> _State:
+    return _rins_random(current, rnd_state, delta=0.50)

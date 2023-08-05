@@ -2,7 +2,7 @@ import copy
 from balans.base_state import _State
 
 
-def dins(current: _State, rnd_state, delta) -> _State:
+def _dins(current: _State, rnd_state, delta) -> _State:
     #  Take an LP relaxed solution of the original MIP.
     #  By considering only discrete variables, forms a Set J where |x_lp -x_inc| >=   0.5
     #  For binary variables we have a hard constraint,
@@ -22,12 +22,12 @@ def dins(current: _State, rnd_state, delta) -> _State:
     print("\t discrete_indexes:", discrete_indexes)
     print("\t lp_index_to_val: ", lp_index_to_val)
 
-    # By considering only discrete variables, form a set_j where |x_lp - x_inc| >= 0.5
+    # Consider discrete variables only and form a set_j where |x_lp - x_inc| >= 0.5
     set_j = set([i for i in discrete_indexes
                  if abs(lp_index_to_val[i] - current.index_to_val[i]) >= 0.5])
 
-    # DINS for binary: Local Branching Constraint to change at most half of the binary variables
-    # <= k in local branching
+    # DINS for binary: Local branching constraint
+    # to change at most half of the binary variables <= k in local branching
     local_branching_size = int(delta * len(binary_indexes))
 
     print("\t Destroy set:", set_j)
@@ -42,14 +42,14 @@ def dins(current: _State, rnd_state, delta) -> _State:
 
 
 def dins_50(current: _State, rnd_state) -> _State:
-    return dins(current, rnd_state, delta=0.50)
+    return _dins(current, rnd_state, delta=0.50)
 
 
 def dins_75(current: _State, rnd_state) -> _State:
-    return dins(current, rnd_state, delta=0.75)
+    return _dins(current, rnd_state, delta=0.75)
 
 
-def dins_randomized(current: _State, rnd_state, delta) -> _State:
+def _dins_random(current: _State, rnd_state, delta) -> _State:
     #  Take an LP relaxed solution of the original MIP.
     #  By considering only discrete variables, forms a Set J where |x_lp -x_inc| >=   0.5
     #  For binary variables we have a hard constraint,
@@ -73,11 +73,11 @@ def dins_randomized(current: _State, rnd_state, delta) -> _State:
     set_j = set([i for i in discrete_indexes
                  if abs(lp_index_to_val[i] - current.index_to_val[i]) >= 0.5])
 
-    # Randomization STEP for set_j
+    # Randomize set_j
     fix_size = int(delta * len(set_j))
     random_set_j = set(rnd_state.choice(set_j, fix_size))
 
-    # DINS Random Binary
+    # DINS for binary: Instead of local branching, pick randomly
     dins_random_set = set(rnd_state.choice(binary_indexes, int(delta * len(binary_indexes))))
 
     print("\t Destroy set:", random_set_j)
@@ -91,10 +91,10 @@ def dins_randomized(current: _State, rnd_state, delta) -> _State:
 
 
 def dins_random_50(current: _State, rnd_state) -> _State:
-    return dins_randomized(current, rnd_state, delta=0.50)
+    return _dins_random(current, rnd_state, delta=0.50)
 
 
 def dins_random_75(current: _State, rnd_state) -> _State:
-    return dins_randomized(current, rnd_state, delta=0.75)
+    return _dins_random(current, rnd_state, delta=0.75)
 
 

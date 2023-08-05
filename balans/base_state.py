@@ -12,7 +12,7 @@ class _State:
                  index_to_val: Dict[Any, float],
                  obj_val: float,
                  destroy_set=None,
-                 dins_random_set = None,
+                 dins_random_set=None,
                  is_dins=False,
                  rens_float_set=None,
                  is_zero_obj=False,
@@ -22,6 +22,7 @@ class _State:
         self.instance = instance
         self.index_to_val = index_to_val  # index defined by SCIP var.getIndex()
         self.obj_val = obj_val
+
         self.destroy_set = destroy_set
         self.dins_random_set = dins_random_set
         self.is_dins = is_dins
@@ -43,8 +44,9 @@ class _State:
         self.is_dins = False
         self.rens_float_set = None
         self.is_zero_obj = False
-        self.is_proximity = False
         self.local_branching_size = 0
+        self.is_proximity = False
+        # TODO previous_index_to_val is not reset, is this correct?
 
     def solve_and_update(self):
         # Solve the current state with the destroyed variables and update

@@ -139,7 +139,6 @@ class _Instance:
             index_to_val = self.get_index_to_val(model)
             obj_value = model.getObjVal()
 
-
             # Update Objective for transformed objectives
             if is_proximity or is_zero_obj:
 
@@ -158,7 +157,6 @@ class _Instance:
 
                 # Update objective value
                 obj_value = model.getSolObjVal(var_to_val)
-
 
             print("\t Solve DONE!")
             print("\t index_to_val: ", index_to_val)
