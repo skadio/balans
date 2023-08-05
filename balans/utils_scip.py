@@ -6,6 +6,7 @@ from typing import Tuple, Dict, Any
 def get_model_and_vars(path, is_verbose=False, has_pre_solve=True,
                        solution_count=None, gap=None, time=None,
                        is_lp_relaxation=False):
+    # TODO need to think about what SCIP defaults to use, turn-off SCIP-ALNS
 
     # Model
     model = scip.Model()
