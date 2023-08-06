@@ -55,7 +55,7 @@ print("Best solution objective:", result.best_state.objective())
 * Rins[^5]
 [^5]: E. Danna, E. Rothberg, and C. L. Pape. Exploring relaxation induced neighborhoods to improve MIP solutions. Mathematical Programming, 2005.
 * Zero Objective[^6]
-[^5]: Zero Objective.
+[^6]: Zero Objective.
 
 ## Available Repair Operators
 * Repair MIP
