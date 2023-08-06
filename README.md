@@ -44,19 +44,18 @@ print("Best solution objective:", result.best_state.objective())
 ```
 
 ## Available Destroy Operators
-* Dins[^2] 
-[^2]: S. Ghosh. DINS, a MIP Improvement Heuristic. Integer Programming and Combinatorial Optimization: IPCO, 2007.
-* Local Branching[^3]
-[^3]: M. Fischetti and A. Lodi. Local branching. Mathematical Programming, 2003.
-* Mutation[^4]
-[^4]: Rothberg. An Evolutionary Algorithm for Polishing Mixed Integer Programming Solutions. INFORMS Journal on Computing, 2007.
-* Zero Objective[^5]
-[^5]: Zero Objective. 
-* Rens[^6]
-[^6]: Berthold. RENS–the optimal rounding. Mathematical Programming Computation, 2014.
-* Rins[^1]
-[^1]: E. Danna, E. Rothberg, and C. L. Pape. Exploring relaxation induced neighborhoods to improve MIP solutions. Mathematical Programming, 2005.
-
+* Dins[^1] 
+[^1]: S. Ghosh. DINS, a MIP Improvement Heuristic. Integer Programming and Combinatorial Optimization: IPCO, 2007.
+* Local Branching[^2]
+[^2]: M. Fischetti and A. Lodi. Local branching. Mathematical Programming, 2003.
+* Mutation[^3]
+[^3]: Rothberg. An Evolutionary Algorithm for Polishing Mixed Integer Programming Solutions. INFORMS Journal on Computing, 2007.
+* Rens[^4]
+[^4]: Berthold. RENS–the optimal rounding. Mathematical Programming Computation, 2014.
+* Rins[^5]
+[^5]: E. Danna, E. Rothberg, and C. L. Pape. Exploring relaxation induced neighborhoods to improve MIP solutions. Mathematical Programming, 2005.
+* Zero Objective[^6]
+[^5]: Zero Objective.
 
 ## Available Repair Operators
 * Repair MIP
