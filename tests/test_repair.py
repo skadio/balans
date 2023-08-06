@@ -21,7 +21,7 @@ class RepairTest(BaseTest):
     def test_repair(self):
 
         # Input
-        instance = "neos-5140963-mincio.mps.gz"
+        instance = "neos-5140963-mincio.mps"
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
 
         # Parameters

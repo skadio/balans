@@ -28,7 +28,7 @@ class IndexTest(BaseTest):
         # Testing whether we get the correct index set
 
         # Input
-        instance = "neos-5140963-mincio.mps.gz"
+        instance = "neos-5140963-mincio.mps"
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
 
         model = Model()
@@ -50,7 +50,7 @@ class IndexTest(BaseTest):
     def test_disc_index_t2(self):
         # Testing whether we get the correct index set
         # Input
-        instance = "neos-5140963-mincio.mps.gz"
+        instance = "neos-5140963-mincio.mps"
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
 
         model = Model()

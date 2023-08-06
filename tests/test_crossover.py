@@ -19,12 +19,11 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 
 
-# noinspection PyUnresolvedReferences
 class CrossoverTest(BaseTest):
 
     def test_crossover(self):
         # Input
-        instance = "noswot.mps.gz"
+        instance = "noswot.mps"
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
 
         # Parameters

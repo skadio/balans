@@ -24,7 +24,7 @@ class MutationTest(BaseTest):
 
     def test_mutation(self):
         # Input
-        instance = "noswot.mps.gz"
+        instance = "noswot.mps"
         instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
 
         # Parameters

@@ -38,7 +38,7 @@ balans = Balans(destroy_ops=[DestroyOperators.Dins,
                 stop=MaxIterations(100))
 
 # Run
-result = balans.solve("noswot.mps.gz")
+result = balans.solve("noswot.mps")
 
 # Result
 print("Best solution:", result.best_state.solution())
