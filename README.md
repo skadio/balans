@@ -11,18 +11,16 @@ The framework integrates [MABWiser](https://github.com/fidelity/mabwiser/) for c
 ## Quick Start
 
 ```python
-# Contextual multi-armed bandits
-from mabwiser.mab import LearningPolicy
-
 # Adaptive large neigborhood
 from alns.select import MABSelector
 from alns.accept import HillClimbing
 from alns.stop import MaxIterations
 
+# Contextual multi-armed bandits
+from mabwiser.mab import LearningPolicy
+
 # Meta-solver built on top of SCIP
-from balans.solver import Balans
-from balans.destroy import DestroyOperators
-from balans.repair import RepairOperators
+from balans.solver import Balans, DestroyOperators, RepairOperators
 
 # Balans
 balans = Balans(destroy_ops=[DestroyOperators.Dins, 
@@ -46,18 +44,19 @@ print("Best solution objective:", result.best_state.objective())
 ```
 
 ## Available Destroy Operators
-* Rins[^1]
-[^1]: E. Danna, E. Rothberg, and C. L. Pape. Exploring relaxation induced neighborhoods to improve MIP solutions. Mathematical Programming, 2005.
 * Dins[^2] 
 [^2]: S. Ghosh. DINS, a MIP Improvement Heuristic. Integer Programming and Combinatorial Optimization: IPCO, 2007.
 * Local Branching[^3]
 [^3]: M. Fischetti and A. Lodi. Local branching. Mathematical Programming, 2003.
 * Mutation[^4]
 [^4]: Rothberg. An Evolutionary Algorithm for Polishing Mixed Integer Programming Solutions. INFORMS Journal on Computing, 2007.
-* No Objective[^5]
+* Zero Objective[^5]
 [^5]: Zero Objective. 
 * Rens[^6]
 [^6]: Berthold. RENS–the optimal rounding. Mathematical Programming Computation, 2014.
+* Rins[^1]
+[^1]: E. Danna, E. Rothberg, and C. L. Pape. Exploring relaxation induced neighborhoods to improve MIP solutions. Mathematical Programming, 2005.
+
 
 ## Available Repair Operators
 * Repair MIP

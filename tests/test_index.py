@@ -5,9 +5,7 @@ from alns.stop import *
 from pyscipopt import Model
 import numpy as np
 
-from balans.destroy import DestroyOperators
-from balans.repair import RepairOperators
-from balans.solver import Balans
+from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 from tests.test_base import BaseTest
 from balans.base_state import _State

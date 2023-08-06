@@ -3,9 +3,7 @@ from alns.accept import *
 from alns.select import *
 from alns.stop import *
 
-from balans.destroy import DestroyOperators
-from balans.repair import RepairOperators
-from balans.solver import Balans
+from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 from tests.test_base import BaseTest
 
