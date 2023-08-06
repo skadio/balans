@@ -86,14 +86,6 @@ $ cd balans
 $ python -m unittest discover tests
 ```
 
-## Changelog
-
-| Date | Notes |
-|--------|-------------|
-| July 7, 2023 | Initial release |
-
-
-
 ## License
 
 Balans is licensed under the [Apache License 2.0](LICENSE).
