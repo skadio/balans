@@ -1,4 +1,6 @@
 import os
+import itertools
+
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
@@ -33,7 +35,7 @@ class SolverTest(BaseTest):
                        DestroyOperators.Zero_Objective,
                        DestroyOperators.Rins,
                        DestroyOperators.Rens,
-                       DestroyOperators.Crossover3]
+                       DestroyOperators.Crossover]
 
         repair_ops = [RepairOperators.Repair]
 
@@ -66,7 +68,7 @@ class SolverTest(BaseTest):
                        DestroyOperators.Zero_Objective,
                        DestroyOperators.Rins,
                        DestroyOperators.Rens,
-                       DestroyOperators.Crossover3]
+                       DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
@@ -100,7 +102,7 @@ class SolverTest(BaseTest):
                        DestroyOperators.Zero_Objective,
                        DestroyOperators.Rins,
                        DestroyOperators.Rens,
-                       DestroyOperators.Crossover3]
+                       DestroyOperators.Crossover]
 
         instance = _Instance(instance_path)
 
@@ -145,7 +147,7 @@ class SolverTest(BaseTest):
                        DestroyOperators.Zero_Objective,
                        DestroyOperators.Rins,
                        DestroyOperators.Rens,
-                       DestroyOperators.Crossover3]
+                       DestroyOperators.Crossover]
 
         instance = _Instance(instance_path)
 
@@ -197,7 +199,7 @@ class SolverTest(BaseTest):
                        DestroyOperators.Zero_Objective,
                        DestroyOperators.Rins,
                        DestroyOperators.Rens,
-                       DestroyOperators.Crossover3]
+                       DestroyOperators.Crossover]
 
         instance = _Instance(instance_path)
 
@@ -241,7 +243,7 @@ class SolverTest(BaseTest):
                        DestroyOperators.Zero_Objective,
                        DestroyOperators.Rins,
                        DestroyOperators.Rens,
-                       DestroyOperators.Crossover3]
+                       DestroyOperators.Crossover]
 
         repair_ops = [RepairOperators.Repair]
 
@@ -259,3 +261,83 @@ class SolverTest(BaseTest):
         print("Best solution:", result.best_state.objective())
 
         self.assertEqual(result.best_state.objective(), 4)
+
+    def test_balans_t7(self):
+        # Input
+        instance = "test2.5.cip"
+        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+
+        # Parameters
+        seed = 123456
+        destroy_ops = [DestroyOperators.Rins,
+                       DestroyOperators.Local_Branching]
+
+        repair_ops = [RepairOperators.Repair]
+
+        # for destroy_op in destroy_ops:
+        if repair_ops:
+
+            initial_index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
+
+            selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
+                                   learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
+            accept = RandomWalk()
+            stop = MaxIterations(1)
+            seed = 123456
+            balans = Balans([DestroyOperators.Rins], repair_ops, selector, accept, stop, seed)
+            # Run
+            result = balans.solve(instance_path, initial_index_to_val)
+            # Retrieve the final solution
+            best_state = result.best_state
+
+            print("Best solution first loop:", result.best_state.solution())
+
+            best_sol_init = result.best_state.solution()
+
+            couple_ops = [DestroyOperators.Mutation2]
+
+            # Given best_sol_init run one iteration with other op
+            for second_op in destroy_ops:
+                if not second_op == DestroyOperators.Mutation2:
+                    couple_ops.append(second_op)
+
+                    # Selector
+                    selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
+                                           learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
+                    accept = RandomWalk()
+                    stop = MaxIterations(1)
+                    seed = 123456
+                    # Solver
+                    balans = Balans([DestroyOperators.Local_Branching], repair_ops, selector, accept, stop, seed)
+                    initial_index_to_val = best_sol_init
+                    print("initial index to val:", initial_index_to_val)
+
+                    # Run
+                    result = balans.solve(instance_path, initial_index_to_val)
+
+                    # Retrieve the final solution
+                    best_state = result.best_state
+                    best_solution = best_state.solution()
+
+                    print("Best solution second loop:", result.best_state.solution())
+
+                    accept = RandomWalk()
+                    stop = MaxIterations(2)
+                    couple_ops = [DestroyOperators.Rins, DestroyOperators.Local_Branching]
+
+                    selector = RandomSelect(num_destroy=2, num_repair=1)
+                    # Solver
+                    balans = Balans(couple_ops, repair_ops, selector, accept, stop, seed)
+                    # Run
+                    initial_index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
+
+                    result2 = balans.solve(instance_path, initial_index_to_val)
+                    # Retrieve the final solution
+                    best_state2 = result2.best_state
+                    best_objective2 = best_state2.objective()
+                    best_solution2 = best_state2.solution()
+
+                    print("Best solution final:", result2.best_state.solution())
+                    print("Best solution final value:", result2.best_state.objective())
+
+                    self.assertDictEqual(best_solution2, best_solution)

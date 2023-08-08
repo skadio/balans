@@ -23,7 +23,6 @@ class _State:
                  previous_index_to_val=None,
                  local_branching_size=0,
                  is_proximity=None):
-
         # State holds an instance and its solution and objective
         # Instance holds features and the solve() logic dictated by operators
         self.instance = instance
@@ -55,8 +54,6 @@ class _State:
         self.is_zero_obj = False
         self.local_branching_size = 0
         self.is_proximity = False
-        # TODO previous_index_to_val is not reset, is this correct?
-        # TODO anything to clean up after random solves?
 
     def solve_and_update(self):
         # Solve the current state with the destroyed variables and update

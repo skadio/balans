@@ -23,7 +23,6 @@ class _Instance:
         self.lp_index_to_val = None
         self.lp_obj_value = None
 
-        # TODO how come these are static?
         self.random_index_to_val = None  # static, second random solution
         self.random_obj_value = None  # static, second random solution
 
@@ -113,11 +112,9 @@ class _Instance:
             if is_proximity or is_zero_obj:
 
                 # Build model and variables
-                # TODO why build again?
                 model, variables = get_model_and_vars(path=self.path)
 
                 # Solution of transformed problem
-                # TODO do we have unit test to test this solution switch?
                 var_to_val = model.createSol()
                 for i in range(model.getNVars()):
                     var_to_val[variables[i]] = index_to_val[i]
@@ -150,14 +147,12 @@ class _Instance:
         obj_value = model.getObjVal()
 
         # Reset problem
-        # TODO Why is this needed?
         model.freeProb()
 
         self.extract_lp_features(self.path)
 
         # Create two more random solutions for crossover heuristics**
         # Only needed for Crossover
-        # TODO Not sure about creating random with fixed gap (same BnB tree each time!)
         self.random_index_to_val, self.random_obj_value = random_solve(path=self.path, gap=0.80, time=20)
 
         # Return solution

@@ -13,7 +13,7 @@ from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterio
 
 from balans.base_instance import _Instance
 from balans.base_state import _State
-from balans.destroy.crossover import crossover, crossover2, crossover3
+from balans.destroy.crossover import crossover1, crossover2, crossover
 from balans.destroy.dins import dins_50, dins_random_50
 from balans.destroy.local_branching import local_branching_50
 from balans.destroy.mutation import mutation_25, mutation_50, mutation_75, mutation_binary_50
@@ -26,9 +26,9 @@ from balans.utils import Constants, check_false, check_true, create_rng
 
 
 class DestroyOperators(NamedTuple):
-    Crossover = crossover
+    Crossover1 = crossover1
     Crossover2 = crossover2
-    Crossover3 = crossover3
+    Crossover = crossover
     Dins = dins_50
     Dins_Random = dins_random_50
     Local_Branching = local_branching_50
@@ -49,6 +49,8 @@ class RepairOperators(NamedTuple):
 
 # Type Declarations
 DestroyType = (type(DestroyOperators.Crossover),
+               type(DestroyOperators.Crossover1),
+               type(DestroyOperators.Crossover2),
                type(DestroyOperators.Dins),
                type(DestroyOperators.Dins_Random),
                type(DestroyOperators.Local_Branching),

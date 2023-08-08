@@ -20,8 +20,6 @@ def _dins(current: _State, rnd_state, delta) -> _State:
     binary_indexes = current.instance.binary_indexes
     lp_index_to_val = current.instance.lp_index_to_val
 
-    print("\t discrete_indexes:", discrete_indexes)
-    print("\t lp_index_to_val: ", lp_index_to_val)
 
     # Consider discrete variables only and form a set_j where |x_lp - x_inc| >= 0.5
     set_j = set([i for i in discrete_indexes
@@ -32,7 +30,6 @@ def _dins(current: _State, rnd_state, delta) -> _State:
     local_branching_size = int(delta * len(binary_indexes))
 
     print("\t Destroy set:", set_j)
-    print("\t DINS Binary size:", local_branching_size)
 
     return _State(next_state.instance,
                   next_state.index_to_val,

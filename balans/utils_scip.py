@@ -8,7 +8,6 @@ from balans.utils import Constants
 def get_model_and_vars(path, is_verbose=False, has_pre_solve=True,
                        solution_count=None, gap=None, time=None,
                        is_lp_relaxation=False):
-    # TODO need to think about what SCIP defaults to use, turn-off SCIP-ALNS?
 
     # Model
     model = scip.Model()
@@ -27,9 +26,10 @@ def get_model_and_vars(path, is_verbose=False, has_pre_solve=True,
     if solution_count == 1:
         model.setParam("limits/bestsol", 1)
 
-    # Search only for the first incumbent
+    # Set random solution gap and randomize the branching setting by "random seed shift" .
     if gap is not None:
         model.setParam("limits/gap", gap)
+        model.setParam("randomization/randomseedshift", int(gap*100))
 
     if time is not None:
         model.setParam("limits/time", time)

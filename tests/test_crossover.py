@@ -26,7 +26,7 @@ class CrossoverTest(BaseTest):
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -51,7 +51,7 @@ class CrossoverTest(BaseTest):
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -76,7 +76,7 @@ class CrossoverTest(BaseTest):
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
@@ -104,7 +104,7 @@ class CrossoverTest(BaseTest):
         # Parameters
         seed = 123456
 
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
@@ -123,7 +123,7 @@ class CrossoverTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Crossover3)
+        alns.add_destroy_operator(DestroyOperators.Crossover)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -147,7 +147,7 @@ class CrossoverTest(BaseTest):
         # Parameters
         seed = 123456
 
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
@@ -166,7 +166,7 @@ class CrossoverTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Crossover3)
+        alns.add_destroy_operator(DestroyOperators.Crossover)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -192,7 +192,7 @@ class CrossoverTest(BaseTest):
 
         # Parameters
         seed = 123456
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
