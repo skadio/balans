@@ -13,7 +13,7 @@ def proximity(current: _State, rnd_state) -> _State:
     # Drop all other variables by making their coefficient 0.
     # Send the destroy set to base_instance.
     # Note : the required objective operations for proximity search happens in base_instance file.
-
+    print("\t Selected Operator: ", "proximity search")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()

@@ -124,7 +124,7 @@ class _Instance:
 
             print("\t Solve DONE!", obj_value)
             print("\t index_to_val: ", index_to_val)
-
+            print("\n")
             return index_to_val, obj_value
 
     def initial_solve(self, index_to_val) -> Tuple[Dict[Any, float], float]:
