@@ -13,20 +13,17 @@ from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
 
-TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
-
 
 class CrossoverTest(BaseTest):
 
     def test_crossover(self):
         # Input
         instance = "noswot.mps"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_MIP, instance)
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -47,11 +44,11 @@ class CrossoverTest(BaseTest):
     def test_crossover_t1(self):
         # Input
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -72,11 +69,11 @@ class CrossoverTest(BaseTest):
     def test_crossover_t2(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
@@ -99,12 +96,12 @@ class CrossoverTest(BaseTest):
     def test_crossover_t3(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
 
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
@@ -123,7 +120,7 @@ class CrossoverTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Crossover3)
+        alns.add_destroy_operator(DestroyOperators.Crossover)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -142,12 +139,12 @@ class CrossoverTest(BaseTest):
     def test_crossover_t4(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
 
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
@@ -166,7 +163,7 @@ class CrossoverTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Crossover3)
+        alns.add_destroy_operator(DestroyOperators.Crossover)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -188,11 +185,11 @@ class CrossoverTest(BaseTest):
     def test_crossover_t4_with_warm_start(self):
         # Input
         instance = "test2.5.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
-        destroy_ops = [DestroyOperators.Crossover3]
+        destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))

@@ -13,16 +13,13 @@ from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
 
-TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
-
 
 class LocalBranchingTest(BaseTest):
 
     def test_local_branching_t1(self):
         # Input
         instance = "test5.13.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -57,7 +54,7 @@ class LocalBranchingTest(BaseTest):
     def test_local_branching_classic_t2(self):
         # Input
         instance = "test5.13.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
         print(instance_path)
 
         # Parameters
@@ -93,7 +90,7 @@ class LocalBranchingTest(BaseTest):
     def test_local_branching_v2_t3(self):
         # Input
         instance = "test5.13.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456

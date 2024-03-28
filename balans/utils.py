@@ -26,15 +26,22 @@ class Constants(NamedTuple):
     var_lb = "var_lb"
     var_ub = "var_ub"
 
-    # Data folder name
-    DATA_DIR = "data"
-    DATA_DIR_MIP = DATA_DIR + os.sep + "miplib"
-    TEST_DIR = "tests"
-    DATA_DIR_TOY = TEST_DIR + os.sep + "data"
+    # Data folder constants
+    _DATA_DIR_NAME = "data"
+    _DATA_DIR_MIP_NAME = _DATA_DIR_NAME + os.sep + "miplib"
+    _DATA_DIR_MIPGZ_NAME = _DATA_DIR_NAME + os.sep + "miplib_gz"
+    _TEST_DIR_NAME = "tests"
+    _DATA_DIR_TOY_NAME = _TEST_DIR_NAME + os.sep + "toy"
+
+    # Data paths
+    _FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_MIP = _FILE_DIR + os.sep + ".." + os.sep + _DATA_DIR_MIP_NAME
+    DATA_MIP_GZ = _FILE_DIR + os.sep + ".." + os.sep + _DATA_DIR_MIPGZ_NAME
+    DATA_TOY = _FILE_DIR + os.sep + ".." + os.sep + _DATA_DIR_TOY_NAME
 
     # Random solution stopping criteria
-    random_gap = 0.80
-    random_time = 30
+    random_gap_ub1 = 0.95
+    random_gap_ub2 = 0.90
 
 
 def create_rng(seed):

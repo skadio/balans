@@ -13,7 +13,7 @@ from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterio
 
 from balans.base_instance import _Instance
 from balans.base_state import _State
-from balans.destroy.crossover import crossover, crossover2, crossover3
+from balans.destroy.crossover import crossover
 from balans.destroy.dins import dins_50, dins_random_50
 from balans.destroy.local_branching import local_branching_50
 from balans.destroy.mutation import mutation_25, mutation_50, mutation_75, mutation_binary_50
@@ -27,8 +27,6 @@ from balans.utils import Constants, check_false, check_true, create_rng
 
 class DestroyOperators(NamedTuple):
     Crossover = crossover
-    Crossover2 = crossover2
-    Crossover3 = crossover3
     Dins = dins_50
     Dins_Random = dins_random_50
     Local_Branching = local_branching_50
@@ -112,10 +110,10 @@ class Balans:
 
         # RNG
         self._rng = create_rng(self.seed)
+        self.alns_seed = self._rng.randint(0, self.seed)
 
         # ALNS
-        alns_seed = self._rng.randint(0, self.seed)
-        self.alns = ALNS(np.random.RandomState(alns_seed))
+        self.alns = ALNS(np.random.RandomState(self.alns_seed))
         for op in destroy_ops:
             self.alns.add_destroy_operator(op)
         for op in repair_ops:
@@ -209,3 +207,64 @@ class Balans:
         # if time is not None:
         #     check_true(isinstance(time, int), TypeError("Time must be an integer." + str(time)))
         #     check_true(time >= 0, ValueError("Time must be non-negative" + str(gap)))
+
+
+
+# class DestroyOperators(NamedTuple):
+#     class Crossover(NamedTuple):
+#         """Crossover Operator
+#         This operator..
+#         """
+#         pass
+#
+#     class Dins(NamedTuple):
+#         """ DINS Operator
+#         This operator ..
+#
+#         is_random: bool
+#             Whether the destroy is random
+#
+#         delta: Num
+#            If int, represents the number of variables to destroy
+#            If float, represents the percentage of variables to destroy (0.0, 1.0]
+#         """
+#         is_random: bool = False
+#         delta: Num = 0.25
+#
+#         def _validate(self):
+#             check_true(isinstance(self.is_random, bool), TypeError("Is_random must be an boolean."))
+#             check_true(isinstance(self.delta, (int, float)), TypeError("Delta must be an integer or float."))
+#             check_true(0 <= self.delta, ValueError("Delta must be between positive."))
+#
+#     class LocalBranching(NamedTuple):
+#         """ Local Branching Operator
+#         This operator ..
+#
+#         delta: Num
+#            If int, represents the number of variables to destroy
+#            If float, represents the percentage of variables to destroy (0.0, 1.0]
+#         """
+#         delta: Num = 0.25
+#
+#         def _validate(self):
+#             check_true(isinstance(self.delta, (int, float)), TypeError("Delta must be an integer or float."))
+#             check_true(0 <= self.delta, ValueError("Delta must be between positive."))
+#
+#         class Mutation(NamedTuple):
+#             """ Mutation Operator
+#             This operator ..
+#
+#             is_binary: bool
+#                 Whether the destroy operates on binary variables only
+#
+#             delta: Num
+#                If int, represents the number of variables to destroy
+#                If float, represents the percentage of variables to destroy (0.0, 1.0]
+#             """
+#             is_binary: bool = False
+#             delta: Num = 0.25
+#
+#             def _validate(self):
+#                 check_true(isinstance(self.is_binary, bool), TypeError("Is_binary must be an boolean."))
+#                 check_true(isinstance(self.delta, (int, float)), TypeError("Delta must be an integer or float."))
+#                 check_true(0 <= self.delta, ValueError("Delta must be between positive."))

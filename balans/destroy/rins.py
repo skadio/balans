@@ -1,6 +1,5 @@
 import copy
-
-import numpy as np
+import math
 
 from balans.base_state import _State
 
@@ -11,7 +10,7 @@ def rins(current: _State, rnd_state) -> _State:
     #  Otherwise, put it to the destroy set.
     #  Send the destroy set to base_instance.
 
-    print("\t Selected Operator: ", "rins")
+    print("*** Operator: ", "RINS")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
@@ -22,7 +21,7 @@ def rins(current: _State, rnd_state) -> _State:
 
     #  If a variable x_inc = x_lp, do not change it.
     indexes_with_same_value = [i for i in discrete_indexes if
-                               np.isclose(lp_index_to_val[i], next_state.index_to_val[i])]
+                               math.isclose(lp_index_to_val[i], next_state.index_to_val[i])]
 
     # Else potentially change it
     destroy_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
@@ -39,7 +38,7 @@ def _rins_random(current: _State, rnd_state, delta) -> _State:
     #  If a DISCRETE variable x_inc = x_lp, then do not change it.
     #  Otherwise, put it to the destroy set.
     #  Send the destroy set to base_instance.
-
+    print("*** Operator: ", "RINS RANDOM")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
@@ -50,7 +49,7 @@ def _rins_random(current: _State, rnd_state, delta) -> _State:
 
     #  If a variable x_inc = x_lp, do not change it.
     indexes_with_same_value = [i for i in discrete_indexes if
-                               np.isclose(lp_index_to_val[i], next_state.index_to_val[i])]
+                               math.isclose(lp_index_to_val[i], next_state.index_to_val[i])]
 
     # Randomization STEP
     fix_size = int(delta * len(indexes_with_same_value))

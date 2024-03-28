@@ -3,7 +3,7 @@ from typing import Tuple, Dict, Any
 
 from pyscipopt import quicksum
 
-from balans.utils_scip import get_model_and_vars, random_solve, get_index_to_val
+from balans.utils_scip import get_model_and_vars, get_index_to_val_and_objective
 from balans.utils_scip import lp_solve, is_binary, is_discrete, split_binary_vars
 
 
@@ -23,16 +23,11 @@ class _Instance:
         self.lp_index_to_val = None
         self.lp_obj_value = None
 
-        # TODO how come these are static?
-        self.random_index_to_val = None  # static, second random solution
-        self.random_obj_value = None  # static, second random solution
-
     def solve(self,
               is_initial_solve=False,
               index_to_val=None,
               destroy_set=None,
               dins_random_set=None,
-              is_dins=False,
               rens_float_set=None,
               is_zero_obj=False,
               local_branching_size=0,
@@ -57,8 +52,9 @@ class _Instance:
                             # model.addCons(constraint)
                             model.addCons(var == index_to_val[var.getIndex()])
                         else:
-                            # IF in destroy, and DINS is active, don't fix but add bounding constraint
-                            if is_dins or dins_random_set:
+                            # IF in destroy, and DINS is active, don't fix the destroy var
+                            # but add bounding constraint around initial lp solution
+                            if dins_random_set:
                                 index = var.getIndex()
                                 current_lp_diff = abs(index_to_val[index] - self.lp_index_to_val[index])
                                 model.addCons(abs(var - self.lp_index_to_val[index]) <= current_lp_diff)
@@ -106,14 +102,13 @@ class _Instance:
 
             # Solve
             model.optimize()
-            index_to_val = get_index_to_val(model)
-            obj_value = model.getObjVal()
+            index_to_val, obj_value = get_index_to_val_and_objective(model)
 
-            # Update Objective for transformed objectives
+            # Need to find the original obj value for transformed objectives
             if is_proximity or is_zero_obj:
 
                 # Build model and variables
-                # TODO why build again?
+                # This resets the objective back to original
                 model, variables = get_model_and_vars(path=self.path)
 
                 # Solution of transformed problem
@@ -122,7 +117,8 @@ class _Instance:
                 for i in range(model.getNVars()):
                     var_to_val[variables[i]] = index_to_val[i]
 
-                # Update objective value
+                # Objective value of the solution found in transformed
+                print("\t Transformed obj: ", obj_value)
                 obj_value = model.getSolObjVal(var_to_val)
 
             print("\t Solve DONE!", obj_value)
@@ -146,19 +142,12 @@ class _Instance:
 
         # Solve
         model.optimize()
-        index_to_val = get_index_to_val(model)
-        obj_value = model.getObjVal()
+        index_to_val, obj_value = get_index_to_val_and_objective(model)
 
         # Reset problem
-        # TODO Why is this needed?
         model.freeProb()
 
         self.extract_lp_features(self.path)
-
-        # Create two more random solutions for crossover heuristics**
-        # Only needed for Crossover
-        # TODO Not sure about creating random with fixed gap (same BnB tree each time!)
-        self.random_index_to_val, self.random_obj_value = random_solve(path=self.path, gap=0.80, time=20)
 
         # Return solution
         return index_to_val, obj_value
@@ -183,5 +172,3 @@ class _Instance:
     def extract_lp_features(self, path):
         # Solve LP relaxation and save it
         self.lp_index_to_val, self.lp_obj_value = lp_solve(path)
-
-

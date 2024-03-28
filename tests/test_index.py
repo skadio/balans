@@ -13,8 +13,6 @@ from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
 
-TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
 SEED = 42
 np.random.seed(SEED)
 rnd_state = np.random.RandomState(SEED)
@@ -27,7 +25,7 @@ class IndexTest(BaseTest):
 
         # Input
         instance = "neos-5140963-mincio.mps"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_MIP, instance)
 
         model = Model()
         model.hideOutput()
@@ -49,7 +47,7 @@ class IndexTest(BaseTest):
         # Testing whether we get the correct index set
         # Input
         instance = "neos-5140963-mincio.mps"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_MIP, instance)
 
         model = Model()
         model.hideOutput()
@@ -71,7 +69,7 @@ class IndexTest(BaseTest):
         # Testing whether we get the correct index set
         # Input
         instance = "model2.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -91,7 +89,7 @@ class IndexTest(BaseTest):
         # Testing whether we get the correct index set
         # Input
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
@@ -112,7 +110,7 @@ class IndexTest(BaseTest):
 
         # Input
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456

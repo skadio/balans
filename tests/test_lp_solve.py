@@ -3,9 +3,6 @@ from balans.utils import Constants
 from tests.test_base import BaseTest
 from balans.utils_scip import lp_solve
 
-TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
-
 
 class LPSolTest(BaseTest):
 
@@ -14,7 +11,7 @@ class LPSolTest(BaseTest):
 
         # 3 DISCRETE DECISION VARIABLES > model.cip
         instance = "model.cip"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # LP solution
         lp_index_to_val, lp_obj_val = lp_solve(instance_path)
@@ -28,7 +25,7 @@ class LPSolTest(BaseTest):
 
         # 3 DISCRETE DECISION VARIABLES > model.cip
         instance = "10teams.mps"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_MIP, instance)
 
         # LP solution
         lp_index_to_val, lp_obj_val = lp_solve(instance_path)
@@ -40,7 +37,7 @@ class LPSolTest(BaseTest):
 
         # 3 DISCRETE DECISION VARIABLES > model.cip
         instance = "30n20b8.mps"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_MIP, instance)
 
         # LP solution
         lp_index_to_val, lp_obj_val = lp_solve(instance_path)

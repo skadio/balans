@@ -11,7 +11,7 @@ def _dins(current: _State, rnd_state, delta) -> _State:
     #  If a variable is inside the Set J, it is part of the destroy set.
     #  Send the destroy set (Set J) and dins_set to base_instance.
 
-    print("\t Selected Operator: ", "dins")
+    print("\t Selected Operator: ", "DINS")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
@@ -39,7 +39,6 @@ def _dins(current: _State, rnd_state, delta) -> _State:
                   next_state.index_to_val,
                   next_state.obj_val,
                   destroy_set=set_j,
-                  is_dins=True,
                   local_branching_size=local_branching_size)
 
 
@@ -58,7 +57,7 @@ def _dins_random(current: _State, rnd_state, delta) -> _State:
     #  here we say change at most half of them.
     #  If a variable is inside the Set J, it is part of the destroy set.
     #  Send the destroy set (Set J) and dins_set to base_instance.
-
+    print("*** Operator: ", "DINS RANDOM")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()

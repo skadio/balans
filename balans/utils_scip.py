@@ -1,14 +1,16 @@
 from typing import Tuple, Dict, Any
 
+import math
+
 import pyscipopt as scip
 
 from balans.utils import Constants
 
 
-def get_model_and_vars(path, is_verbose=False, has_pre_solve=True,
+def get_model_and_vars(path, is_verbose=False, has_pre_solve=True, scip_seed=-1,
                        solution_count=None, gap=None, time=None,
                        is_lp_relaxation=False):
-    # TODO need to think about what SCIP defaults to use, turn-off SCIP-ALNS?
+    # TODO need to think about what SCIP defaults to use, turn-off SCIP-ALNS? when benchmarking
 
     # Model
     model = scip.Model()
@@ -19,6 +21,9 @@ def get_model_and_vars(path, is_verbose=False, has_pre_solve=True,
 
     # Instance
     model.readProblem(path)
+
+    if not scip_seed == -1:
+        model.setParam("randomization/randomseedshift", scip_seed)
 
     if not has_pre_solve:
         model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
@@ -53,25 +58,25 @@ def lp_solve(path) -> Tuple[Dict[Any, float], float]:
 
     # Solve
     model.optimize()
-    index_to_val = get_index_to_val(model)
-    obj_value = model.getObjVal()
+    index_to_val, obj_value = get_index_to_val_and_objective(model)
+
+    # Reset problem
+    model.freeProb()
 
     # Return solution and objective
     return index_to_val, obj_value
 
 
-def random_solve(path, gap=Constants.random_gap, time=Constants.random_time) -> Tuple[Dict[Any, float], float]:
+def random_solve(path, scip_seed=-1, gap=None) -> Tuple[Dict[Any, float], float]:
 
     # Build model and variables
-    model, variables = get_model_and_vars(path, gap=gap, time=time)
+    model, variables = get_model_and_vars(path, scip_seed=scip_seed, gap=gap)
 
     # Solve
     model.optimize()
-    random_index_to_val = get_index_to_val(model)
-    random_obj_value = model.getObjVal()
+    random_index_to_val, random_obj_value = get_index_to_val_and_objective(model)
 
     # Reset problem
-    # TODO Why is this needed?
     model.freeProb()
 
     # Return solution
@@ -86,8 +91,10 @@ def is_binary(var_type) -> bool:
     return var_type in Constants.binary
 
 
-def get_index_to_val(model) -> Dict[Any, float]:
-    return dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
+def get_index_to_val_and_objective(model) -> Tuple[Dict[Any, float], float]:
+    index_to_val = dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
+    obj_value = model.getObjVal()
+    return index_to_val, obj_value
 
 
 def split_binary_vars(variables, binary_indexes, index_to_val):
@@ -95,7 +102,7 @@ def split_binary_vars(variables, binary_indexes, index_to_val):
     one_binary_vars = []
     for var in variables:
         if var.getIndex() in binary_indexes:
-            if index_to_val[var.getIndex()] == 0:
+            if math.isclose(index_to_val[var.getIndex()], 0.0):
                 zero_binary_vars.append(var)
             else:
                 one_binary_vars.append(var)

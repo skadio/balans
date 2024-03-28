@@ -3,12 +3,11 @@ from typing import Any, Dict
 from balans.base_instance import _Instance
 
 
-# noinspection GrazieInspection
 class _State:
     """
     State of an instance with its solution and objective
-    Operators sets the solve settings of the state
-    State calls instance.solve() with settings dictated by the operators
+    First, operators sets the solve settings of the state object
+    Then, state calls instance.solve() with settings dictated by the operators
     """
 
     def __init__(self,
@@ -17,7 +16,6 @@ class _State:
                  obj_val: float,
                  destroy_set=None,
                  dins_random_set=None,
-                 is_dins=False,
                  rens_float_set=None,
                  is_zero_obj=False,
                  previous_index_to_val=None,
@@ -34,7 +32,6 @@ class _State:
         # and passes to instance.solve() and updates its solution and objective
         self.destroy_set = destroy_set
         self.dins_random_set = dins_random_set
-        self.is_dins = is_dins
         self.rens_float_set = rens_float_set
         self.is_zero_obj = is_zero_obj
         self.previous_index_to_val = previous_index_to_val
@@ -50,13 +47,10 @@ class _State:
     def reset_solve_settings(self):
         self.destroy_set = None
         self.dins_random_set = None
-        self.is_dins = False
         self.rens_float_set = None
         self.is_zero_obj = False
         self.local_branching_size = 0
         self.is_proximity = False
-        # TODO previous_index_to_val is not reset, is this correct?
-        # TODO anything to clean up after random solves?
 
     def solve_and_update(self):
         # Solve the current state with the destroyed variables and update
@@ -64,7 +58,6 @@ class _State:
                                                               index_to_val=self.index_to_val,
                                                               destroy_set=self.destroy_set,
                                                               dins_random_set=self.dins_random_set,
-                                                              is_dins=self.is_dins,
                                                               rens_float_set=self.rens_float_set,
                                                               is_zero_obj=self.is_zero_obj,
                                                               local_branching_size=self.local_branching_size,

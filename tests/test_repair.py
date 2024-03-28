@@ -10,17 +10,13 @@ from tests.test_base import BaseTest
 from mabwiser.mab import LearningPolicy
 
 
-TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = TEST_DIR + os.sep + ".." + os.sep
-
-
 class RepairTest(BaseTest):
 
     def test_repair(self):
 
         # Input
         instance = "neos-5140963-mincio.mps"
-        instance_path = os.path.join(ROOT_DIR, Constants.DATA_DIR_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_MIP, instance)
 
         # Parameters
         seed = 123456
