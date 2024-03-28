@@ -10,6 +10,7 @@ def rens(current: _State, rnd_state) -> _State:
     #  Send the destroy set (None for the rens case) and
     #  rens_float_set to base_instance.
 
+    print("\t Selected Operator: ", "rens")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()

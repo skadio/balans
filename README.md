@@ -23,14 +23,16 @@ from mabwiser.mab import LearningPolicy
 from balans.solver import Balans, DestroyOperators, RepairOperators
 
 # Balans
-balans = Balans(destroy_ops=[DestroyOperators.Dins, 
+balans = Balans(destroy_ops=[DestroyOperators.Crossover,
+                             DestroyOperators.Dins, 
                              DestroyOperators.Mutation, 
                              DestroyOperators.Local_Branching,
+                             DestroyOperators.Proximity,
                              DestroyOperators.Rens, 
                              DestroyOperators.Rins,
                              DestroyOperators.Zero_Objective],
                 repair_ops=[RepairOperators.Repair],
-                selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=6, num_repair=1,
+                selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=8, num_repair=1,
                                      learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15)),
                 accept=HillClimbing(),
                 stop=MaxIterations(100))
@@ -56,6 +58,10 @@ print("Best solution objective:", result.best_state.objective())
 [^5]: E. Danna, E. Rothberg, and C. L. Pape. Exploring relaxation induced neighborhoods to improve MIP solutions. Mathematical Programming, 2005.
 * Zero Objective[^6]
 [^6]: Zero Objective.
+* Proximity Search[^7]
+[^7]: M. Fischetti and M. Monaci. Proximity search for 0-1 mixed-integer convex programming. Journal of Heuristics, 20(6):709–731, Dec 2014.
+* Crossover[^8]
+[^8]: E. Rothberg. An Evolutionary Algorithm for Polishing Mixed Integer Programming Solutions. INFORMS Journal on Computing, 19(4):534–541, 2007.
 
 ## Available Repair Operators
 * Repair MIP

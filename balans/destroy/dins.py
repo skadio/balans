@@ -11,6 +11,7 @@ def _dins(current: _State, rnd_state, delta) -> _State:
     #  If a variable is inside the Set J, it is part of the destroy set.
     #  Send the destroy set (Set J) and dins_set to base_instance.
 
+    print("\t Selected Operator: ", "dins")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
