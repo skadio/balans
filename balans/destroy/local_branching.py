@@ -10,6 +10,7 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
     #  Send the destroy set to base_instance.
     #  Note: These indexes are determined by the solver in this implementation.
     # Please see the base_instance is_local_branching part. Operations are implemented inside that.
+
     print("\t Selected Operator: ", "local branching")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)

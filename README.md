@@ -23,9 +23,11 @@ from mabwiser.mab import LearningPolicy
 from balans.solver import Balans, DestroyOperators, RepairOperators
 
 # Balans
-balans = Balans(destroy_ops=[DestroyOperators.Dins, 
+balans = Balans(destroy_ops=[DestroyOperators.Crossover,
+                             DestroyOperators.Dins, 
                              DestroyOperators.Mutation, 
                              DestroyOperators.Local_Branching,
+                             DestroyOperators.Proximity,
                              DestroyOperators.Rens, 
                              DestroyOperators.Rins,
                              DestroyOperators.Crossover,
@@ -59,10 +61,10 @@ print("Best solution objective:", result.best_state.objective())
 * Zero Objective[^6]
 [^6]: Zero Objective.
 * Proximity Search[^7]
-[^7]: M. Fischetti and M. Monaci. Proximity search for 0-1 mixed-integer convex
-programming. Journal of Heuristics, 20(6):709–731, Dec 2014.
+[^7]: M. Fischetti and M. Monaci. Proximity search for 0-1 mixed-integer convex programming. Journal of Heuristics, 20(6):709–731, Dec 2014.
 * Crossover[^8]
-[^8]: E. Rothberg. An Evolutionary Algorithm for Polishing Mixed Integer Programming Solutions. INFORMS Journal on Computing, 19(4):534–541, 2007.
+[^8]: E. Rothberg. An Evolutionary Algorithm for Polishing Mixed Integer Programming Solutions. INFORMS Journal on Computing, 19(4):534–541, 2007.
+
 ## Available Repair Operators
 * Repair MIP
 

@@ -11,6 +11,7 @@ def rins(current: _State, rnd_state) -> _State:
     #  Otherwise, put it to the destroy set.
     #  Send the destroy set to base_instance.
 
+    print("\t Selected Operator: ", "rins")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
