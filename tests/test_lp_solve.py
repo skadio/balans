@@ -16,7 +16,7 @@ class LPSolTest(BaseTest):
         # LP solution
         lp_index_to_val, lp_obj_val = lp_solve(instance_path)
 
-        self.assertAlmostEquals(lp_obj_val, 2.666666666666667)
+        self.assertAlmostEqual(lp_obj_val, 2.666666666666667)
 
         self.assertAlmostEqual(lp_obj_val, 2.666666666666667)
 

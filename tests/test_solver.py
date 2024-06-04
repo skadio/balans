@@ -276,7 +276,7 @@ class SolverTest(BaseTest):
 
             selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                    learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
-            accept = RandomWalk()
+            accept = AlwaysAccept()
             stop = MaxIterations(1)
             seed = 123456
             balans = Balans([DestroyOperators.Rins], repair_ops, selector, accept, stop, seed)
@@ -299,7 +299,7 @@ class SolverTest(BaseTest):
                     # Selector
                     selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                            learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
-                    accept = RandomWalk()
+                    accept = AlwaysAccept()
                     stop = MaxIterations(1)
                     seed = 123456
                     # Solver
@@ -316,7 +316,7 @@ class SolverTest(BaseTest):
 
                     print("Best solution second loop:", result.best_state.solution())
 
-                    accept = RandomWalk()
+                    accept = AlwaysAccept()
                     stop = MaxIterations(2)
                     couple_ops = [DestroyOperators.Rins, DestroyOperators.Local_Branching]
 
