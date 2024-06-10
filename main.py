@@ -38,9 +38,9 @@ print("Best solution objective:", result.best_state.objective())
 
 
 # Check for optimality
-# model = Model("scip")
-# model.readProblem(instance_path)
-# model.optimize()
-# solution = model.getBestSol()
-# print(solution)
-# print("Optimal value:", model.getObjVal())
+model = Model("scip")
+model.readProblem(instance_path)
+model.optimize()
+solution = model.getBestSol()
+print(solution)
+print("Optimal value:", model.getObjVal())

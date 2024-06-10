@@ -5,9 +5,9 @@ from typing import NamedTuple
 import numpy as np
 from alns.ALNS import ALNS
 from alns.Result import Result
-from alns.accept import AdaptiveThreshold, GreatDeluge, HillClimbing
-from alns.accept import LateAcceptanceHillClimbing, NonLinearGreatDeluge, RandomWalk
-from alns.accept import RecordToRecordTravel, SimulatedAnnealing, WorseAccept
+from alns.accept import MovingAverageThreshold, GreatDeluge, HillClimbing
+from alns.accept import LateAcceptanceHillClimbing, NonLinearGreatDeluge, AlwaysAccept
+from alns.accept import RecordToRecordTravel, SimulatedAnnealing, RandomAccept
 from alns.select import AlphaUCB, MABSelector, RandomSelect, RouletteWheel, SegmentedRouletteWheel
 from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterion
 
@@ -60,15 +60,15 @@ DestroyType = (type(DestroyOperators.Crossover),
 
 RepairType = (type(RepairOperators.Repair))
 
-AcceptType = (AdaptiveThreshold,
+AcceptType = (MovingAverageThreshold,
               GreatDeluge,
               HillClimbing,
               LateAcceptanceHillClimbing,
               NonLinearGreatDeluge,
-              RandomWalk,
+              AlwaysAccept,
               RecordToRecordTravel,
               SimulatedAnnealing,
-              WorseAccept)
+              RandomAccept)
 
 SelectorType = (AlphaUCB,
                 MABSelector,
