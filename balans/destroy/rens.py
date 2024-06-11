@@ -3,7 +3,7 @@ import copy
 from balans.base_state import _State
 
 
-def rens(current: _State, rnd_state, delta) -> _State:
+def _rens(current: _State, rnd_state, delta) -> _State:
     #  Take the LP relaxed solution of the original MIP.
     #  For discrete variables, choose the non-integral ones
     #  and store them in the rens_float_set to be bounded list.
@@ -34,4 +34,4 @@ def rens(current: _State, rnd_state, delta) -> _State:
                   rens_float_set=rens_float_set)
 
 def rens_50(current: _State, rnd_state) -> _State:
-    return rens(current, rnd_state, delta=0.50)
+    return _rens(current, rnd_state, delta=0.50)
