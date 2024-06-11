@@ -22,6 +22,7 @@ class _Instance:
         self.sense = None
         self.lp_index_to_val = None
         self.lp_obj_value = None
+        self.float_set = None
 
     def solve(self,
               is_initial_solve=False,
@@ -93,8 +94,10 @@ class _Instance:
                 for var in variables:
                     if var.getIndex() in rens_float_set:
                         # Restrict discrete vars to round up and down integer version of it
-                        model.addCons(var <= math.floor(index_to_val[var.getIndex()]))
-                        model.addCons(var >= math.ceil(index_to_val[var.getIndex()]))
+                        model.addCons(var >= math.floor(index_to_val[var.getIndex()]))
+                        model.addCons(var <= math.ceil(index_to_val[var.getIndex()]))
+                    else:
+                        model.addCons(var == index_to_val[var.getIndex()])
 
             # Zero Objective
             if is_zero_obj:
@@ -172,3 +175,8 @@ class _Instance:
     def extract_lp_features(self, path):
         # Solve LP relaxation and save it
         self.lp_index_to_val, self.lp_obj_value = lp_solve(path)
+
+        # Set of Discrete variables, where the lp relaxation is not integral
+        self.float_set = [i for i in self.discrete_indexes if not self.lp_index_to_val[i].is_integer()]
+
+        print(self.lp_index_to_val, self.float_set)
