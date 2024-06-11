@@ -178,5 +178,3 @@ class _Instance:
 
         # Set of Discrete variables, where the lp relaxation is not integral
         self.float_set = [i for i in self.discrete_indexes if not self.lp_index_to_val[i].is_integer()]
-
-        print(self.lp_index_to_val, self.float_set)
