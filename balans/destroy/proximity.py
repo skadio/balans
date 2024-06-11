@@ -2,7 +2,6 @@ import copy
 
 from balans.base_state import _State
 
-
 def proximity(current: _State, rnd_state) -> _State:
     # Objective function modification
     # Change the objective coefficients of the original

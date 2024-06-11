@@ -27,6 +27,7 @@ class _Instance:
     def solve(self,
               is_initial_solve=False,
               index_to_val=None,
+              obj_val=None,
               destroy_set=None,
               dins_random_set=None,
               rens_float_set=None,
@@ -80,14 +81,22 @@ class _Instance:
 
             # Proximity: Binary variables, flip their objective
             if is_proximity:
-                zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
+                # add cutoff constraint depending on sense,
+                # a slack variable z to prevent infeasible solution, \theta = 1
+                theta = 1
+                z = model.addVar(vtype="C", lb = 0)
+                if self.sense == "minimize":
+                    model.addCons(model.getObjective() <= obj_val - theta + z)
+                else:
+                    model.addCons(model.getObjective() >= obj_val + theta + z)
 
+                zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
                 # if x_inc=0, update its objective coefficient to 1.
                 # if x_inc=1, update its objective coefficient to -1.
                 # Drop all other vars (when not in the expr it is set to 0 by default)
                 zero_expr = quicksum(zero_var for zero_var in zero_binary_vars)
-                one_expr = quicksum(-1 * one_var for one_var in one_binary_vars)
-                model.setObjective(zero_expr + one_expr, self.sense)
+                one_expr = quicksum(1 - one_var for one_var in one_binary_vars)
+                model.setObjective(zero_expr + one_expr + 1000 * z, "minimize")
 
             # RENS: Discrete variables, where the lp relaxation is not integral
             if rens_float_set:
@@ -115,7 +124,6 @@ class _Instance:
                 model, variables = get_model_and_vars(path=self.path)
 
                 # Solution of transformed problem
-                # TODO do we have unit test to test this solution switch?
                 var_to_val = model.createSol()
                 for i in range(model.getNVars()):
                     var_to_val[variables[i]] = index_to_val[i]

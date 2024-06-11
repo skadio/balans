@@ -1,0 +1,17 @@
+STATISTICS
+  Problem name     : model
+  Variables        : 7 (5 binary, 0 implicit integer, 2 continuous)
+  Constraints      : 1 initial, 1 maximal
+OBJECTIVE
+  Sense            : minimize
+VARIABLES
+  [binary] <x1>: obj=-1, original bounds=[0,1]
+  [binary] <x2>: obj=-1, original bounds=[0,1]
+  [binary] <x5>: obj=-1, original bounds=[0,1]
+  [binary] <x4>: obj=-1, original bounds=[0,1]
+  [binary] <x3>: obj=-1, original bounds=[0,1]
+  [continuous] <x6>: obj=-1, original bounds=[0,+inf]
+  [continuous] <x7>: obj=0, original bounds=[0,+inf]
+CONSTRAINTS
+  [linear] <c1>: <x3>[B] +<x4>[B] +<x6>[C] +<x7>[C] == 60;
+END

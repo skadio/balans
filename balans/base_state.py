@@ -56,6 +56,7 @@ class _State:
         # Solve the current state with the destroyed variables and update
         self.index_to_val, self.obj_val = self.instance.solve(is_initial_solve=False,
                                                               index_to_val=self.index_to_val,
+                                                              obj_val=self.obj_val,
                                                               destroy_set=self.destroy_set,
                                                               dins_random_set=self.dins_random_set,
                                                               rens_float_set=self.rens_float_set,
