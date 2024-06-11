@@ -3,7 +3,7 @@ import copy
 from balans.base_state import _State
 
 
-def rens(current: _State, rnd_state) -> _State:
+def _rens(current: _State, rnd_state, delta) -> _State:
     #  Take the LP relaxed solution of the original MIP.
     #  For discrete variables, choose the non-integral ones
     #  and store them in the rens_float_set to be bounded list.
@@ -17,10 +17,15 @@ def rens(current: _State, rnd_state) -> _State:
 
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
-    lp_index_to_val = current.instance.lp_index_to_val
+    # list of discrete indexes that are floating point in LP
+    floating_discrete_indexes = current.instance.lp_floating_discrete_indexes
 
-    # Discrete variables, where the lp relaxation is not integral
-    rens_float_set = [i for i in discrete_indexes if not lp_index_to_val[i].is_integer()]
+    # Randomization STEP
+    size = int(delta * len(floating_discrete_indexes))
+    floating_discrete_indexes = set(rnd_state.choice(floating_discrete_indexes, size))
+
+    # Else potentially change it
+    rens_float_set = set([i for i in discrete_indexes if i in floating_discrete_indexes])
 
     print("\t Float set:", rens_float_set)
 
@@ -28,3 +33,6 @@ def rens(current: _State, rnd_state) -> _State:
                   next_state.index_to_val,
                   next_state.obj_val,
                   rens_float_set=rens_float_set)
+
+def rens_50(current: _State, rnd_state) -> _State:
+    return _rens(current, rnd_state, delta=0.50)
