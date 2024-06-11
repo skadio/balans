@@ -96,10 +96,10 @@ class _Instance:
                 # Drop all other vars (when not in the expr it is set to 0 by default)
                 zero_expr = quicksum(zero_var for zero_var in zero_binary_vars)
                 one_expr = quicksum(1 - one_var for one_var in one_binary_vars)
-                # 1000 * z is to make sure not make the problem infeasible
+                # M * z is to make sure not make the problem infeasible
                 # it will be better to suit in ALNS iteration
                 # With this z variable, it will lift the constraint we added when necessary.
-                model.setObjective(zero_expr + one_expr + Constants.M * z, "minimize")
+                model.setObjective(zero_expr + one_expr + Constants.M * z, Constants.minimize)
 
             # RENS: Discrete variables, where the lp relaxation is not integral
             if rens_float_set:

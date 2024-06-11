@@ -26,7 +26,7 @@ class Constants(NamedTuple):
     var_lb = "var_lb"
     var_ub = "var_ub"
 
-    # for Big-M constraint
+    # for Big-M constraint, currently used in Proximity
     M = 1000
 
     # Data folder constants
