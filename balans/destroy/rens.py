@@ -17,14 +17,15 @@ def _rens(current: _State, rnd_state, delta) -> _State:
 
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
-    float_set = current.instance.float_set
+    # list of discrete indexes that are floating point in LP
+    float_indexes = current.instance.lp_floating_discrete_indexes
 
     # Randomization STEP
-    fix_size = int(delta * len(float_set))
-    float_set = set(rnd_state.choice(float_set, fix_size))
+    fix_size = int(delta * len(float_indexes))
+    float_indexes = set(rnd_state.choice(float_indexes, fix_size))
 
     # Else potentially change it
-    rens_float_set = set([i for i in discrete_indexes if i in float_set])
+    rens_float_set = set([i for i in discrete_indexes if i in float_indexes])
 
     print("\t Float set:", rens_float_set)
 

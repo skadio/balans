@@ -5,6 +5,7 @@ from pyscipopt import quicksum
 
 from balans.utils_scip import get_model_and_vars, get_index_to_val_and_objective
 from balans.utils_scip import lp_solve, is_binary, is_discrete, split_binary_vars
+from balans.utils import Constants
 
 
 class _Instance:
@@ -22,7 +23,7 @@ class _Instance:
         self.sense = None
         self.lp_index_to_val = None
         self.lp_obj_value = None
-        self.float_set = None
+        self.lp_floating_discrete_indexes = None
 
     def solve(self,
               is_initial_solve=False,
@@ -79,33 +80,37 @@ class _Instance:
                 one_expr = quicksum(1 - one_var for one_var in one_binary_vars)
                 model.addCons(zero_expr + one_expr <= local_branching_size)
 
-            # Proximity: Binary variables, flip their objective
+            # Proximity: Binary variables, modify objective, add new constraint
             if is_proximity:
                 # add cutoff constraint depending on sense,
                 # a slack variable z to prevent infeasible solution, \theta = 1
-                theta = 1
-                z = model.addVar(vtype="C", lb = 0)
-                if self.sense == "minimize":
-                    model.addCons(model.getObjective() <= obj_val - theta + z)
+                z = model.addVar(vtype=Constants.continuous, lb = 0)
+                if self.sense == Constants.minimize:
+                    model.addCons(model.getObjective() <= obj_val - Constants.theta + z)
                 else:
-                    model.addCons(model.getObjective() >= obj_val + theta + z)
+                    model.addCons(model.getObjective() >= obj_val + Constants.theta + z)
 
                 zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
-                # if x_inc=0, update its objective coefficient to 1.
-                # if x_inc=1, update its objective coefficient to -1.
+                # if x_inc=0, new objective expression is x_inc.
+                # if x_inc=1, new objective expression is 1 - x_inc.
                 # Drop all other vars (when not in the expr it is set to 0 by default)
                 zero_expr = quicksum(zero_var for zero_var in zero_binary_vars)
                 one_expr = quicksum(1 - one_var for one_var in one_binary_vars)
-                model.setObjective(zero_expr + one_expr + 1000 * z, "minimize")
+                # 1000 * z is to make sure not make the problem infeasible
+                # it will be better to suit in ALNS iteration
+                # With this z variable, it will lift the constraint we added when necessary.
+                model.setObjective(zero_expr + one_expr + Constants.M * z, "minimize")
 
             # RENS: Discrete variables, where the lp relaxation is not integral
             if rens_float_set:
                 for var in variables:
                     if var.getIndex() in rens_float_set:
                         # Restrict discrete vars to round up and down integer version of it
+                        # EX: If var = 3.5, the constraint is var >= 3 and var <= 4
                         model.addCons(var >= math.floor(index_to_val[var.getIndex()]))
                         model.addCons(var <= math.ceil(index_to_val[var.getIndex()]))
                     else:
+                        # If not in the set, fix the var
                         model.addCons(var == index_to_val[var.getIndex()])
 
             # Zero Objective
@@ -184,5 +189,5 @@ class _Instance:
         # Solve LP relaxation and save it
         self.lp_index_to_val, self.lp_obj_value = lp_solve(path)
 
-        # Set of Discrete variables, where the lp relaxation is not integral
-        self.float_set = [i for i in self.discrete_indexes if not self.lp_index_to_val[i].is_integer()]
+        # list of discrete indexes that are floating point in LP
+        self.lp_floating_discrete_indexes = [i for i in self.discrete_indexes if not self.lp_index_to_val[i].is_integer()]
