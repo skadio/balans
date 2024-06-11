@@ -28,9 +28,9 @@ class _Instance:
     def solve(self,
               is_initial_solve=False,
               index_to_val=None,
-              obj_val=None,
+              obj_value=None,
               destroy_set=None,
-              dins_random_set=None,
+              dins_set=None,
               rens_float_set=None,
               is_zero_obj=False,
               local_branching_size=0,
@@ -41,36 +41,44 @@ class _Instance:
         if is_initial_solve:
             return self.initial_solve(index_to_val)
         else:
+            # flag to identify if any constraint added or objective function changed
+            # If flag = True, optimize the problem and get new sol and obj
+            # If flag = False, return the current sol and obj, do not optimize
+            flag = False
             # Build model and variables
             model, variables = get_model_and_vars(path=self.path)
 
-            # DESTROY used for Crossover, DINS, Mutation, RINS
+            # DESTROY used for Crossover, Mutation, RINS
             if destroy_set:
-                for var in variables:
-                    # Only consider discrete vars (binary and integer)
-                    if var.getIndex() in self.discrete_indexes:
-                        # IF not in destroy, fix it
-                        if var.getIndex() not in destroy_set:
-                            # constraint = var == index_to_val[var.getIndex()]
-                            # model.addCons(constraint)
-                            model.addCons(var == index_to_val[var.getIndex()])
-                        else:
-                            # IF in destroy, and DINS is active, don't fix the destroy var
-                            # but add bounding constraint around initial lp solution
-                            if dins_random_set:
+                if len(destroy_set) > 0:
+                    flag = True
+                    for var in variables:
+                        # Only consider discrete vars (binary and integer)
+                        if var.getIndex() in self.discrete_indexes:
+                            # IF not in destroy, fix it
+                            if var.getIndex() not in destroy_set:
+                                model.addCons(var == index_to_val[var.getIndex()])
+
+            # DINS: Discrete Variables, where incumbent and lp relaxation have distance more than 0.5
+            # Binary variables, same as local branching
+            if dins_set:
+                if len(dins_set) > 0:
+                    flag = True
+                    for var in variables:
+                        # Only consider integer (non-binary) variables
+                        if var.getIndex() in self.discrete_indexes and var.getIndex() not in self.binary_indexes:
+                            if var.getIndex() in dins_set:
+                                # If in dins set add bounding constraint around initial lp solution
                                 index = var.getIndex()
                                 current_lp_diff = abs(index_to_val[index] - self.lp_index_to_val[index])
                                 model.addCons(abs(var - self.lp_index_to_val[index]) <= current_lp_diff)
-
-            # RANDOM DINS: binary variables have more strict condition to be fixed
-            if dins_random_set:
-                for var in variables:
-                    if var.getIndex() in dins_random_set:
-                        # Fix all binary vars in dins_binary
-                        model.addCons(var == index_to_val[var.getIndex()])
+                            else:
+                                # If not in the set, fix the var
+                                model.addCons(var == index_to_val[var.getIndex()])
 
             # Local Branching: Binary variables, flip a limited subset
             if local_branching_size > 0:
+                flag = True
                 # Only change a subset of the binary variables, keep others fixed. e.g.,
                 zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
 
@@ -82,13 +90,14 @@ class _Instance:
 
             # Proximity: Binary variables, modify objective, add new constraint
             if is_proximity:
+                flag = True
                 # add cutoff constraint depending on sense,
                 # a slack variable z to prevent infeasible solution, \theta = 1
-                z = model.addVar(vtype=Constants.continuous, lb = 0)
+                z = model.addVar(vtype=Constants.continuous, lb=0)
                 if self.sense == Constants.minimize:
-                    model.addCons(model.getObjective() <= obj_val - Constants.theta + z)
+                    model.addCons(model.getObjective() <= obj_value - Constants.theta + z)
                 else:
-                    model.addCons(model.getObjective() >= obj_val + Constants.theta + z)
+                    model.addCons(model.getObjective() >= obj_value + Constants.theta + z)
 
                 zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
                 # if x_inc=0, new objective expression is x_inc.
@@ -103,42 +112,50 @@ class _Instance:
 
             # RENS: Discrete variables, where the lp relaxation is not integral
             if rens_float_set:
-                for var in variables:
-                    if var.getIndex() in rens_float_set:
-                        # Restrict discrete vars to round up and down integer version of it
-                        # EX: If var = 3.5, the constraint is var >= 3 and var <= 4
-                        model.addCons(var >= math.floor(index_to_val[var.getIndex()]))
-                        model.addCons(var <= math.ceil(index_to_val[var.getIndex()]))
-                    else:
-                        # If not in the set, fix the var
-                        model.addCons(var == index_to_val[var.getIndex()])
+                if len(rens_float_set) > 0:
+                    flag = True
+                    for var in variables:
+                        if var.getIndex() in rens_float_set:
+                            # Restrict discrete vars to round up and down integer version of it
+                            # EX: If var = 3.5, the constraint is var >= 3 and var <= 4
+                            model.addCons(var >= math.floor(index_to_val[var.getIndex()]))
+                            model.addCons(var <= math.ceil(index_to_val[var.getIndex()]))
+                        else:
+                            # If not in the set, fix the var
+                            model.addCons(var == index_to_val[var.getIndex()])
 
             # Zero Objective
             if is_zero_obj:
+                flag = True
                 model.setObjective(0, self.sense)
 
-            # Solve
-            model.optimize()
-            index_to_val, obj_value = get_index_to_val_and_objective(model)
+            if flag == True:
+                # Solve
+                model.optimize()
+                index_to_val, obj_value = get_index_to_val_and_objective(model)
 
-            # Need to find the original obj value for transformed objectives
-            if is_proximity or is_zero_obj:
+                # Need to find the original obj value for transformed objectives
+                if is_proximity or is_zero_obj:
 
-                # Build model and variables
-                # This resets the objective back to original
-                model, variables = get_model_and_vars(path=self.path)
+                    # Build model and variables
+                    # This resets the objective back to original
+                    model, variables = get_model_and_vars(path=self.path)
 
-                # Solution of transformed problem
-                var_to_val = model.createSol()
-                for i in range(model.getNVars()):
-                    var_to_val[variables[i]] = index_to_val[i]
+                    # Solution of transformed problem
+                    var_to_val = model.createSol()
+                    for i in range(model.getNVars()):
+                        var_to_val[variables[i]] = index_to_val[i]
 
-                # Objective value of the solution found in transformed
-                print("\t Transformed obj: ", obj_value)
-                obj_value = model.getSolObjVal(var_to_val)
+                    # Objective value of the solution found in transformed
+                    print("\t Transformed obj: ", obj_value)
+                    obj_value = model.getSolObjVal(var_to_val)
 
-            print("\t Solve DONE!", obj_value)
-            print("\t index_to_val: ", index_to_val)
+                print("\t Solve DONE!", obj_value)
+                print("\t index_to_val: ", index_to_val)
+            else:
+                print("Nothing to do")
+                print("\t Current Obj:", obj_value)
+                print("\t index_to_val: ", index_to_val)
 
             return index_to_val, obj_value
 
@@ -190,4 +207,5 @@ class _Instance:
         self.lp_index_to_val, self.lp_obj_value = lp_solve(path)
 
         # list of discrete indexes that are floating point in LP
-        self.lp_floating_discrete_indexes = [i for i in self.discrete_indexes if not self.lp_index_to_val[i].is_integer()]
+        self.lp_floating_discrete_indexes = [i for i in self.discrete_indexes if
+                                             not self.lp_index_to_val[i].is_integer()]

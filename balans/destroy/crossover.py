@@ -59,7 +59,7 @@ def crossover(current: _State, rnd_state) -> _State:
 #     #  If a DISCRETE variable x_inc = x_rand, do not change it.
 #     #  Otherwise, put it to the destroy set.
 #     #  Send the destroy set to base_instance.
-#     print("\t Destroy current objective:", current.obj_val)
+#     print("\t Destroy current objective:", current.obj_value)
 #     next_state = copy.deepcopy(current)
 #     next_state.reset_solve_settings()
 #
@@ -80,7 +80,7 @@ def crossover(current: _State, rnd_state) -> _State:
 #     print("\t Destroy set:", crossover_set)
 #     return _State(next_state.instance,
 #                   next_state.index_to_val,
-#                   next_state.obj_val,
+#                   next_state.obj_value,
 #                   destroy_set=crossover_set)
 
 # def crossover3(current: _State, rnd_state) -> _State:
@@ -88,7 +88,7 @@ def crossover(current: _State, rnd_state) -> _State:
 #     #  If a DISCRETE variable x_inc = x_inc2, do not change it.
 #     #  Otherwise, put it to the destroy set.
 #     #  Send the destroy set to base_instance.
-#     print("\t Destroy current objective:", current.obj_val)
+#     print("\t Destroy current objective:", current.obj_value)
 #     next_state = copy.deepcopy(current)
 #     next_state.reset_solve_settings()
 #
@@ -110,7 +110,7 @@ def crossover(current: _State, rnd_state) -> _State:
 #     print("\t Destroy set:", crossover_set)
 #     return _State(next_state.instance,
 #                   next_state.index_to_val,
-#                   next_state.obj_val,
+#                   next_state.obj_value,
 #                   destroy_set=crossover_set,
 #                   previous_index_to_val=current.index_to_val)
 #

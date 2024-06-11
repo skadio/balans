@@ -15,7 +15,7 @@ class _State:
                  index_to_val: Dict[Any, float],
                  obj_val: float,
                  destroy_set=None,
-                 dins_random_set=None,
+                 dins_set=None,
                  rens_float_set=None,
                  is_zero_obj=False,
                  previous_index_to_val=None,
@@ -31,7 +31,7 @@ class _State:
         # State receives the solve settings from the operators
         # and passes to instance.solve() and updates its solution and objective
         self.destroy_set = destroy_set
-        self.dins_random_set = dins_random_set
+        self.dins_set = dins_set
         self.rens_float_set = rens_float_set
         self.is_zero_obj = is_zero_obj
         self.previous_index_to_val = previous_index_to_val
@@ -46,7 +46,7 @@ class _State:
 
     def reset_solve_settings(self):
         self.destroy_set = None
-        self.dins_random_set = None
+        self.dins_set = None
         self.rens_float_set = None
         self.is_zero_obj = False
         self.local_branching_size = 0
@@ -56,9 +56,9 @@ class _State:
         # Solve the current state with the destroyed variables and update
         self.index_to_val, self.obj_val = self.instance.solve(is_initial_solve=False,
                                                               index_to_val=self.index_to_val,
-                                                              obj_val=self.obj_val,
+                                                              obj_value=self.obj_val,
                                                               destroy_set=self.destroy_set,
-                                                              dins_random_set=self.dins_random_set,
+                                                              dins_set=self.dins_set,
                                                               rens_float_set=self.rens_float_set,
                                                               is_zero_obj=self.is_zero_obj,
                                                               local_branching_size=self.local_branching_size,
