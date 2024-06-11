@@ -28,8 +28,8 @@ def crossover(current: _State, rnd_state) -> _State:
     random_seed2 = rnd_state.tomaxint()
     random_gap2 = rnd_state.uniform(low=0.1, high=Constants.random_gap_ub2)
 
-    random1_index_to_val, random1_obj_value = random_solve(path=current.instance.path, scip_seed=random_seed1, gap=random_gap1)
-    random2_index_to_val, random2_obj_value = random_solve(path=current.instance.path, scip_seed=random_seed2, gap=random_gap2)
+    random1_index_to_val, random1_obj_val = random_solve(path=current.instance.path, scip_seed=random_seed1, gap=random_gap1)
+    random2_index_to_val, random2_obj_val = random_solve(path=current.instance.path, scip_seed=random_seed2, gap=random_gap2)
 
     print("Random Solution1:", random1_index_to_val)
     print("Random Solution2:", random2_index_to_val)
@@ -43,7 +43,7 @@ def crossover(current: _State, rnd_state) -> _State:
 
     # Update the next index
     next_state.index_to_val = random1_index_to_val
-    next_state.obj_val = random1_obj_value
+    next_state.obj_val = random1_obj_val
 
     print("\tIndex to val:", next_state.index_to_val)
 

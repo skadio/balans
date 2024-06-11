@@ -14,7 +14,7 @@ from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterio
 from balans.base_instance import _Instance
 from balans.base_state import _State
 from balans.destroy.crossover import crossover
-from balans.destroy.dins import dins_50
+from balans.destroy.dins import dins
 from balans.destroy.local_branching import local_branching_50
 from balans.destroy.mutation import mutation_25, mutation_50, mutation_75, mutation_binary_50
 from balans.destroy.proximity import proximity
@@ -27,8 +27,7 @@ from balans.utils import Constants, check_false, check_true, create_rng
 
 class DestroyOperators(NamedTuple):
     Crossover = crossover
-    Dins = dins_50
-    # Dins_Random = dins_random_50
+    Dins = dins
     Local_Branching = local_branching_50
     Mutation = mutation_25
     Mutation2 = mutation_50

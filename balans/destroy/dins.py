@@ -6,8 +6,7 @@ from balans.base_state import _State
 def _dins(current: _State, rnd_state, delta) -> _State:
     #  Take an LP relaxed solution of the original MIP.
     #  By considering only discrete variables, forms a Set J where |x_lp -x_inc| >=   0.5
-    #  For binary variables we have a hard constraint,
-    #  here we say change at most half of them.
+    #  IF delta is given, do local branching for binary variables, change at most delta of them.
     #  If a variable is inside the Set J, it is part of the destroy set.
     #  Send the dins set (Set J) and local branching size to base_instance.
 
@@ -38,6 +37,10 @@ def _dins(current: _State, rnd_state, delta) -> _State:
                   next_state.obj_val,
                   dins_set=set_j,
                   local_branching_size=local_branching_size)
+
+
+def dins(current: _State, rnd_state) -> _State:
+    return _dins(current, rnd_state, delta=0.0)
 
 
 def dins_50(current: _State, rnd_state) -> _State:
@@ -88,12 +91,4 @@ def dins_75(current: _State, rnd_state) -> _State:
 #                   destroy_set=random_set_j,
 #                   dins_random_set=dins_random_set)
 #
-#
-# def dins_random_50(current: _State, rnd_state) -> _State:
-#     return _dins_random(current, rnd_state, delta=0.50)
-#
-#
-# def dins_random_75(current: _State, rnd_state) -> _State:
-#     return _dins_random(current, rnd_state, delta=0.75)
-#
-#
+
