@@ -23,7 +23,7 @@ class _Instance:
         self.integer_indexes = None       # discrete but not binary
         self.sense = None
         self.lp_index_to_val = None
-        self.lp_obj_value = None
+        self.lp_obj_val = None
         self.lp_floating_discrete_indexes = None
 
     def solve(self,
@@ -128,7 +128,7 @@ class _Instance:
                 has_destroy = True
                 model.setObjective(0, self.sense)
 
-            # If no destroy, dont's solve, quit with previous objective
+            # If no destroy, don't solve, quit with previous objective
             if not has_destroy:
                 print("No destroy to apply, don't call optimize()")
                 print("\t Current Obj:", obj_val)
@@ -201,24 +201,12 @@ class _Instance:
                 else:
                     self.integer_indexes.append(var.getIndex())
 
-        # # Set discrete indexes
-        # self.discrete_indexes = []
-        # for var in variables:
-        #     if is_discrete(var.vtype()):
-        #         self.discrete_indexes.append(var.getIndex())
-        #
-        # # Set binary indexes
-        # self.binary_indexes = []
-        # for var in variables:
-        #     if is_binary(var.vtype()):
-        #         self.binary_indexes.append(var.getIndex())
-
         # Optimization direction
         self.sense = model.getObjectiveSense()
 
     def extract_lp_features(self, path):
         # Solve LP relaxation and save it
-        self.lp_index_to_val, self.lp_obj_value = lp_solve(path)
+        self.lp_index_to_val, self.lp_obj_val = lp_solve(path)
 
         # list of discrete indexes that are floating point in LP
         self.lp_floating_discrete_indexes = [i for i in self.discrete_indexes if

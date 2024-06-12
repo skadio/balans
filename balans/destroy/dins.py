@@ -42,7 +42,6 @@ def _dins(current: _State, rnd_state, delta) -> _State:
 def dins(current: _State, rnd_state) -> _State:
     return _dins(current, rnd_state, delta=0.0)
 
-
 def dins_50(current: _State, rnd_state) -> _State:
     return _dins(current, rnd_state, delta=0.50)
 
