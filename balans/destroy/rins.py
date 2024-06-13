@@ -21,7 +21,7 @@ def rins(current: _State, rnd_state) -> _State:
 
     #  If a variable x_inc = x_lp, do not change it.
     indexes_with_same_value = [i for i in discrete_indexes if
-                               math.isclose(lp_index_to_val[i], next_state.index_to_val[i])]
+                               math.isclose(lp_index_to_val[i], current.index_to_val[i])]
 
     # Else potentially change it
     destroy_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])

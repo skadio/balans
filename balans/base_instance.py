@@ -13,9 +13,10 @@ class _Instance:
     Instance from a given MIP file with solve operations on top, subject to operator
     """
 
-    def __init__(self, path):
+    def __init__(self, path, seed):
         # Instance holds the given path
         self.path = path
+        self.seed = seed
 
         # Static, set once and for all
         self.discrete_indexes = None    # all discrete: binary + integer
@@ -26,6 +27,10 @@ class _Instance:
         self.lp_obj_val = None
         self.lp_floating_discrete_indexes = None
 
+        # TODO add scip model and variables
+        self.model = None
+        self.variables = None
+
     def solve(self,
               is_initial_solve=False,
               index_to_val=None,
@@ -33,12 +38,13 @@ class _Instance:
               destroy_set=None,
               dins_set=None,
               rens_float_set=None,
-              is_zero_obj=False,
+              has_random_obj=False,
               local_branching_size=0,
               is_proximity=False) -> Tuple[Dict[Any, float], float]:
 
         print("\t Solve")
 
+        # TODO this can be removed and call this solve() --> incremental_solve()
         if is_initial_solve:
             return self.initial_solve(index_to_val)
         else:
@@ -54,27 +60,24 @@ class _Instance:
                 if len(destroy_set) > 0:
                     has_destroy = True
                     for var in variables:
-                        # Only consider discrete vars (binary and integer)
-                        if var.getIndex() in self.discrete_indexes:
-                            # IF not in destroy, fix it
-                            if var.getIndex() not in destroy_set:
-                                model.addCons(var == index_to_val[var.getIndex()])
+                        # IF not in destroy, fix it
+                        if var.getIndex() not in destroy_set:
+                            # fix the variable
+                            model.addCons(var == index_to_val[var.getIndex()])
 
             # DINS: Discrete Variables, where incumbent and lp relaxation have distance more than 0.5
             if dins_set:
                 if len(dins_set) > 0:
                     has_destroy = True
                     for var in variables:
-                        # Only consider integer variables
-                        if var.getIndex() in self.discrete_indexes:
-                            if var.getIndex() in self.integer_indexes and var.getIndex() in dins_set:
-                                # Add bounding constraint around initial lp solution
-                                index = var.getIndex()
-                                current_lp_diff = abs(index_to_val[index] - self.lp_index_to_val[index])
-                                model.addCons(abs(var - self.lp_index_to_val[index]) <= current_lp_diff)
-                            else:
-                                # If binary OR not in dins set, fix the var
-                                model.addCons(var == index_to_val[var.getIndex()])
+                        if var.getIndex() in dins_set:
+                            # Add bounding constraint around initial lp solution
+                            index = var.getIndex()
+                            current_lp_diff = abs(index_to_val[index] - self.lp_index_to_val[index])
+                            model.addCons(abs(var - self.lp_index_to_val[index]) <= current_lp_diff)
+                        else:
+                            # fix the variable
+                            model.addCons(var == index_to_val[var.getIndex()])
 
             # Local Branching: Binary variables, flip a limited subset (can come from DINS with delta)
             if local_branching_size > 0:
@@ -115,17 +118,18 @@ class _Instance:
                     has_destroy = True
                     for var in variables:
                         if var.getIndex() in rens_float_set:
-                            # Restrict discrete vars to round up and down integer version of it
+                            # Restrict discrete vars to round up and down integer version of the lp
                             # EX: If var = 3.5, the constraint is var >= 3 and var <= 4
-                            model.addCons(var >= math.floor(index_to_val[var.getIndex()]))
-                            model.addCons(var <= math.ceil(index_to_val[var.getIndex()]))
+                            model.addCons(var >= math.floor(self.lp_index_to_val[var.getIndex()]))
+                            model.addCons(var <= math.ceil(self.lp_index_to_val[var.getIndex()]))
                         else:
-                            # If not in the set, fix the var
+                            # If not in the set, fix the var to the current state
                             model.addCons(var == index_to_val[var.getIndex()])
 
-            # Zero Objective
-            if is_zero_obj:
+            # Random Objective
+            if has_random_obj:
                 has_destroy = True
+                # TODO
                 model.setObjective(0, self.sense)
 
             # If no destroy, don't solve, quit with previous objective
@@ -136,11 +140,12 @@ class _Instance:
                 return index_to_val, obj_val
 
             # If destroy, solve for next state
+            # TODO catch infeasibility and return current solution
             model.optimize()
             index_to_val, obj_val = get_index_to_val_and_objective(model)
 
             # Need to find the original obj value for transformed objectives
-            if is_proximity or is_zero_obj:
+            if is_proximity or has_random_obj:
 
                 # Build model and variables
                 # This resets the objective back to original
@@ -162,8 +167,9 @@ class _Instance:
 
     def initial_solve(self, index_to_val) -> Tuple[Dict[Any, float], float]:
 
-        # Build model and variables
-        model, variables = get_model_and_vars(path=self.path, solution_count=1)
+        # Build model and variables with random starting point
+        model, variables = get_model_and_vars(path=self.path, scip_seed=self.seed,
+                                              has_random_obj=True, solution_count=1)
 
         # If a solution is given fix it. Can be partial (denoted by None value)
         if index_to_val is not None:

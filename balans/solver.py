@@ -20,7 +20,7 @@ from balans.destroy.mutation import mutation_25, mutation_50, mutation_75, mutat
 from balans.destroy.proximity import proximity
 from balans.destroy.rens import rens_50
 from balans.destroy.rins import rins, rins_random_50
-from balans.destroy.zero_objective import zero_objective
+from balans.destroy.random_objective import zero_objective
 from balans.repair.repair import repair
 from balans.utils import Constants, check_false, check_true, create_rng
 
@@ -112,11 +112,9 @@ class Balans:
         self.alns_seed = self._rng.randint(0, self.seed)
 
         # ALNS
-        self.alns = ALNS(np.random.RandomState(self.alns_seed))
-        for op in destroy_ops:
-            self.alns.add_destroy_operator(op)
-        for op in repair_ops:
-            self.alns.add_repair_operator(op)
+        self.destroy_ops = destroy_ops
+        self.repair_ops = repair_ops
+        self.alns = None
 
         # Instance and the first solution
         self._instance: Optional[_Instance] = None
@@ -143,9 +141,16 @@ class Balans:
         self._validate_solve_args(instance_path)
 
         # Create instance from mip file
-        self._instance = _Instance(instance_path)
+        self._instance = _Instance(instance_path, self.seed)
 
+        # TODO
+        # Run initial solve here, get a copy of model and variables (don't free the model)
+        # Give the model to the initial_state below
+        # Implement a state.__copy()__ operator with reference to instance and model without copy
+        # Change all deep copies with state.copy()
         # Initial solution
+
+        self._instance.initial_solve(index_to_val=index_to_val)
         self._initial_index_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True,
                                                                                  index_to_val=index_to_val)
         print(">>> START objective:", self._initial_obj_val)
@@ -154,6 +159,17 @@ class Balans:
         # Initial state and solution
         initial_state = _State(self._instance, self.initial_index_to_val,
                                self.initial_obj_val, previous_index_to_val=self._initial_index_to_val)
+
+        self.alns = ALNS(np.random.RandomState(self.alns_seed))
+        for op in self.destroy_ops:
+            # TODO don't add if not good
+            self.alns.add_destroy_operator(op)
+        for op in self.repair_ops:
+            self.alns.add_repair_operator(op)
+
+        # TODO recreate selector, if a destroy operator is removed
+        # selector = MABSelector(reward=[5, 2, 1, 0.5], num_destroy=8, num_repair=1,
+        #                        learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
 
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
 

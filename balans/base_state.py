@@ -17,7 +17,7 @@ class _State:
                  destroy_set=None,
                  dins_set=None,
                  rens_float_set=None,
-                 is_zero_obj=False,
+                 has_random_obj=False,
                  previous_index_to_val=None,
                  local_branching_size=0,
                  is_proximity=None):
@@ -33,7 +33,7 @@ class _State:
         self.destroy_set = destroy_set
         self.dins_set = dins_set
         self.rens_float_set = rens_float_set
-        self.is_zero_obj = is_zero_obj
+        self.has_random_obj = has_random_obj
         self.previous_index_to_val = previous_index_to_val
         self.local_branching_size = local_branching_size
         self.is_proximity = is_proximity
@@ -48,7 +48,7 @@ class _State:
         self.destroy_set = None
         self.dins_set = None
         self.rens_float_set = None
-        self.is_zero_obj = False
+        self.has_random_obj = False
         self.local_branching_size = 0
         self.is_proximity = False
 
@@ -60,6 +60,6 @@ class _State:
                                                               destroy_set=self.destroy_set,
                                                               dins_set=self.dins_set,
                                                               rens_float_set=self.rens_float_set,
-                                                              is_zero_obj=self.is_zero_obj,
+                                                              has_random_obj=self.has_random_obj,
                                                               local_branching_size=self.local_branching_size,
                                                               is_proximity=self.is_proximity)

@@ -8,8 +8,6 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
     #  here we say change at most half of them (delta=0.5).
     #  Other possible delta values are 0.25 and 0.75.
     #  Send the destroy set to base_instance.
-    #  Note: These indexes are determined by the solver in this implementation.
-    # Please see the base_instance is_local_branching part. Operations are implemented inside that.
 
     print("*** Operator: ", "LOCAL BRANCHING")
     print("\t Destroy current objective:", current.obj_val)
@@ -20,7 +18,7 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
     binary_indexes = current.instance.binary_indexes
 
     # <= k in local branching
-    local_branching_size = int(delta * len(binary_indexes))
+    local_branching_size = rnd_state.randint(0, int(delta * len(binary_indexes)))
 
     return _State(next_state.instance,
                   next_state.index_to_val,

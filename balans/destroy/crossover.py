@@ -1,10 +1,9 @@
 import copy
 
-import numpy as np
+import math
 
 from balans.base_state import _State
 from balans.utils_scip import random_solve
-from balans.utils import Constants
 
 
 # 3 DIFFERENT VERSIONS OF CROSS OVER IMPLEMENTED, ORIGINAL ONE IS CROSSOVER.
@@ -21,31 +20,19 @@ def crossover(current: _State, rnd_state) -> _State:
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
 
-    # Dynamic 2 RANDOM SOLUTIONS
-    random_seed1 = rnd_state.tomaxint()
-    random_gap1 = rnd_state.uniform(low=0.1, high=Constants.random_gap_ub1)
+    # Dynamic Random Solution
+    r1_seed = rnd_state.tomaxint()
+    r1_index_to_val, r1_obj_val = random_solve(path=current.instance.path, scip_seed=r1_seed,
+                                               has_random_obj=True, solution_count=1)
 
-    random_seed2 = rnd_state.tomaxint()
-    random_gap2 = rnd_state.uniform(low=0.1, high=Constants.random_gap_ub2)
+    print("Random Solution1:", r1_index_to_val)
 
-    random1_index_to_val, random1_obj_val = random_solve(path=current.instance.path, scip_seed=random_seed1, gap=random_gap1)
-    random2_index_to_val, random2_obj_val = random_solve(path=current.instance.path, scip_seed=random_seed2, gap=random_gap2)
-
-    print("Random Solution1:", random1_index_to_val)
-    print("Random Solution2:", random2_index_to_val)
-
-    #  If a variable x_rand1 = x_rand2, do not change it.
+    #  If a discrete variable x_rand1 = x_inc, do not change it.
     indexes_with_same_value = [i for i in discrete_indexes if
-                               np.isclose(random1_index_to_val[i], random2_index_to_val[i])]
+                               math.isclose(r1_index_to_val[i], current.index_to_val[i])]
 
     # Else potentially change it
     crossover_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
-
-    # Update the next index
-    next_state.index_to_val = random1_index_to_val
-    next_state.obj_val = random1_obj_val
-
-    print("\tIndex to val:", next_state.index_to_val)
 
     print("\t Destroy set:", crossover_set)
     return _State(next_state.instance,

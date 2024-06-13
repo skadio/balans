@@ -9,7 +9,7 @@ from balans.utils import Constants
 
 def get_model_and_vars(path, is_verbose=False, has_pre_solve=True, scip_seed=-1,
                        solution_count=None, gap=None, time=None,
-                       is_lp_relaxation=False):
+                       is_lp_relaxation=False, has_random_obj=False):
     # TODO need to think about what SCIP defaults to use, turn-off SCIP-ALNS? when benchmarking
 
     # Model
@@ -31,6 +31,10 @@ def get_model_and_vars(path, is_verbose=False, has_pre_solve=True, scip_seed=-1,
     # Search only for the first incumbent
     if solution_count == 1:
         model.setParam("limits/bestsol", 1)
+
+    if has_random_obj:
+        # TODO
+        pass
 
     # Search only for the first incumbent
     if gap is not None:
@@ -67,10 +71,11 @@ def lp_solve(path) -> Tuple[Dict[Any, float], float]:
     return index_to_val, obj_value
 
 
-def random_solve(path, scip_seed=-1, gap=None) -> Tuple[Dict[Any, float], float]:
+def random_solve(path, scip_seed=-1, gap=None, has_random_obj=False, solution_count=1) -> Tuple[Dict[Any, float], float]:
 
     # Build model and variables
-    model, variables = get_model_and_vars(path, scip_seed=scip_seed, gap=gap)
+    model, variables = get_model_and_vars(path, scip_seed=scip_seed, gap=gap,
+                                          has_random_obj=has_random_obj, solution_count=solution_count)
 
     # Solve
     model.optimize()

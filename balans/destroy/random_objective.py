@@ -12,4 +12,4 @@ def zero_objective(current: _State, rnd_state) -> _State:
     return _State(next_state.instance,
                   next_state.index_to_val,
                   next_state.obj_val,
-                  is_zero_obj=True)
+                  has_random_obj=True)

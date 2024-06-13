@@ -16,13 +16,12 @@ def _dins(current: _State, rnd_state, delta) -> _State:
     next_state.reset_solve_settings()
 
     # Static features from the instance
-    discrete_indexes = current.instance.discrete_indexes
+    integer_indexes = current.instance.integer_indexes
     binary_indexes = current.instance.binary_indexes
     lp_index_to_val = current.instance.lp_index_to_val
 
-    # DINS for discrete:
-    # Consider discrete variables only and form a set_j where |x_lp - x_inc| >= 0.5
-    set_j = set([i for i in discrete_indexes
+    # DINS for integer variables: form a set_j where |x_lp - x_inc| >= 0.5
+    set_j = set([i for i in integer_indexes
                  if abs(lp_index_to_val[i] - current.index_to_val[i]) >= 0.5])
 
     # DINS for binary: Local branching constraint
