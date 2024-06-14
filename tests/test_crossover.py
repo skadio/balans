@@ -76,8 +76,6 @@ class CrossoverTest(BaseTest):
         destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
-        instance = _Instance(instance_path)
-
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
         accept = HillClimbing()
@@ -180,7 +178,7 @@ class CrossoverTest(BaseTest):
         best_solution = best_state.solution()
 
         print(f"Best heuristic solution objective is {best_objective}.")
-        self.assertEqual(best_objective, -60.0)
+        self.assertEqual(best_objective, -40.0)
 
     def test_crossover_t4_with_warm_start(self):
         # Input
@@ -218,4 +216,4 @@ class CrossoverTest(BaseTest):
         print("Best solution value:", result.best_state.objective())
 
         # Assert objective
-        self.assertEqual(best_objective, -60.0)
+        self.assertEqual(best_objective, -40.0)

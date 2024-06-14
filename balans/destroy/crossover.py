@@ -9,7 +9,7 @@ from balans.utils_scip import random_solve
 # 3 DIFFERENT VERSIONS OF CROSS OVER IMPLEMENTED, ORIGINAL ONE IS CROSSOVER.
 def crossover(current: _State, rnd_state) -> _State:
     #  Take TWO RANDOM solutions.
-    #  If a DISCRETE variable x_rand = x_rand2, do not change it.
+    #  If a DISCRETE variable x_rand = x_inc, do not change it.
     #  Otherwise, put it to the destroy set.
     #  Send the destroy set to base_instance.
     print("*** Operator: ", "CROSSOVER")

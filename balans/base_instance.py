@@ -1,7 +1,8 @@
 import math
+import random
 from typing import Tuple, Dict, Any
 
-from pyscipopt import quicksum
+from pyscipopt import quicksum, Expr
 
 from balans.utils_scip import get_model_and_vars, get_index_to_val_and_objective
 from balans.utils_scip import lp_solve, is_binary, is_discrete, split_binary_vars
@@ -13,7 +14,7 @@ class _Instance:
     Instance from a given MIP file with solve operations on top, subject to operator
     """
 
-    def __init__(self, path, seed):
+    def __init__(self, path, seed=Constants.default_seed):
         # Instance holds the given path
         self.path = path
         self.seed = seed
@@ -56,6 +57,7 @@ class _Instance:
             model, variables = get_model_and_vars(path=self.path)
 
             # DESTROY used for Crossover, Mutation, RINS
+            # One question, do we fix variables that are not discrete variables?
             if destroy_set:
                 if len(destroy_set) > 0:
                     has_destroy = True
@@ -129,8 +131,14 @@ class _Instance:
             # Random Objective
             if has_random_obj:
                 has_destroy = True
-                # TODO
-                model.setObjective(0, self.sense)
+                variables = model.getVars()
+                objective = Expr()
+                for var in variables:
+                    coeff = random.uniform(0,1)
+                    if coeff != 0:
+                        objective += coeff * var
+                objective.normalize()
+                model.setObjective(objective)
 
             # If no destroy, don't solve, quit with previous objective
             if not has_destroy:
@@ -140,8 +148,15 @@ class _Instance:
                 return index_to_val, obj_val
 
             # If destroy, solve for next state
-            # TODO catch infeasibility and return current solution
             model.optimize()
+
+            # Catch infeasibility and return current solution
+            if model.getStatus() == "infeasible":
+                print("Model infeasible, go back to previous state")
+                print("\t Current Obj:", obj_val)
+                print("\t index_to_val: ", index_to_val)
+                return index_to_val, obj_val
+
             index_to_val, obj_val = get_index_to_val_and_objective(model)
 
             # Need to find the original obj value for transformed objectives
@@ -182,15 +197,21 @@ class _Instance:
 
         # Solve
         model.optimize()
-        index_to_val, obj_value = get_index_to_val_and_objective(model)
+        index_to_val, obj_val = get_index_to_val_and_objective(model)
 
-        # Reset problem
-        model.freeProb()
+        model, variables = get_model_and_vars(path=self.path)
+
+        # Solution of transformed problem
+        var_to_val = model.createSol()
+        for i in range(model.getNVars()):
+            var_to_val[variables[i]] = index_to_val[i]
+
+        obj_val = model.getSolObjVal(var_to_val)
 
         self.extract_lp_features(self.path)
 
         # Return solution
-        return index_to_val, obj_value
+        return index_to_val, obj_val
 
     def extract_base_features(self, model, variables):
 

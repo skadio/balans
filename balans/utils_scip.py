@@ -1,7 +1,9 @@
+import random
 from typing import Tuple, Dict, Any
 
 import math
 
+import pyscipopt
 import pyscipopt as scip
 
 from balans.utils import Constants
@@ -32,9 +34,16 @@ def get_model_and_vars(path, is_verbose=False, has_pre_solve=True, scip_seed=-1,
     if solution_count == 1:
         model.setParam("limits/bestsol", 1)
 
+    # Get a random feasible solution by creating a random objective coefficient
     if has_random_obj:
-        # TODO
-        pass
+        variables = model.getVars()
+        objective = pyscipopt.Expr()
+        for var in variables:
+            coeff = random.uniform(0,1)
+            if coeff != 0:
+                objective += coeff * var
+        objective.normalize()
+        model.setObjective(objective)
 
     # Search only for the first incumbent
     if gap is not None:

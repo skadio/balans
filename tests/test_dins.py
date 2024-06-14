@@ -148,7 +148,7 @@ class DinsTest(BaseTest):
         # self.assertEqual(initial_index_to_val[0], best_index_to_val[0])
 
         print(f"Best heuristic solution objective is {best_objective}.")
-        self.assertEqual(best_objective, -60.0)
+        self.assertEqual(best_objective, -40.0)
 
     def test_dins_t5(self):
         # Input
@@ -183,4 +183,4 @@ class DinsTest(BaseTest):
         # Retrieve the final solution
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
-        self.assertEqual(result.best_state.objective(), -60.0)
+        self.assertEqual(result.best_state.objective(), -40.0)

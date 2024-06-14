@@ -20,7 +20,7 @@ class RepairTest(BaseTest):
 
         # Parameters
         seed = 123456
-        destroy_ops = [DestroyOperators.Mutation2]
+        destroy_ops = [DestroyOperators.Mutation]
         repair_ops = [RepairOperators.Repair]
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))

@@ -83,7 +83,7 @@ class IndexTest(BaseTest):
         # Initial state and solution
         initial_state = _State(_instance, initial_index_to_val, initial_obj_val)
         # Assert
-        self.assertEqual(initial_obj_val, 2.999979654947926)
+        self.assertEqual(initial_obj_val, 8)
 
     def test_initial_destroy_t4(self):
         # Testing whether we get the correct index set
