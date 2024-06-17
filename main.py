@@ -12,6 +12,7 @@ from mabwiser.mab import LearningPolicy
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 
+seed = 1
 # Balans
 balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                              DestroyOperators.Dins,
@@ -23,13 +24,17 @@ balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                              DestroyOperators.Zero_Objective],
                 repair_ops=[RepairOperators.Repair],
                 selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=8, num_repair=1,
-                                     learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50), seed=1),
+                                     learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50), seed=seed),
                 accept=HillClimbing(),
-                stop=MaxIterations(100),seed=1)
-                # stop=MaxRuntime(30))
+#                stop=MaxIterations(100)
+                stop=MaxRuntime(1),
+                seed=seed)
 
-instance = "air05.mps"
-instance_path = os.path.join(Constants.DATA_MIP, instance)
+# instance = "air05.mps"
+# instance_path = os.path.join(Constants.DATA_MIP, instance)
+
+instance = "test2.5.cip"
+instance_path = os.path.join(Constants.DATA_TOY, instance)
 
 # # Run
 result = balans.solve(instance_path)

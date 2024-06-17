@@ -4,7 +4,7 @@ from typing import NamedTuple
 
 import numpy as np
 from alns.ALNS import ALNS
-from alns.Result import Result
+from alns.select import MABSelector
 from alns.accept import MovingAverageThreshold, GreatDeluge, HillClimbing
 from alns.accept import LateAcceptanceHillClimbing, NonLinearGreatDeluge, AlwaysAccept
 from alns.accept import RecordToRecordTravel, SimulatedAnnealing, RandomAccept
@@ -23,6 +23,8 @@ from balans.destroy.rins import rins, rins_random_50
 from balans.destroy.random_objective import zero_objective
 from balans.repair.repair import repair
 from balans.utils import Constants, check_false, check_true, create_rng
+
+from mabwiser.mab import LearningPolicy
 
 
 class DestroyOperators(NamedTuple):
@@ -133,7 +135,7 @@ class Balans:
     def initial_obj_val(self) -> float:
         return self._initial_obj_val
 
-    def solve(self, instance_path, index_to_val=None) -> Result:
+    def solve(self, instance_path, index_to_val=None):
         """
         instance_path: the path to the MIP instance file
         index_to_val: initial (partial) solution to warm start the variables
@@ -161,15 +163,28 @@ class Balans:
                                self.initial_obj_val, previous_index_to_val=self._initial_index_to_val)
 
         self.alns = ALNS(np.random.RandomState(self.alns_seed))
-        for op in self.destroy_ops:
-            # TODO don't add if not good
-            self.alns.add_destroy_operator(op)
+        # If the problem has no binary, remove Local Branching and Proximity
+        if len(self._instance.binary_indexes) == 0:
+            for op in self.destroy_ops:
+                if op != DestroyOperators.Local_Branching and op != DestroyOperators.Proximity:
+                    self.alns.add_destroy_operator(op)
+            self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy-2,
+                                        num_repair=self.selector.num_repair,
+                                        learning_policy=self.selector.learning_policy, seed=self.seed)
+        # If the problem has no integer, remove Dins and Rens
+        elif len(self._instance.integer_indexes) == 0:
+            for op in self.destroy_ops:
+                if op != DestroyOperators.Dins and op != DestroyOperators.Rens:
+                    self.alns.add_destroy_operator(op)
+            self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy-2,
+                                        num_repair=self.selector.num_repair,
+                                        learning_policy=self.selector, seed=self.seed)
+        else:
+            for op in self.destroy_ops:
+                self.alns.add_destroy_operator(op)
+
         for op in self.repair_ops:
             self.alns.add_repair_operator(op)
-
-        # TODO recreate selector, if a destroy operator is removed
-        # selector = MABSelector(reward=[5, 2, 1, 0.5], num_destroy=8, num_repair=1,
-        #                        learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
 
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
 
