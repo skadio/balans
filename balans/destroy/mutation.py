@@ -17,11 +17,11 @@ def _mutation(current: _State, rnd_state, delta) -> _State:
     discrete_indexes = current.instance.discrete_indexes
     destroy_size = int(delta * len(discrete_indexes)) + 1
 
-    print("\t Discrete index:", discrete_indexes)
+    # print("\t Discrete index:", discrete_indexes)
 
     mutation_set = set(rnd_state.choice(discrete_indexes, destroy_size))
 
-    print("\t Destroy set:", mutation_set)
+    # print("\t Destroy set:", mutation_set)
 
     return _State(next_state.instance,
                   next_state.index_to_val,

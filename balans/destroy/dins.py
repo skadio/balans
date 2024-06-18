@@ -10,7 +10,7 @@ def _dins(current: _State, rnd_state, delta) -> _State:
     #  If a variable is inside the Set J, it is part of the destroy set.
     #  Send the dins set (Set J) and local branching size to base_instance.
 
-    print("\t Selected Operator: ", "DINS")
+    print("*** Operator: ", "DINS")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()

@@ -3,7 +3,7 @@ from typing import Tuple, Dict, Any
 
 import math
 
-import pyscipopt
+# import pyscipopt
 import pyscipopt as scip
 
 from balans.utils import Constants
@@ -37,7 +37,7 @@ def get_model_and_vars(path, is_verbose=False, has_pre_solve=True, scip_seed=-1,
     # Get a random feasible solution by creating a random objective coefficient
     if has_random_obj:
         variables = model.getVars()
-        objective = pyscipopt.Expr()
+        objective = scip.Expr()
         for var in variables:
             coeff = random.uniform(0,1)
             if coeff != 0:

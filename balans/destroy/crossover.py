@@ -1,7 +1,10 @@
 import copy
 
 import math
+import pyscipopt as scip
+import random
 
+from balans.utils_scip import get_model_and_vars, get_index_to_val_and_objective
 from balans.base_state import _State
 from balans.utils_scip import random_solve
 
@@ -22,10 +25,28 @@ def crossover(current: _State, rnd_state) -> _State:
 
     # Dynamic Random Solution
     r1_seed = rnd_state.tomaxint()
-    r1_index_to_val, r1_obj_val = random_solve(path=current.instance.path, scip_seed=r1_seed,
-                                               has_random_obj=True, solution_count=1)
+    org_objective = current.instance.model.getObjective()
+    variables = current.instance.model.getVars()
+    objective = scip.Expr()
+    for var in variables:
+        coeff = random.uniform(0, 1)
+        if coeff != 0:
+            objective += coeff * var
+    objective.normalize()
+    current.instance.model.setObjective(objective)
+    current.instance.model.setParam("limits/bestsol", 1)
+    current.instance.model.setHeuristics(scip.SCIP_PARAMSETTING.OFF)
 
-    print("Random Solution1:", r1_index_to_val)
+    # Solve
+    current.instance.model.optimize()
+    r1_index_to_val, r1_obj_val = get_index_to_val_and_objective(current.instance.model)
+
+    # Get back the original model
+    current.instance.model.freeTransform()
+    current.instance.model.setParam("limits/bestsol", -1)
+    current.instance.model.setObjective(org_objective)
+    current.instance.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
+    # print("Random Solution1:", r1_index_to_val)
 
     #  If a discrete variable x_rand1 = x_inc, do not change it.
     indexes_with_same_value = [i for i in discrete_indexes if

@@ -12,7 +12,7 @@ from mabwiser.mab import LearningPolicy
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 
-seed = 1
+seed = 6
 # Balans
 balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                              DestroyOperators.Dins,
@@ -27,25 +27,23 @@ balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                                      learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50), seed=seed),
                 accept=HillClimbing(),
 #                stop=MaxIterations(100)
-                stop=MaxRuntime(1),
+                stop=MaxRuntime(100),
                 seed=seed)
 
-# instance = "air05.mps"
-# instance_path = os.path.join(Constants.DATA_MIP, instance)
-
-instance = "test2.5.cip"
-instance_path = os.path.join(Constants.DATA_TOY, instance)
+instance = "air05.mps"
+instance = "noswot.mps"
+instance_path = os.path.join(Constants.DATA_MIP, instance)
 
 # # Run
 result = balans.solve(instance_path)
-print("Best solution:", result.best_state.solution())
+# print("Best solution:", result.best_state.solution())
 print("Best solution objective:", result.best_state.objective())
 
 
-# Check for optimality
-# model = Model("scip")
-# model.readProblem(instance_path)
-# model.optimize()
-# solution = model.getBestSol()
-# print(solution)
-# print("Optimal value:", model.getObjVal())
+#Check for optimality
+model = Model("scip")
+model.readProblem(instance_path)
+model.optimize()
+solution = model.getBestSol()
+print(solution)
+print("Optimal value:", model.getObjVal())

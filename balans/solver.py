@@ -2,6 +2,8 @@ import os
 from typing import List, Optional, Dict
 from typing import NamedTuple
 
+import pyscipopt as scip
+
 import numpy as np
 from alns.ALNS import ALNS
 from alns.select import MABSelector
@@ -142,27 +144,26 @@ class Balans:
         """
         self._validate_solve_args(instance_path)
 
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        model.setParam("limits/maxorigsol", 0)
+        model.setParam("randomization/randomseedshift", self.seed)
+
         # Create instance from mip file
-        self._instance = _Instance(instance_path, self.seed)
+        self._instance = _Instance(model, self.seed)
 
-        # TODO
-        # Run initial solve here, get a copy of model and variables (don't free the model)
-        # Give the model to the initial_state below
-        # Implement a state.__copy()__ operator with reference to instance and model without copy
-        # Change all deep copies with state.copy()
-        # Initial solution
+        self._initial_index_to_val, self._initial_obj_val = self._instance.initial_solve(index_to_val=index_to_val)
 
-        self._instance.initial_solve(index_to_val=index_to_val)
-        self._initial_index_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True,
-                                                                                 index_to_val=index_to_val)
         print(">>> START objective:", self._initial_obj_val)
-        print(">>> START objective index:", self._initial_index_to_val)
+        # print(">>> START objective index:", self._initial_index_to_val)
 
         # Initial state and solution
         initial_state = _State(self._instance, self.initial_index_to_val,
                                self.initial_obj_val, previous_index_to_val=self._initial_index_to_val)
 
         self.alns = ALNS(np.random.RandomState(self.alns_seed))
+
         # If the problem has no binary, remove Local Branching and Proximity
         if len(self._instance.binary_indexes) == 0:
             for op in self.destroy_ops:
@@ -178,7 +179,7 @@ class Balans:
                     self.alns.add_destroy_operator(op)
             self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy-2,
                                         num_repair=self.selector.num_repair,
-                                        learning_policy=self.selector, seed=self.seed)
+                                        learning_policy=self.selector.learning_policy, seed=self.seed)
         else:
             for op in self.destroy_ops:
                 self.alns.add_destroy_operator(op)
