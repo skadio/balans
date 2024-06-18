@@ -2,99 +2,96 @@ import random
 from typing import Tuple, Dict, Any
 
 import math
-
-# import pyscipopt
 import pyscipopt as scip
-
 from balans.utils import Constants
 
 
-def get_model_and_vars(path, is_verbose=False, has_pre_solve=True, scip_seed=-1,
-                       solution_count=None, gap=None, time=None,
-                       is_lp_relaxation=False, has_random_obj=False):
-    # TODO need to think about what SCIP defaults to use, turn-off SCIP-ALNS? when benchmarking
-
-    # Model
-    model = scip.Model()
-
-    # Verbosity
-    if not is_verbose:
-        model.hideOutput()
-
-    # Instance
-    model.readProblem(path)
-
-    if not scip_seed == -1:
-        model.setParam("randomization/randomseedshift", scip_seed)
-
-    if not has_pre_solve:
-        model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
-
-    # Search only for the first incumbent
-    if solution_count == 1:
-        model.setParam("limits/bestsol", 1)
-
-    # Get a random feasible solution by creating a random objective coefficient
-    if has_random_obj:
-        variables = model.getVars()
-        objective = scip.Expr()
-        for var in variables:
-            coeff = random.uniform(0,1)
-            if coeff != 0:
-                objective += coeff * var
-        objective.normalize()
-        model.setObjective(objective)
-
-    # Search only for the first incumbent
-    if gap is not None:
-        model.setParam("limits/gap", gap)
-
-    if time is not None:
-        model.setParam("limits/time", time)
-
-    # Variables
-    variables = model.getVars()
-
-    # Continuous relaxation of the problem
-    if is_lp_relaxation:
-        for var in variables:
-            model.chgVarType(var, Constants.continuous)
-
-    # Return model and vars
-    return model, variables
-
-
-def lp_solve(path) -> Tuple[Dict[Any, float], float]:
-
-    # Build model and variables
-    model, variables = get_model_and_vars(path, is_lp_relaxation=True)
-
-    # Solve
-    model.optimize()
-    index_to_val, obj_value = get_index_to_val_and_objective(model)
-
-    # Reset problem
-    model.freeProb()
-
-    # Return solution and objective
-    return index_to_val, obj_value
-
-
-def random_solve(path, scip_seed=-1, gap=None, has_random_obj=False, solution_count=1) -> Tuple[Dict[Any, float], float]:
-
-    # Build model and variables
-    model, variables = get_model_and_vars(path, scip_seed=scip_seed, gap=gap,
-                                          has_random_obj=has_random_obj, solution_count=solution_count)
-
-    # Solve
-    model.optimize()
-    random_index_to_val, random_obj_value = get_index_to_val_and_objective(model)
-
-    # Reset problem
-    model.freeProb()
-
-    # Return solution
-    return random_index_to_val, random_obj_value
+# def get_model_and_vars(path, is_verbose=False, has_pre_solve=True, scip_seed=-1,
+#                        solution_count=None, gap=None, time=None,
+#                        is_lp_relaxation=False, has_random_obj=False):
+#     # TODO need to think about what SCIP defaults to use, turn-off SCIP-ALNS? when benchmarking
+#
+#     # Model
+#     model = scip.Model()
+#
+#     # Verbosity
+#     if not is_verbose:
+#         model.hideOutput()
+#
+#     # Instance
+#     model.readProblem(path)
+#
+#     if not scip_seed == -1:
+#         model.setParam("randomization/randomseedshift", scip_seed)
+#
+#     if not has_pre_solve:
+#         model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
+#
+#     # Search only for the first incumbent
+#     if solution_count == 1:
+#         model.setParam("limits/bestsol", 1)
+#
+#     # Get a random feasible solution by creating a random objective coefficient
+#     if has_random_obj:
+#         variables = model.getVars()
+#         objective = scip.Expr()
+#         for var in variables:
+#             coeff = random.uniform(0,1)
+#             if coeff != 0:
+#                 objective += coeff * var
+#         objective.normalize()
+#         model.setObjective(objective)
+#
+#     # Search only for the first incumbent
+#     if gap is not None:
+#         model.setParam("limits/gap", gap)
+#
+#     if time is not None:
+#         model.setParam("limits/time", time)
+#
+#     # Variables
+#     variables = model.getVars()
+#
+#     # Continuous relaxation of the problem
+#     if is_lp_relaxation:
+#         for var in variables:
+#             model.chgVarType(var, Constants.continuous)
+#
+#     # Return model and vars
+#     return model, variables
+#
+#
+# def lp_solve(path) -> Tuple[Dict[Any, float], float]:
+#
+#     # Build model and variables
+#     model, variables = get_model_and_vars(path, is_lp_relaxation=True)
+#
+#     # Solve
+#     model.optimize()
+#     index_to_val, obj_value = get_index_to_val_and_objective(model)
+#
+#     # Reset problem
+#     model.freeProb()
+#
+#     # Return solution and objective
+#     return index_to_val, obj_value
+#
+#
+# def random_solve(path, scip_seed=-1, gap=None, has_random_obj=False, solution_count=1) -> Tuple[Dict[Any, float], float]:
+#
+#     # Build model and variables
+#     model, variables = get_model_and_vars(path, scip_seed=scip_seed, gap=gap,
+#                                           has_random_obj=has_random_obj, solution_count=solution_count)
+#
+#     # Solve
+#     model.optimize()
+#     random_index_to_val, random_obj_value = get_index_to_val_and_objective(model)
+#
+#     # Reset problem
+#     model.freeProb()
+#
+#     # Return solution
+#     return random_index_to_val, random_obj_value
 
 
 def is_discrete(var_type) -> bool:

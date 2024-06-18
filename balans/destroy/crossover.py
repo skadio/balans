@@ -4,9 +4,8 @@ import math
 import pyscipopt as scip
 import random
 
-from balans.utils_scip import get_model_and_vars, get_index_to_val_and_objective
+from balans.utils_scip import get_index_to_val_and_objective
 from balans.base_state import _State
-from balans.utils_scip import random_solve
 
 
 # 3 DIFFERENT VERSIONS OF CROSS OVER IMPLEMENTED, ORIGINAL ONE IS CROSSOVER.

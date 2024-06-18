@@ -5,8 +5,8 @@ from typing import Tuple, Dict, Any
 from pyscipopt import quicksum, Expr
 import pyscipopt as scip
 
-from balans.utils_scip import get_model_and_vars, get_index_to_val_and_objective
-from balans.utils_scip import lp_solve, is_binary, is_discrete, split_binary_vars
+from balans.utils_scip import get_index_to_val_and_objective
+from balans.utils_scip import is_binary, is_discrete, split_binary_vars
 from balans.utils import Constants
 
 
