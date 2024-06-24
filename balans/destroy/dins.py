@@ -28,7 +28,7 @@ def _dins(current: _State, rnd_state, delta) -> _State:
     # to change at most half of the binary variables <= k in local branching
     local_branching_size = int(delta * len(binary_indexes))
 
-    print("\t DINS set:", set_j)
+    # print("\t DINS set:", set_j)
     print("\t DINS Binary size:", local_branching_size)
 
     return _State(next_state.instance,

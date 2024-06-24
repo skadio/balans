@@ -26,7 +26,7 @@ def rins(current: _State, rnd_state) -> _State:
     # Else potentially change it
     destroy_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
 
-    print("\t Destroy set:", destroy_set)
+    # print("\t Destroy set:", destroy_set)
     return _State(next_state.instance,
                   next_state.index_to_val,
                   next_state.obj_val,

@@ -2,6 +2,7 @@ import os
 from typing import List, Optional, Dict
 from typing import NamedTuple
 
+import alns.select.RandomSelect
 import pyscipopt as scip
 
 import numpy as np
@@ -164,28 +165,32 @@ class Balans:
 
         self.alns = ALNS(np.random.RandomState(self.alns_seed))
 
+        count = 0
         # If the problem has no binary, remove Local Branching and Proximity
         if len(self._instance.binary_indexes) == 0:
             for op in self.destroy_ops:
                 if op != DestroyOperators.Local_Branching and op != DestroyOperators.Proximity:
                     self.alns.add_destroy_operator(op)
-            self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy-2,
-                                        num_repair=self.selector.num_repair,
-                                        learning_policy=self.selector.learning_policy, seed=self.seed)
+                else:
+                    count += 1
         # If the problem has no integer, remove Dins and Rens
         elif len(self._instance.integer_indexes) == 0:
             for op in self.destroy_ops:
                 if op != DestroyOperators.Dins and op != DestroyOperators.Rens:
                     self.alns.add_destroy_operator(op)
-            self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy-2,
-                                        num_repair=self.selector.num_repair,
-                                        learning_policy=self.selector.learning_policy, seed=self.seed)
+                else:
+                    count += 1
         else:
             for op in self.destroy_ops:
                 self.alns.add_destroy_operator(op)
 
         for op in self.repair_ops:
             self.alns.add_repair_operator(op)
+
+        if isinstance(self.selector, MABSelector):
+            self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy - count,
+                                        num_repair=self.selector.num_repair,
+                                        learning_policy=self.selector.mab.learning_policy, seed=self.seed)
 
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
 

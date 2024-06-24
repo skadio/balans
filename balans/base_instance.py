@@ -131,8 +131,8 @@ class _Instance:
                 if coeff != 0:
                     objective += coeff * var
             objective.normalize()
-            self.model.setObjective(objective)
-            self.model.setParam("limits/bestsol", 1)
+            self.model.setObjective(objective, self.sense)
+            self.model.setParam("limits/solutions", 1)
             self.model.setHeuristics(scip.SCIP_PARAMSETTING.OFF)
 
         # If no destroy, don't solve, quit with previous objective
@@ -141,6 +141,11 @@ class _Instance:
             print("\t Current Obj:", obj_val)
             # print("\t index_to_val: ", index_to_val)
             return index_to_val, obj_val
+
+        if local_branching_size > 0:
+            self.model.setParam("limits/time", 600)
+        else:
+            self.model.setParam("limits/time", 120)
 
         # If destroy, solve for next state
         self.model.optimize()
@@ -153,35 +158,50 @@ class _Instance:
 
             # Get back the original model
             self.model.freeTransform()
-            self.model.setParam("limits/bestsol", -1)
+            self.model.setParam("limits/solutions", -1)
             self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
             for con in cons:
                 self.model.delCons(con)
-            self.model.setObjective(org_objective)
+            self.model.setObjective(org_objective, self.sense)
             if is_proximity:
                 self.model.delVar(z)
+            return index_to_val, obj_val
 
+        if has_random_obj and self.model.getStatus() == "timelimit":
+            print("Model infeasible, go back to previous state")
+            print("\t Current Obj:", obj_val)
+            # print("\t index_to_val: ", index_to_val)
+
+            # Get back the original model
+            self.model.freeTransform()
+            self.model.setParam("limits/solutions", -1)
+            self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
+            self.model.setObjective(org_objective, self.sense)
             return index_to_val, obj_val
 
         index_to_val, obj_val = get_index_to_val_and_objective(self.model)
 
         # Get back the original model
         self.model.freeTransform()
-        self.model.setParam("limits/bestsol", -1)
+        self.model.setParam("limits/solutions", -1)
+        self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
         for con in cons:
             self.model.delCons(con)
-        self.model.setObjective(org_objective)
+        self.model.setObjective(org_objective, self.sense)
         if is_proximity:
             self.model.delVar(z)
 
         # Need to find the original obj value for transformed objectives
         if is_proximity or has_random_obj:
+            # Solution of transformed problem
+            var_to_val = self.model.createSol()
+            for i in range(self.model.getNVars()):
+                var_to_val[variables[i]] = index_to_val[i]
+
             # Objective value of the solution found in transformed
             print("\t Transformed obj: ", obj_val)
-            # Solution of transformed problem
-            obj_val = 0
-            for key, value in org_objective.terms.items():
-                obj_val += index_to_val[key[0].getIndex()] * value
+            obj_val = self.model.getSolObjVal(var_to_val)
+            self.model.freeSol(var_to_val)
 
         print("\t Solve DONE!", obj_val)
         # print("\t index_to_val: ", index_to_val)
@@ -194,15 +214,8 @@ class _Instance:
         # Initial solve extracts static instance features
         self.extract_base_features(self.model, variables)
 
-        # Get a random feasible solution by creating a random objective coefficient
-        org_objective = self.model.getObjective()
-        objective = scip.Expr()
-        for var in variables:
-            coeff = random.uniform(0, 1)
-            if coeff != 0:
-                objective += coeff * var
-        objective.normalize()
-        self.model.setObjective(objective)
+        if self.sense == Constants.maximize:
+            self.model.setObjective(-self.model.getObjective())
 
         # If a solution is given fix it. Can be partial (denoted by None value)
         cons = []
@@ -211,27 +224,15 @@ class _Instance:
                 if index_to_val[var.getIndex()] is not None:
                     cons.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
-        # Search only for the first incumbent
-        self.model.setParam("limits/bestsol", 1)
-        self.model.setHeuristics(scip.SCIP_PARAMSETTING.OFF)
-
+        self.model.setParam("limits/time", 20)
         # Solve
         self.model.optimize()
         index_to_val, obj_val = get_index_to_val_and_objective(self.model)
 
         # Get back the original model
-        # self.model.freeProb()
         self.model.freeTransform()
-        self.model.setParam("limits/bestsol", -1)
         for con in cons:
             self.model.delCons(con)
-        self.model.setObjective(org_objective)
-        self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
-
-        # Solution of transformed problem
-        obj_val = 0
-        for key, value in org_objective.terms.items():
-            obj_val += index_to_val[key[0].getIndex()] * value
 
         # Solve LP relaxation and save it
         int_index = []

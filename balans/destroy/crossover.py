@@ -23,17 +23,16 @@ def crossover(current: _State, rnd_state) -> _State:
     discrete_indexes = current.instance.discrete_indexes
 
     # Dynamic Random Solution
-    r1_seed = rnd_state.tomaxint()
     org_objective = current.instance.model.getObjective()
     variables = current.instance.model.getVars()
     objective = scip.Expr()
     for var in variables:
-        coeff = random.uniform(0, 1)
+        coeff = rnd_state.uniform(0, 1)
         if coeff != 0:
             objective += coeff * var
     objective.normalize()
-    current.instance.model.setObjective(objective)
-    current.instance.model.setParam("limits/bestsol", 1)
+    current.instance.model.setObjective(objective, current.instance.sense)
+    current.instance.model.setParam("limits/solutions", 1)
     current.instance.model.setHeuristics(scip.SCIP_PARAMSETTING.OFF)
 
     # Solve
@@ -42,8 +41,8 @@ def crossover(current: _State, rnd_state) -> _State:
 
     # Get back the original model
     current.instance.model.freeTransform()
-    current.instance.model.setParam("limits/bestsol", -1)
-    current.instance.model.setObjective(org_objective)
+    current.instance.model.setParam("limits/solutions", -1)
+    current.instance.model.setObjective(org_objective, current.instance.sense)
     current.instance.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
     # print("Random Solution1:", r1_index_to_val)
 
@@ -54,7 +53,7 @@ def crossover(current: _State, rnd_state) -> _State:
     # Else potentially change it
     crossover_set = set([i for i in discrete_indexes if i not in indexes_with_same_value])
 
-    print("\t Destroy set:", crossover_set)
+    # print("\t Destroy set:", crossover_set)
     return _State(next_state.instance,
                   next_state.index_to_val,
                   next_state.obj_val,
