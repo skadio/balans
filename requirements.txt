@@ -1,4 +1,4 @@
 alns[mabwiser]
 mabwiser
-numpy
+numpy==1.26.4
 pyscipopt
