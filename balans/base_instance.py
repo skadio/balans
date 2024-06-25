@@ -216,6 +216,7 @@ class _Instance:
 
         if self.sense == Constants.maximize:
             self.model.setObjective(-self.model.getObjective())
+            self.sense = Constants.minimize
 
         # If a solution is given fix it. Can be partial (denoted by None value)
         cons = []
