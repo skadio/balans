@@ -27,12 +27,12 @@ def crossover(current: _State, rnd_state) -> _State:
     variables = current.instance.model.getVars()
     objective = scip.Expr()
     for var in variables:
-        coeff = rnd_state.uniform(0, 1)
+        coeff = rnd_state.uniform(-1, 1)
         if coeff != 0:
             objective += coeff * var
     objective.normalize()
     current.instance.model.setObjective(objective, current.instance.sense)
-    current.instance.model.setParam("limits/solutions", 1)
+    current.instance.model.setParam("limits/bestsol", 1)
     current.instance.model.setHeuristics(scip.SCIP_PARAMSETTING.OFF)
 
     # Solve
@@ -41,7 +41,7 @@ def crossover(current: _State, rnd_state) -> _State:
 
     # Get back the original model
     current.instance.model.freeTransform()
-    current.instance.model.setParam("limits/solutions", -1)
+    current.instance.model.setParam("limits/bestsol", -1)
     current.instance.model.setObjective(org_objective, current.instance.sense)
     current.instance.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
     # print("Random Solution1:", r1_index_to_val)

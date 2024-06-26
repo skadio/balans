@@ -127,12 +127,12 @@ class _Instance:
             variables = self.model.getVars()
             objective = Expr()
             for var in variables:
-                coeff = random.uniform(0,1)
+                coeff = random.uniform(-1,1)
                 if coeff != 0:
                     objective += coeff * var
             objective.normalize()
             self.model.setObjective(objective, self.sense)
-            self.model.setParam("limits/solutions", 1)
+            self.model.setParam("limits/bestsol", 1)
             self.model.setHeuristics(scip.SCIP_PARAMSETTING.OFF)
 
         # If no destroy, don't solve, quit with previous objective
@@ -143,7 +143,7 @@ class _Instance:
             return index_to_val, obj_val
 
         if local_branching_size > 0:
-            self.model.setParam("limits/time", 600)
+            self.model.setParam("limits/time", 240)
         else:
             self.model.setParam("limits/time", 120)
 
@@ -158,7 +158,7 @@ class _Instance:
 
             # Get back the original model
             self.model.freeTransform()
-            self.model.setParam("limits/solutions", -1)
+            self.model.setParam("limits/bestsol", -1)
             self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
             for con in cons:
                 self.model.delCons(con)
@@ -174,7 +174,7 @@ class _Instance:
 
             # Get back the original model
             self.model.freeTransform()
-            self.model.setParam("limits/solutions", -1)
+            self.model.setParam("limits/bestsol", -1)
             self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
             self.model.setObjective(org_objective, self.sense)
             return index_to_val, obj_val
