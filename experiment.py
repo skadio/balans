@@ -62,8 +62,10 @@ if __name__ == "__main__":
     parser.add_argument("--instance")
     args = parser.parse_args()
 
-    approaches = ["local_branching", "crossover", "mutation", "proximity", "rins",
-                  "all_EpsilonGreedy", "all_Softmax", "all_UCB"]
+    # approaches = ["local_branching", "crossover", "mutation", "proximity", "rins",
+    #               "all_EpsilonGreedy", "all_Softmax", "all_UCB"]
+
+    approaches = ["all_Softmax"]
 
     seed = int(args.instance.split("_")[-1].split(".")[0]) + 2000
     limit = 360
@@ -134,7 +136,7 @@ if __name__ == "__main__":
                                        DestroyOperators.Rens],
                           repair_ops=[RepairOperators.Repair],
                           selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=7, num_repair=1,
-                                               learning_policy=LearningPolicy.UCB1(), seed=seed),
+                                               learning_policy=LearningPolicy.UCB1(alpha = 0.5), seed=seed),
                           accept=HillClimbing(),
                           stop=MaxRuntime(limit),
                           seed=seed)
@@ -168,12 +170,12 @@ if __name__ == "__main__":
     init_index_to_val = dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
 
     # Collect runtime on vanilla scip
-    model.setParam("limits/time", limit + 20)
-    model.optimize()
-    event.scip_log[0] = event.scip_log[0][1:]
-    event.scip_log[1] = event.scip_log[1][1:]
-    with open('results/' + args.domain + '/scip/' + args.instance.split("/")[-1], "wb") as fp:
-        pickle.dump(event.scip_log, fp)
+    # model.setParam("limits/time", limit + 20)
+    # model.optimize()
+    # event.scip_log[0] = event.scip_log[0][1:]
+    # event.scip_log[1] = event.scip_log[1][1:]
+    # with open('results/' + args.domain + '/scip/' + args.instance.split("/")[-1], "wb") as fp:
+    #     pickle.dump(event.scip_log, fp)
 
     for approach in approaches:
         if not os.path.exists('results/' + args.domain + '/' + approach):

@@ -176,7 +176,11 @@ class _Instance:
             self.model.freeTransform()
             self.model.setParam("limits/bestsol", -1)
             self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
+            for con in cons:
+                self.model.delCons(con)
             self.model.setObjective(org_objective, self.sense)
+            if is_proximity:
+                self.model.delVar(z)
             return index_to_val, obj_val
 
         index_to_val, obj_val = get_index_to_val_and_objective(self.model)

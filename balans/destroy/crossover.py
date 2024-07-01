@@ -37,6 +37,17 @@ def crossover(current: _State, rnd_state) -> _State:
 
     # Solve
     current.instance.model.optimize()
+
+    if current.instance.model.getNSols() == 0:
+        current.instance.model.freeTransform()
+        current.instance.model.setParam("limits/bestsol", -1)
+        current.instance.model.setObjective(org_objective, current.instance.sense)
+        current.instance.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
+        return _State(next_state.instance,
+                  next_state.index_to_val,
+                  next_state.obj_val,
+                  destroy_set=[])
+
     r1_index_to_val, r1_obj_val = get_index_to_val_and_objective(current.instance.model)
 
     # Get back the original model
