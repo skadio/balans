@@ -28,4 +28,4 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
 
 
 def local_branching_50(current: _State, rnd_state) -> _State:
-    return _local_branching(current, rnd_state, delta=0.10)
+    return _local_branching(current, rnd_state, delta=0.20)

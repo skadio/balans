@@ -143,9 +143,9 @@ class _Instance:
             return index_to_val, obj_val
 
         if local_branching_size > 0:
-            self.model.setParam("limits/time", 240)
+            self.model.setParam("limits/time", 60)
         else:
-            self.model.setParam("limits/time", 120)
+            self.model.setParam("limits/time", 12)
 
         # If destroy, solve for next state
         self.model.optimize()
@@ -167,8 +167,8 @@ class _Instance:
                 self.model.delVar(z)
             return index_to_val, obj_val
 
-        if has_random_obj and self.model.getStatus() == "timelimit":
-            print("Model infeasible, go back to previous state")
+        if self.model.getNSols() == 0:
+            print("No solution, go back to previous state")
             print("\t Current Obj:", obj_val)
             # print("\t index_to_val: ", index_to_val)
 
