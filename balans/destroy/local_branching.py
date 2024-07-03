@@ -18,14 +18,14 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
     binary_indexes = current.instance.binary_indexes
 
     # <= k in local branching
-    local_branching_size = rnd_state.randint(1, int(delta * len(binary_indexes))+1)
+    local_branching_size = min(int(delta * current.adaptive * len(binary_indexes)),
+                               int(current.max_fraction * len(binary_indexes)))
     print("Local Branching Size:", local_branching_size)
 
-    return _State(next_state.instance,
-                  next_state.index_to_val,
-                  next_state.obj_val,
-                  local_branching_size=local_branching_size)
+    next_state.local_branching_size = local_branching_size
+
+    return next_state
 
 
-def local_branching_50(current: _State, rnd_state) -> _State:
-    return _local_branching(current, rnd_state, delta=0.20)
+def local_branching_10(current: _State, rnd_state) -> _State:
+    return _local_branching(current, rnd_state, delta=0.15)

@@ -1,7 +1,7 @@
 import copy
 
 from balans.base_state import _State
-
+from balans.utils import Constants
 
 def proximity(current: _State, rnd_state) -> _State:
     # Objective function modification
@@ -19,8 +19,8 @@ def proximity(current: _State, rnd_state) -> _State:
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
 
-    return _State(next_state.instance,
-                  next_state.index_to_val,
-                  next_state.obj_val,
-                  is_proximity=True)
+    is_proximity = min(Constants.theta * current.adaptive, current.max_fraction)
+    next_state.is_proximity = is_proximity
+
+    return next_state
 

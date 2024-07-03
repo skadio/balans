@@ -31,6 +31,9 @@ class _State:
         self.index_to_val = index_to_val  # index defined by SCIP var.getIndex()
         self.obj_val = obj_val
 
+        self.adaptive = 1.02
+        self.max_fraction = 0.5
+
         # State receives the solve settings from the operators
         # and passes to instance.solve() and updates its solution and objective
         self.destroy_set = destroy_set
@@ -42,7 +45,7 @@ class _State:
         self.is_proximity = is_proximity
 
     def __deepcopy__(self, memo):
-        return deepcopy_with_sharing(self, shared_attribute_names=["instance"], memo=memo)
+        return deepcopy_with_sharing(self, shared_attribute_names=["instance", "adaptive"], memo=memo)
 
     def solution(self):
         return self.index_to_val
@@ -60,14 +63,19 @@ class _State:
 
     def solve_and_update(self):
         # Solve the current state with the destroyed variables and update
-        self.index_to_val, self.obj_val = self.instance.solve(index_to_val=self.index_to_val,
-                                                              obj_val=self.obj_val,
-                                                              destroy_set=self.destroy_set,
-                                                              dins_set=self.dins_set,
-                                                              rens_float_set=self.rens_float_set,
-                                                              has_random_obj=self.has_random_obj,
-                                                              local_branching_size=self.local_branching_size,
-                                                              is_proximity=self.is_proximity)
+        self.index_to_val, self.obj_val, improvement = self.instance.solve(
+                                                                  index_to_val=self.index_to_val,
+                                                                  obj_val=self.obj_val,
+                                                                  destroy_set=self.destroy_set,
+                                                                  dins_set=self.dins_set,
+                                                                  rens_float_set=self.rens_float_set,
+                                                                  has_random_obj=self.has_random_obj,
+                                                                  local_branching_size=self.local_branching_size,
+                                                                  is_proximity=self.is_proximity)
+        if improvement:
+            self.adaptive = self.adaptive * 1.02
+        else:
+            self.adaptive = self.adaptive
 
 
 def deepcopy_with_sharing(obj, shared_attribute_names, memo=None):

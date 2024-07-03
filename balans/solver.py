@@ -16,9 +16,10 @@ from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterio
 
 from balans.base_instance import _Instance
 from balans.base_state import _State
-from balans.destroy.crossover import crossover
+from balans.destroy.crossover import crossover, crossover_random_25
 from balans.destroy.dins import dins
-from balans.destroy.local_branching import local_branching_50
+from balans.destroy.local_branching import local_branching_10
+from balans.destroy.lb_relax import lb_relax_25
 from balans.destroy.mutation import mutation_25, mutation_50, mutation_75, mutation_binary_50
 from balans.destroy.proximity import proximity
 from balans.destroy.rens import rens_50
@@ -27,13 +28,12 @@ from balans.destroy.random_objective import zero_objective
 from balans.repair.repair import repair
 from balans.utils import Constants, check_false, check_true, create_rng
 
-from mabwiser.mab import LearningPolicy
-
 
 class DestroyOperators(NamedTuple):
     Crossover = crossover
     Dins = dins
-    Local_Branching = local_branching_50
+    Local_Branching = local_branching_10
+    LB_relax = lb_relax_25
     Mutation = mutation_25
     Mutation2 = mutation_50
     Mutation3 = mutation_75
@@ -52,8 +52,8 @@ class RepairOperators(NamedTuple):
 # Type Declarations
 DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Dins),
-               # type(DestroyOperators.Dins_Random),
                type(DestroyOperators.Local_Branching),
+               type(DestroyOperators.LB_relax),
                type(DestroyOperators.Mutation),
                type(DestroyOperators.Mutation2),
                type(DestroyOperators.Mutation3),

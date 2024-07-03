@@ -62,13 +62,13 @@ if __name__ == "__main__":
     parser.add_argument("--instance")
     args = parser.parse_args()
 
-    # approaches = ["local_branching", "crossover", "mutation", "proximity", "rins",
-    #               "all_EpsilonGreedy", "all_Softmax", "all_UCB"]
+    # approaches = ["lb_relax", "local_branching", "crossover", "mutation", "proximity",
+    #               "all_EpsilonGreedy", "all_Softmax"]
 
     approaches = ["all_Softmax"]
 
     seed = int(args.instance.split("_")[-1].split(".")[0]) + 2000
-    limit = 360
+    limit = 3600
     approach_to_solver_dict = {
         "crossover": Balans(destroy_ops=[DestroyOperators.Crossover],
                             repair_ops=[RepairOperators.Repair],
@@ -94,7 +94,7 @@ if __name__ == "__main__":
                             accept=HillClimbing(),
                             stop=MaxRuntime(limit),
                             seed=seed),
-        "rins": Balans(destroy_ops=[DestroyOperators.Rins],
+        "lb_relax": Balans(destroy_ops=[DestroyOperators.LB_relax],
                        repair_ops=[RepairOperators.Repair],
                        selector=RandomSelect(num_destroy=1, num_repair=1),
                        accept=HillClimbing(),
@@ -104,7 +104,7 @@ if __name__ == "__main__":
                                                  DestroyOperators.Dins,
                                                  DestroyOperators.Mutation,
                                                  DestroyOperators.Local_Branching,
-                                                 DestroyOperators.Rins,
+                                                 DestroyOperators.LB_relax,
                                                  DestroyOperators.Proximity,
                                                  DestroyOperators.Rens],
                                     repair_ops=[RepairOperators.Repair],
@@ -118,7 +118,7 @@ if __name__ == "__main__":
                                            DestroyOperators.Dins,
                                            DestroyOperators.Mutation,
                                            DestroyOperators.Local_Branching,
-                                           DestroyOperators.Rins,
+                                           DestroyOperators.LB_relax,
                                            DestroyOperators.Proximity,
                                            DestroyOperators.Rens],
                               repair_ops=[RepairOperators.Repair],
@@ -131,12 +131,12 @@ if __name__ == "__main__":
                                        DestroyOperators.Dins,
                                        DestroyOperators.Mutation,
                                        DestroyOperators.Local_Branching,
-                                       DestroyOperators.Rins,
+                                       DestroyOperators.LB_relax,
                                        DestroyOperators.Proximity,
                                        DestroyOperators.Rens],
                           repair_ops=[RepairOperators.Repair],
                           selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=7, num_repair=1,
-                                               learning_policy=LearningPolicy.UCB1(alpha = 0.5), seed=seed),
+                                               learning_policy=LearningPolicy.UCB1(alpha=0.5), seed=seed),
                           accept=HillClimbing(),
                           stop=MaxRuntime(limit),
                           seed=seed)

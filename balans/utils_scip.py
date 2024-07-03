@@ -119,3 +119,16 @@ def split_binary_vars(variables, binary_indexes, index_to_val):
                 one_binary_vars.append(var)
 
     return zero_binary_vars, one_binary_vars
+
+def sort_list_with_indices(lst):
+    # Enumerate the list to keep track of original indices
+    indexed_list = [(val, idx) for idx, val in enumerate(lst)]
+
+    # Sort the indexed list based on the values
+    sorted_list = sorted(indexed_list, key=lambda x: x[0], reverse=True)
+
+    # Extract the sorted values and indices
+    sorted_values = [val for val, _ in sorted_list]
+    sorted_indices = [idx for _, idx in sorted_list]
+
+    return sorted_values, sorted_indices

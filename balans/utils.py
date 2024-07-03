@@ -47,7 +47,7 @@ class Constants(NamedTuple):
     random_gap_ub2 = 0.90
 
     # theta for proximity destroy heuristic
-    theta = 1
+    theta = 0.05
 
 
 def create_rng(seed):

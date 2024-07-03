@@ -15,18 +15,17 @@ def _mutation(current: _State, rnd_state, delta) -> _State:
 
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
-    destroy_size = int(delta * len(discrete_indexes)) + 1
+    destroy_size = min(int(delta * current.adaptive * len(discrete_indexes)),
+                       int(current.max_fraction * len(discrete_indexes)))
 
     # print("\t Discrete index:", discrete_indexes)
 
-    mutation_set = set(rnd_state.choice(discrete_indexes, destroy_size))
+    mutation_set = set(rnd_state.choice(discrete_indexes, destroy_size, replace=False))
 
     # print("\t Destroy set:", mutation_set)
+    next_state.destroy_set = mutation_set
 
-    return _State(next_state.instance,
-                  next_state.index_to_val,
-                  next_state.obj_val,
-                  destroy_set=mutation_set)
+    return next_state
 
 
 def mutation_25(current: _State, rnd_state) -> _State:
