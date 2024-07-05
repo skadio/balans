@@ -37,7 +37,7 @@ class _Instance:
               rens_float_set=None,
               has_random_obj=False,
               local_branching_size=0,
-              is_proximity=False) -> Tuple[Dict[Any, float], float, bool]:
+              is_proximity=False) -> Tuple[Dict[Any, float], float]:
 
         print("\t Solve")
         # flag to identify if any constraint added or objective function changed
@@ -94,9 +94,9 @@ class _Instance:
             # a slack variable z to prevent infeasible solution, \theta = 1
             z = self.model.addVar(vtype=Constants.continuous, lb=0)
             if self.sense == Constants.minimize:
-                cons.append(self.model.addCons(self.model.getObjective() <= obj_val * (1 - is_proximity) + z))
+                cons.append(self.model.addCons(self.model.getObjective() <= obj_val - is_proximity + z))
             else:
-                cons.append(self.model.addCons(self.model.getObjective() >= obj_val * (1 + is_proximity) + z))
+                cons.append(self.model.addCons(self.model.getObjective() >= obj_val + is_proximity + z))
 
             zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
             # if x_inc=0, new objective expression is x_inc.
@@ -141,7 +141,7 @@ class _Instance:
             print("No destroy to apply, don't call optimize()")
             print("\t Current Obj:", obj_val)
             # print("\t index_to_val: ", index_to_val)
-            return index_to_val, obj_val, False
+            return index_to_val, obj_val
 
         if local_branching_size > 0:
             self.model.setParam("limits/time", 600)
@@ -166,7 +166,7 @@ class _Instance:
             self.model.setObjective(org_objective, self.sense)
             if is_proximity:
                 self.model.delVar(z)
-            return index_to_val, obj_val, False
+            return index_to_val, obj_val
 
         if self.model.getNSols() == 0:
             print("No solution, go back to previous state")
@@ -182,7 +182,7 @@ class _Instance:
             self.model.setObjective(org_objective, self.sense)
             if is_proximity:
                 self.model.delVar(z)
-            return index_to_val, obj_val, False
+            return index_to_val, obj_val
 
         if self.model.getStage() == 9 or 10:
             index_to_val, obj_val = get_index_to_val_and_objective(self.model)
@@ -201,7 +201,7 @@ class _Instance:
             self.model.setObjective(org_objective, self.sense)
             if is_proximity:
                 self.model.delVar(z)
-            return index_to_val, obj_val, False
+            return index_to_val, obj_val
 
         # Get back the original model
         self.model.freeTransform()
@@ -228,10 +228,8 @@ class _Instance:
         print("\t Solve DONE!", obj_val)
         # print("\t index_to_val: ", index_to_val)
 
-        if obj_val < org_obj_val:
-            return index_to_val, obj_val, True
-        else:
-            return index_to_val, obj_val, False
+        return index_to_val, obj_val
+
 
     def initial_solve(self, index_to_val) -> Tuple[Dict[Any, float], float]:
         variables = self.model.getVars()

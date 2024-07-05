@@ -168,12 +168,12 @@ if __name__ == "__main__":
     init_index_to_val = dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
 
     # Collect runtime on vanilla scip
-    # model.setParam("limits/time", limit + 20)
-    # model.optimize()
-    # event.scip_log[0] = event.scip_log[0][1:]
-    # event.scip_log[1] = event.scip_log[1][1:]
-    # with open('results/' + args.domain + '/scip/' + args.instance.split("/")[-1], "wb") as fp:
-    #     pickle.dump(event.scip_log, fp)
+    model.setParam("limits/time", limit + 20)
+    model.optimize()
+    event.scip_log[0] = event.scip_log[0][1:]
+    event.scip_log[1] = event.scip_log[1][1:]
+    with open('results/' + args.domain + '/scip/' + args.instance.split("/")[-1], "wb") as fp:
+        pickle.dump(event.scip_log, fp)
 
     for approach in approaches:
         if not os.path.exists('results/' + args.domain + '/' + approach):

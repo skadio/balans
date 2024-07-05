@@ -19,8 +19,7 @@ def proximity(current: _State, rnd_state) -> _State:
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
 
-    is_proximity = Constants.theta * min(current.adaptive, 2)
-    next_state.is_proximity = is_proximity
+    next_state.is_proximity = Constants.theta
 
     return next_state
 
