@@ -15,8 +15,9 @@ def _mutation(current: _State, rnd_state, delta) -> _State:
 
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
-    destroy_size = min(int(delta * current.adaptive * len(discrete_indexes)),
-                       int(current.max_fraction * len(discrete_indexes)))
+    # destroy_size = min(int(delta * current.adaptive * len(discrete_indexes)),
+    #                    int(current.max_fraction * len(discrete_indexes)))
+    destroy_size = int(delta * len(discrete_indexes))
 
     # print("\t Discrete index:", discrete_indexes)
 

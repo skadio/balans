@@ -62,10 +62,8 @@ if __name__ == "__main__":
     parser.add_argument("--instance")
     args = parser.parse_args()
 
-    # approaches = ["lb_relax", "local_branching", "crossover", "mutation", "proximity",
-    #               "all_EpsilonGreedy", "all_Softmax"]
-
-    approaches = ["all_Softmax"]
+    approaches = ["lb_relax", "local_branching", "crossover", "mutation", "proximity",
+                  "all_EpsilonGreedy", "all_Softmax"]
 
     seed = int(args.instance.split("_")[-1].split(".")[0]) + 2000
     limit = 3600

@@ -53,6 +53,7 @@ class _Instance:
         # DESTROY used for Crossover, Mutation, RINS, LB relax
         if destroy_set:
             if len(destroy_set) > 0:
+                print(destroy_set)
                 has_destroy = True
                 for var in variables:
                     # IF not in destroy, fix it
@@ -143,7 +144,7 @@ class _Instance:
             return index_to_val, obj_val, False
 
         if local_branching_size > 0:
-            self.model.setParam("limits/time", 300)
+            self.model.setParam("limits/time", 600)
         else:
             self.model.setParam("limits/time", 120)
 
@@ -183,7 +184,24 @@ class _Instance:
                 self.model.delVar(z)
             return index_to_val, obj_val, False
 
-        index_to_val, obj_val = get_index_to_val_and_objective(self.model)
+        if self.model.getStage() == 9 or 10:
+            index_to_val, obj_val = get_index_to_val_and_objective(self.model)
+        else:
+            print(self.model.getStage())
+            print("Don't know why, go back to previous state")
+            print("\t Current Obj:", obj_val)
+            # print("\t index_to_val: ", index_to_val)
+
+            # Get back the original model
+            self.model.freeTransform()
+            self.model.setParam("limits/bestsol", -1)
+            self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
+            for con in cons:
+                self.model.delCons(con)
+            self.model.setObjective(org_objective, self.sense)
+            if is_proximity:
+                self.model.delVar(z)
+            return index_to_val, obj_val, False
 
         # Get back the original model
         self.model.freeTransform()

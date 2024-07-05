@@ -16,8 +16,7 @@ def lb_relax(current: _State, rnd_state, delta) -> _State:
 
     variables = current.instance.model.getVars()
     binary_indexes = current.instance.binary_indexes
-    local_branching_size = min(int(delta * current.adaptive * len(binary_indexes)),
-                               int(current.max_fraction * len(binary_indexes)))
+    local_branching_size = int(len(binary_indexes) * 0.025)
     zero_binary_vars, one_binary_vars = split_binary_vars(variables,
                                                           binary_indexes, current.index_to_val)
 
@@ -71,21 +70,21 @@ def lb_relax(current: _State, rnd_state, delta) -> _State:
 
     # Else potentially change it
     non_zero_set = set([i for i in binary_indexes if i not in indexes_with_same_value])
-    zero_set = set([i for i in binary_indexes if i in indexes_with_same_value])
+    # zero_set = set([i for i in binary_indexes if i in indexes_with_same_value])
+    #
+    # if len(non_zero_set) >= local_branching_size:
+    #     diff = [abs(lp_index_to_val[i] - current.index_to_val[i]) if i in binary_indexes else 0
+    #             for i in range(len(lp_index_to_val))]
+    #     diff_value, diff_index = sort_list_with_indices(diff)
+    #     lb_relax_set = set(diff_index[:local_branching_size])
+    # else:
+    #     random_set = set(rnd_state.choice(list(zero_set), local_branching_size - len(non_zero_set), replace=False))
+    #     lb_relax_set = non_zero_set | random_set
 
-    if len(non_zero_set) >= local_branching_size:
-        diff = [abs(lp_index_to_val[i] - current.index_to_val[i]) if i in binary_indexes else 0
-                for i in range(len(lp_index_to_val))]
-        diff_value, diff_index = sort_list_with_indices(diff)
-        lb_relax_set = set(diff_index[:local_branching_size])
-    else:
-        random_set = set(rnd_state.choice(list(zero_set), local_branching_size - len(non_zero_set), replace=False))
-        lb_relax_set = non_zero_set | random_set
-
-    next_state.destroy_set = lb_relax_set
+    next_state.destroy_set = non_zero_set
 
     return next_state
 
 
-def lb_relax_25(current: _State, rnd_state) -> _State:
-    return lb_relax(current, rnd_state, delta=0.25)
+def lb_relax_05(current: _State, rnd_state) -> _State:
+    return lb_relax(current, rnd_state, delta=0.05)
