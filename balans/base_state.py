@@ -60,27 +60,17 @@ class _State:
 
     def solve_and_update(self):
         # Solve the current state with the destroyed variables and update
-        self.index_to_val, self.obj_val= self.instance.solve(
-                                                                  index_to_val=self.index_to_val,
-                                                                  obj_val=self.obj_val,
-                                                                  destroy_set=self.destroy_set,
-                                                                  dins_set=self.dins_set,
-                                                                  rens_float_set=self.rens_float_set,
-                                                                  has_random_obj=self.has_random_obj,
-                                                                  local_branching_size=self.local_branching_size,
-                                                                  is_proximity=self.is_proximity)
+        self.index_to_val, self.obj_val= self.instance.solve(index_to_val=self.index_to_val,
+                                                             obj_val=self.obj_val,
+                                                             destroy_set=self.destroy_set,
+                                                             dins_set=self.dins_set,
+                                                             rens_float_set=self.rens_float_set,
+                                                             has_random_obj=self.has_random_obj,
+                                                             local_branching_size=self.local_branching_size,
+                                                             is_proximity=self.is_proximity)
+
 
 def deepcopy_with_sharing(obj, shared_attribute_names, memo=None):
-    '''
-    Deepcopy an object, except for a given list of attributes, which should
-    be shared between the original object and its copy.
-
-    obj is some object
-    shared_attribute_names: A list of strings identifying the attributes that
-        should be shared between the original and its copy.
-    memo is the dictionary passed into __deepcopy__.  Ignore this argument if
-        not calling from within __deepcopy__.
-    '''
     assert isinstance(shared_attribute_names, (list, tuple))
     shared_attributes = {k: getattr(obj, k) for k in shared_attribute_names}
 

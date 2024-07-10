@@ -20,13 +20,9 @@ def _rens(current: _State, rnd_state, delta) -> _State:
 
     # Randomization STEP
     size = int(delta * len(floating_discrete_indexes))
-    rens_float_set = set(rnd_state.choice(floating_discrete_indexes, size))
+    next_state.rens_float_set = set(rnd_state.choice(floating_discrete_indexes, size))
 
-    print("\t Float set:", rens_float_set)
-    return _State(next_state.instance,
-                  next_state.index_to_val,
-                  next_state.obj_val,
-                  rens_float_set=rens_float_set)
+    return next_state
 
 
 def rens_50(current: _State, rnd_state) -> _State:

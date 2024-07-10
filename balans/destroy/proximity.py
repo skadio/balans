@@ -3,6 +3,7 @@ import copy
 from balans.base_state import _State
 from balans.utils import Constants
 
+
 def proximity(current: _State, rnd_state) -> _State:
     # Objective function modification
     # Change the objective coefficients of the original
@@ -19,7 +20,7 @@ def proximity(current: _State, rnd_state) -> _State:
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
 
-    next_state.is_proximity = Constants.theta
+    next_state.is_proximity = True
 
     return next_state
 

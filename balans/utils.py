@@ -42,12 +42,8 @@ class Constants(NamedTuple):
     DATA_MIP_GZ = _FILE_DIR + os.sep + ".." + os.sep + _DATA_DIR_MIPGZ_NAME
     DATA_TOY = _FILE_DIR + os.sep + ".." + os.sep + _DATA_DIR_TOY_NAME
 
-    # Random solution stopping criteria
-    random_gap_ub1 = 0.95
-    random_gap_ub2 = 0.90
-
     # theta for proximity destroy heuristic
-    theta = 2
+    theta = 0.005
 
 
 def create_rng(seed):

@@ -5,7 +5,7 @@ from typing import Tuple, Dict, Any
 from pyscipopt import quicksum, Expr
 import pyscipopt as scip
 
-from balans.utils_scip import get_index_to_val_and_objective
+from balans.utils_scip import get_index_to_val_and_objective, lp_solve
 from balans.utils_scip import is_binary, is_discrete, split_binary_vars
 from balans.utils import Constants
 
@@ -47,13 +47,13 @@ class _Instance:
         # Build model and variables
         variables = self.model.getVars()
         org_objective = self.model.getObjective()
+        org_index_to_val = index_to_val
         org_obj_val = obj_val
         cons = []
 
-        # DESTROY used for Crossover, Mutation, RINS, LB relax
+        # DESTROY used for Crossover, Mutation, RINS
         if destroy_set:
             if len(destroy_set) > 0:
-                print(destroy_set)
                 has_destroy = True
                 for var in variables:
                     # IF not in destroy, fix it
@@ -90,14 +90,6 @@ class _Instance:
         # Proximity: Binary variables, modify objective, add new constraint
         if is_proximity:
             has_destroy = True
-            # add cutoff constraint depending on sense, so that next state is better quality
-            # a slack variable z to prevent infeasible solution, \theta = 1
-            z = self.model.addVar(vtype=Constants.continuous, lb=0)
-            if self.sense == Constants.minimize:
-                cons.append(self.model.addCons(self.model.getObjective() <= obj_val - is_proximity + z))
-            else:
-                cons.append(self.model.addCons(self.model.getObjective() >= obj_val + is_proximity + z))
-
             zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
             # if x_inc=0, new objective expression is x_inc.
             # if x_inc=1, new objective expression is 1 - x_inc.
@@ -105,6 +97,10 @@ class _Instance:
             zero_expr = quicksum(zero_var for zero_var in zero_binary_vars)
             one_expr = quicksum(1 - one_var for one_var in one_binary_vars)
 
+            # add cutoff constraint depending on sense, so that next state is better quality
+            # a slack variable z to prevent infeasible solution, \theta = 1
+            z = self.model.addVar(vtype=Constants.continuous, lb=0)
+            cons.append(self.model.addCons(self.model.getObjective() <= obj_val * (1 - Constants.theta) + z))
             # M * z is to make sure model does not use z, unless needed to avoid infeasibility
             self.model.setObjective(zero_expr + one_expr + Constants.M * z, Constants.minimize)
 
@@ -125,7 +121,6 @@ class _Instance:
         # Random Objective
         if has_random_obj:
             has_destroy = True
-            variables = self.model.getVars()
             objective = Expr()
             for var in variables:
                 coeff = random.uniform(-1,1)
@@ -148,64 +143,14 @@ class _Instance:
         else:
             self.model.setParam("limits/time", 120)
 
-        # If destroy, solve for next state
+        # destroy, solve for next state
         self.model.optimize()
 
-        # Catch infeasibility and return current solution
-        if self.model.getStatus() == "infeasible":
-            print("Model infeasible, go back to previous state")
-            print("\t Current Obj:", obj_val)
-            # print("\t index_to_val: ", index_to_val)
-
-            # Get back the original model
-            self.model.freeTransform()
-            self.model.setParam("limits/bestsol", -1)
-            self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
-            for con in cons:
-                self.model.delCons(con)
-            self.model.setObjective(org_objective, self.sense)
-            if is_proximity:
-                self.model.delVar(z)
-            return index_to_val, obj_val
-
-        if self.model.getNSols() == 0:
-            print("No solution, go back to previous state")
-            print("\t Current Obj:", obj_val)
-            # print("\t index_to_val: ", index_to_val)
-
-            # Get back the original model
-            self.model.freeTransform()
-            self.model.setParam("limits/bestsol", -1)
-            self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
-            for con in cons:
-                self.model.delCons(con)
-            self.model.setObjective(org_objective, self.sense)
-            if is_proximity:
-                self.model.delVar(z)
-            return index_to_val, obj_val
-
-        if self.model.getStage() == 9 or 10:
-            index_to_val, obj_val = get_index_to_val_and_objective(self.model)
-        else:
-            print(self.model.getStage())
-            print("Don't know why, go back to previous state")
-            print("\t Current Obj:", obj_val)
-            # print("\t index_to_val: ", index_to_val)
-
-            # Get back the original model
-            self.model.freeTransform()
-            self.model.setParam("limits/bestsol", -1)
-            self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
-            for con in cons:
-                self.model.delCons(con)
-            self.model.setObjective(org_objective, self.sense)
-            if is_proximity:
-                self.model.delVar(z)
-            return index_to_val, obj_val
+        index_to_val, obj_val = get_index_to_val_and_objective(self.model)
 
         # Get back the original model
         self.model.freeTransform()
-        self.model.setParam("limits/solutions", -1)
+        self.model.setParam("limits/bestsol", -1)
         self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
         for con in cons:
             self.model.delCons(con)
@@ -213,30 +158,31 @@ class _Instance:
         if is_proximity:
             self.model.delVar(z)
 
+        if len(index_to_val) == 0:
+            print("Go back to previous state")
+            print("\t Current Obj:", org_obj_val)
+            return org_index_to_val, org_obj_val
+
         # Need to find the original obj value for transformed objectives
         if is_proximity or has_random_obj:
-            # Solution of transformed problem
-            var_to_val = self.model.createSol()
-            for i in range(self.model.getNVars()):
-                var_to_val[variables[i]] = index_to_val[i]
-
             # Objective value of the solution found in transformed
             print("\t Transformed obj: ", obj_val)
-            obj_val = self.model.getSolObjVal(var_to_val)
-            self.model.freeSol(var_to_val)
+
+            obj_val = 0
+            for key, item in org_objective.terms.items():
+                obj_val += item * index_to_val[key[0].getIndex()]
 
         print("\t Solve DONE!", obj_val)
-        # print("\t index_to_val: ", index_to_val)
-
         return index_to_val, obj_val
-
 
     def initial_solve(self, index_to_val) -> Tuple[Dict[Any, float], float]:
         variables = self.model.getVars()
 
         # Initial solve extracts static instance features
         self.extract_base_features(self.model, variables)
+        self.extract_lp_features(self.model)
 
+        # TODO: Do we want to change the problem to minimize all the time?
         if self.sense == Constants.maximize:
             self.model.setObjective(-self.model.getObjective())
             self.sense = Constants.minimize
@@ -249,42 +195,25 @@ class _Instance:
                     cons.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
         self.model.setParam("limits/time", 20)
-        # Solve
+        # Solve to get initial solution
         self.model.optimize()
         index_to_val, obj_val = get_index_to_val_and_objective(self.model)
 
         # Get back the original model
         self.model.freeTransform()
+        self.model.setParam("limits/time", 1e+20)
         for con in cons:
             self.model.delCons(con)
 
-        # Solve LP relaxation and save it
-        int_index = []
-        bin_index = []
-        count = 0
-        for var in variables:
-            if var.vtype() == Constants.integer:
-                self.model.chgVarType(var, Constants.continuous)
-                int_index.append(count)
-            if var.vtype() == Constants.binary:
-                self.model.chgVarType(var, Constants.continuous)
-                bin_index.append(count)
-            count += 1
+        if len(index_to_val) == 0:
+            self.model.setParam("limits/bestsol", 1)
+            # Solve to get initial solution
+            self.model.optimize()
+            index_to_val, obj_val = get_index_to_val_and_objective(self.model)
 
-        self.model.optimize()
-        self.lp_index_to_val, self.lp_obj_val = get_index_to_val_and_objective(self.model)
-        self.lp_floating_discrete_indexes = [i for i in self.discrete_indexes if
-                                             not self.lp_index_to_val[i].is_integer()]
-
-        # Get back the original model
-        self.model.freeTransform()
-        count = 0
-        for var in variables:
-            if count in int_index:
-                self.model.chgVarType(var, Constants.integer)
-            if count in bin_index:
-                self.model.chgVarType(var, Constants.binary)
-            count += 1
+            # Get back the original model
+            self.model.freeTransform()
+            self.model.setParam("limits/bestsol", -1)
 
         # Return solution
         return index_to_val, obj_val
@@ -306,3 +235,8 @@ class _Instance:
 
         # Optimization direction
         self.sense = model.getObjectiveSense()
+
+    def extract_lp_features(self, model):
+        self.lp_index_to_val, self.lp_obj_val = lp_solve(model)
+        self.lp_floating_discrete_indexes = [i for i in self.discrete_indexes if
+                                             not self.lp_index_to_val[i].is_integer()]
