@@ -1,6 +1,7 @@
 from alns.select import MABSelector
 from alns.accept import HillClimbing
 from alns.stop import MaxIterations, MaxRuntime
+from pyscipopt import Model
 
 # Contextual multi-armed bandits
 from mabwiser.mab import LearningPolicy
@@ -9,7 +10,7 @@ from mabwiser.mab import LearningPolicy
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 
-instance_path = "data/miplib/csched007.mps"
+instance_path = "data/2club200v15p5scn.mps"
 # Balans
 balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                              DestroyOperators.Dins,
@@ -30,3 +31,11 @@ balans = Balans(destroy_ops=[DestroyOperators.Crossover,
 result = balans.solve(instance_path)
 
 print("Best solution objective:", result.best_state.objective())
+
+# Check for optimality
+model = Model("scip")
+model.readProblem(instance_path)
+model.optimize()
+solution = model.getBestSol()
+print(solution)
+print("Optimal value:", model.getObjVal())
