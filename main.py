@@ -10,7 +10,7 @@ from mabwiser.mab import LearningPolicy
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 
-instance_path = "data/2club200v15p5scn.mps"
+instance_path = "data/miplib/30n20b8.mps"
 # Balans
 balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                              DestroyOperators.Dins,
