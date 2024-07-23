@@ -41,6 +41,7 @@ class _State:
         self.local_branching_size = local_branching_size
         self.is_proximity = is_proximity
 
+    # We don't need to copy instance when create a deepcopy of state object, so we share the instance between the copy
     def __deepcopy__(self, memo):
         return deepcopy_with_sharing(self, shared_attribute_names=["instance"], memo=memo)
 

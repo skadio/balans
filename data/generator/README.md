@@ -1,4 +1,7 @@
 Problem Domains:  
+See Reference of Distributional MIPLIB:  
+Huang, W., Huang, T., Ferber, A. M., & Dilkina, B. (2024). Distributional MIPLIB: a Multi-Domain Library for Advancing ML-Guided MILP Methods. arXiv preprint arXiv:2406.06954.
+
 Maximum Independent Set (MIS): BA graph, 9000 nodes, degree 5  
 Bergman, D., Cire, A. A., Van Hoeve, W.-J., and Hooker, J. (2016). Decision diagrams for optimization, volume 1. Springer.
 

@@ -73,6 +73,7 @@ def is_binary(var_type) -> bool:
 
 
 def get_index_to_val_and_objective(model) -> Tuple[Dict[Any, float], float]:
+    # we check if the optimized model has solutions, feasible, and is in the solved state
     if model.getNSols() == 0 or model.getStatus() == "infeasible" or (model.getStage() != 9 and model.getStage() != 10):
         return dict(), 9999999
     else:

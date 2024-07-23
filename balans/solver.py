@@ -138,6 +138,7 @@ class Balans:
         """
         self._validate_solve_args(instance_path)
 
+        # read the problem and generate the original model (only once)
         model = scip.Model()
         model.hideOutput()
         model.readProblem(instance_path)

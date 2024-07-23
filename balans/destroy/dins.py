@@ -3,6 +3,7 @@ import copy
 from balans.base_state import _State
 
 
+# TODO: consider about delta, add it back
 def dins(current: _State, rnd_state) -> _State:
     #  Take an LP relaxed solution of the original MIP.
     #  By considering only discrete variables, forms a Set J where |x_lp -x_inc| >= 0.5

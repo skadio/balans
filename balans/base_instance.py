@@ -16,7 +16,7 @@ class _Instance:
     """
 
     def __init__(self, model, seed=Constants.default_seed):
-        # Instance holds the given path
+        # SCIP model
         self.model = model
         self.seed = seed
 
@@ -40,16 +40,17 @@ class _Instance:
               is_proximity=False) -> Tuple[Dict[Any, float], float]:
 
         print("\t Solve")
-        # flag to identify if any constraint added or objective function changed
-        # If flag = True, optimize the problem and get new sol and obj
-        # If flag = False, return the current sol and obj, do not optimize
+        # has_destroy to identify if any constraint added or objective function changed
+        # If has_destroy = True, optimize the problem and get new sol and obj
+        # If has_destroy = False, return the current sol and obj, do not optimize
         has_destroy = False
         # Build model and variables
         variables = self.model.getVars()
         org_objective = self.model.getObjective()
         org_index_to_val = index_to_val
         org_obj_val = obj_val
-        cons = []
+        # Record the constraints we added to the model
+        constraints = []
 
         # DESTROY used for Crossover, Mutation, RINS
         if destroy_set:
@@ -59,7 +60,7 @@ class _Instance:
                     # IF not in destroy, fix it
                     if var.getIndex() not in destroy_set:
                         # fix the variable
-                        cons.append(self.model.addCons(var == index_to_val[var.getIndex()]))
+                        constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
         # DINS: Discrete Variables, where incumbent and lp relaxation have distance more than 0.5
         if dins_set:
@@ -70,10 +71,10 @@ class _Instance:
                         # Add bounding constraint around initial lp solution
                         index = var.getIndex()
                         current_lp_diff = abs(index_to_val[index] - self.lp_index_to_val[index])
-                        cons.append(self.model.addCons(abs(var - self.lp_index_to_val[index]) <= current_lp_diff))
+                        constraints.append(self.model.addCons(abs(var - self.lp_index_to_val[index]) <= current_lp_diff))
                     else:
                         # fix the variable
-                        cons.append(self.model.addCons(var == index_to_val[var.getIndex()]))
+                        constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
         # Local Branching: Binary variables, flip a limited subset (can come from DINS with delta)
         if local_branching_size > 0:
@@ -85,7 +86,7 @@ class _Instance:
             # if current binary var is 1, flip to 0 consumes 1 unit of budget by (1-x)
             zero_expr = quicksum(zero_var for zero_var in zero_binary_vars)
             one_expr = quicksum(1 - one_var for one_var in one_binary_vars)
-            cons.append(self.model.addCons(zero_expr + one_expr <= local_branching_size))
+            constraints.append(self.model.addCons(zero_expr + one_expr <= local_branching_size))
 
         # Proximity: Binary variables, modify objective, add new constraint
         if is_proximity:
@@ -100,7 +101,7 @@ class _Instance:
             # add cutoff constraint depending on sense, so that next state is better quality
             # a slack variable z to prevent infeasible solution, \theta = 1
             z = self.model.addVar(vtype=Constants.continuous, lb=0)
-            cons.append(self.model.addCons(self.model.getObjective() <= obj_val * (1 - Constants.theta) + z))
+            constraints.append(self.model.addCons(self.model.getObjective() <= obj_val * (1 - Constants.theta) + z))
             # M * z is to make sure model does not use z, unless needed to avoid infeasibility
             self.model.setObjective(zero_expr + one_expr + Constants.M * z, Constants.minimize)
 
@@ -112,11 +113,11 @@ class _Instance:
                     if var.getIndex() in rens_float_set:
                         # Restrict discrete vars to round up and down integer version of the lp
                         # EX: If var = 3.5, the constraint is var >= 3 and var <= 4
-                        cons.append(self.model.addCons(var >= math.floor(self.lp_index_to_val[var.getIndex()])))
-                        cons.append(self.model.addCons(var <= math.ceil(self.lp_index_to_val[var.getIndex()])))
+                        constraints.append(self.model.addCons(var >= math.floor(self.lp_index_to_val[var.getIndex()])))
+                        constraints.append(self.model.addCons(var <= math.ceil(self.lp_index_to_val[var.getIndex()])))
                     else:
                         # If not in the set, fix the var to the current state
-                        cons.append(self.model.addCons(var == index_to_val[var.getIndex()]))
+                        constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
         # Random Objective
         if has_random_obj:
@@ -152,8 +153,8 @@ class _Instance:
         self.model.freeTransform()
         self.model.setParam("limits/bestsol", -1)
         self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
-        for con in cons:
-            self.model.delCons(con)
+        for ct in constraints:
+            self.model.delCons(ct)
         self.model.setObjective(org_objective, self.sense)
         if is_proximity:
             self.model.delVar(z)
@@ -186,13 +187,14 @@ class _Instance:
         if self.sense == Constants.maximize:
             self.model.setObjective(-self.model.getObjective())
             self.sense = Constants.minimize
-
+        
+        # Record the constraints we added to the model
+        constraints = []
         # If a solution is given fix it. Can be partial (denoted by None value)
-        cons = []
         if index_to_val is not None:
             for var in variables:
                 if index_to_val[var.getIndex()] is not None:
-                    cons.append(self.model.addCons(var == index_to_val[var.getIndex()]))
+                    constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
         self.model.setParam("limits/time", 20)
         # Solve to get initial solution
@@ -202,8 +204,8 @@ class _Instance:
         # Get back the original model
         self.model.freeTransform()
         self.model.setParam("limits/time", 1e+20)
-        for con in cons:
-            self.model.delCons(con)
+        for ct in constraints:
+            self.model.delCons(ct)
 
         if len(index_to_val) == 0:
             self.model.setParam("limits/bestsol", 1)
