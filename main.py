@@ -1,5 +1,3 @@
-import os
-
 from alns.select import MABSelector
 from alns.accept import HillClimbing
 from alns.stop import MaxIterations, MaxRuntime
@@ -12,7 +10,7 @@ from mabwiser.mab import LearningPolicy
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 
-seed = 1
+instance_path = "data/miplib/30n20b8.mps"
 # Balans
 balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                              DestroyOperators.Dins,
@@ -21,31 +19,23 @@ balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                              DestroyOperators.Rins,
                              DestroyOperators.Proximity,
                              DestroyOperators.Rens,
-                             DestroyOperators.Zero_Objective],
+                             DestroyOperators.Random_Objective],
                 repair_ops=[RepairOperators.Repair],
                 selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=8, num_repair=1,
-                                     learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50), seed=seed),
+                                     learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                 accept=HillClimbing(),
-#                stop=MaxIterations(100)
-                stop=MaxRuntime(1),
-                seed=seed)
+                stop=MaxIterations(30),
+                seed=Constants.default_seed)
 
-# instance = "air05.mps"
-# instance_path = os.path.join(Constants.DATA_MIP, instance)
-
-instance = "test2.5.cip"
-instance_path = os.path.join(Constants.DATA_TOY, instance)
-
-# # Run
+# Run
 result = balans.solve(instance_path)
-print("Best solution:", result.best_state.solution())
+
 print("Best solution objective:", result.best_state.objective())
 
-
 # Check for optimality
-# model = Model("scip")
-# model.readProblem(instance_path)
-# model.optimize()
-# solution = model.getBestSol()
-# print(solution)
-# print("Optimal value:", model.getObjVal())
+model = Model("scip")
+model.readProblem(instance_path)
+model.optimize()
+solution = model.getBestSol()
+print(solution)
+print("Optimal value:", model.getObjVal())

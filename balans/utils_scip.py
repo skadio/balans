@@ -2,99 +2,66 @@ import random
 from typing import Tuple, Dict, Any
 
 import math
-
-import pyscipopt
 import pyscipopt as scip
-
 from balans.utils import Constants
 
 
-def get_model_and_vars(path, is_verbose=False, has_pre_solve=True, scip_seed=-1,
-                       solution_count=None, gap=None, time=None,
-                       is_lp_relaxation=False, has_random_obj=False):
-    # TODO need to think about what SCIP defaults to use, turn-off SCIP-ALNS? when benchmarking
-
-    # Model
-    model = scip.Model()
-
-    # Verbosity
-    if not is_verbose:
-        model.hideOutput()
-
-    # Instance
-    model.readProblem(path)
-
-    if not scip_seed == -1:
-        model.setParam("randomization/randomseedshift", scip_seed)
-
-    if not has_pre_solve:
-        model.setPresolve(scip.SCIP_PARAMSETTING.OFF)
-
-    # Search only for the first incumbent
-    if solution_count == 1:
-        model.setParam("limits/bestsol", 1)
-
-    # Get a random feasible solution by creating a random objective coefficient
-    if has_random_obj:
-        variables = model.getVars()
-        objective = pyscipopt.Expr()
-        for var in variables:
-            coeff = random.uniform(0,1)
-            if coeff != 0:
-                objective += coeff * var
-        objective.normalize()
-        model.setObjective(objective)
-
-    # Search only for the first incumbent
-    if gap is not None:
-        model.setParam("limits/gap", gap)
-
-    if time is not None:
-        model.setParam("limits/time", time)
-
-    # Variables
+def lp_solve(model) -> Tuple[Dict[Any, float], float]:
+    # Solve LP relaxation and save it
+    int_index = []
+    bin_index = []
+    count = 0
     variables = model.getVars()
-
-    # Continuous relaxation of the problem
-    if is_lp_relaxation:
-        for var in variables:
+    for var in variables:
+        if var.vtype() == Constants.integer:
             model.chgVarType(var, Constants.continuous)
+            int_index.append(count)
+        if var.vtype() == Constants.binary:
+            model.chgVarType(var, Constants.continuous)
+            bin_index.append(count)
+        count += 1
 
-    # Return model and vars
-    return model, variables
+    model.optimize()
+    lp_index_to_val, lp_obj_val = get_index_to_val_and_objective(model)
+
+    # Get back the original model
+    model.freeTransform()
+    count = 0
+    for var in variables:
+        if count in int_index:
+            model.chgVarType(var, Constants.integer)
+        if count in bin_index:
+            model.chgVarType(var, Constants.binary)
+        count += 1
+
+    return lp_index_to_val, lp_obj_val
 
 
-def lp_solve(path) -> Tuple[Dict[Any, float], float]:
-
-    # Build model and variables
-    model, variables = get_model_and_vars(path, is_lp_relaxation=True)
+def get_random_solution(model):
+    org_objective = model.getObjective()
+    variables = model.getVars()
+    objective = scip.Expr()
+    for var in variables:
+        coeff = random.uniform(-1, 1)
+        if coeff != 0:
+            objective += coeff * var
+    objective.normalize()
+    model.setObjective(objective, Constants.minimize)
+    model.setParam("limits/bestsol", 1)
+    model.setHeuristics(scip.SCIP_PARAMSETTING.OFF)
 
     # Solve
     model.optimize()
-    index_to_val, obj_value = get_index_to_val_and_objective(model)
 
-    # Reset problem
-    model.freeProb()
+    r1_index_to_val, r1_obj_val = get_index_to_val_and_objective(model)
 
-    # Return solution and objective
-    return index_to_val, obj_value
+    # Get back the original model
+    model.freeTransform()
+    model.setParam("limits/bestsol", -1)
+    model.setObjective(org_objective, Constants.minimize)
+    model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
 
-
-def random_solve(path, scip_seed=-1, gap=None, has_random_obj=False, solution_count=1) -> Tuple[Dict[Any, float], float]:
-
-    # Build model and variables
-    model, variables = get_model_and_vars(path, scip_seed=scip_seed, gap=gap,
-                                          has_random_obj=has_random_obj, solution_count=solution_count)
-
-    # Solve
-    model.optimize()
-    random_index_to_val, random_obj_value = get_index_to_val_and_objective(model)
-
-    # Reset problem
-    model.freeProb()
-
-    # Return solution
-    return random_index_to_val, random_obj_value
+    return r1_index_to_val, r1_obj_val
 
 
 def is_discrete(var_type) -> bool:
@@ -106,9 +73,13 @@ def is_binary(var_type) -> bool:
 
 
 def get_index_to_val_and_objective(model) -> Tuple[Dict[Any, float], float]:
-    index_to_val = dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
-    obj_value = model.getObjVal()
-    return index_to_val, obj_value
+    # we check if the optimized model has solutions, feasible, and is in the solved state
+    if model.getNSols() == 0 or model.getStatus() == "infeasible" or (model.getStage() != 9 and model.getStage() != 10):
+        return dict(), 9999999
+    else:
+        index_to_val = dict([(var.getIndex(), model.getVal(var)) for var in model.getVars()])
+        obj_value = model.getObjVal()
+        return index_to_val, obj_value
 
 
 def split_binary_vars(variables, binary_indexes, index_to_val):

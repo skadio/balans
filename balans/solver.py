@@ -2,6 +2,9 @@ import os
 from typing import List, Optional, Dict
 from typing import NamedTuple
 
+import alns.select.RandomSelect
+import pyscipopt as scip
+
 import numpy as np
 from alns.ALNS import ALNS
 from alns.select import MABSelector
@@ -15,31 +18,27 @@ from balans.base_instance import _Instance
 from balans.base_state import _State
 from balans.destroy.crossover import crossover
 from balans.destroy.dins import dins
-from balans.destroy.local_branching import local_branching_50
-from balans.destroy.mutation import mutation_25, mutation_50, mutation_75, mutation_binary_50
+from balans.destroy.local_branching import local_branching
+from balans.destroy.mutation import mutation_25, mutation_50, mutation_75
 from balans.destroy.proximity import proximity
 from balans.destroy.rens import rens_50
-from balans.destroy.rins import rins, rins_random_50
-from balans.destroy.random_objective import zero_objective
+from balans.destroy.rins import rins_50
+from balans.destroy.random_objective import random_objective
 from balans.repair.repair import repair
 from balans.utils import Constants, check_false, check_true, create_rng
-
-from mabwiser.mab import LearningPolicy
 
 
 class DestroyOperators(NamedTuple):
     Crossover = crossover
     Dins = dins
-    Local_Branching = local_branching_50
+    Local_Branching = local_branching
     Mutation = mutation_25
     Mutation2 = mutation_50
     Mutation3 = mutation_75
-    Mutation_Binary = mutation_binary_50
     Proximity = proximity
     Rens = rens_50
-    Rins = rins
-    Rins_Random = rins_random_50
-    Zero_Objective = zero_objective
+    Rins = rins_50
+    Random_Objective = random_objective
 
 
 class RepairOperators(NamedTuple):
@@ -49,15 +48,12 @@ class RepairOperators(NamedTuple):
 # Type Declarations
 DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Dins),
-               # type(DestroyOperators.Dins_Random),
                type(DestroyOperators.Local_Branching),
                type(DestroyOperators.Mutation),
-               type(DestroyOperators.Mutation2),
-               type(DestroyOperators.Mutation3),
                type(DestroyOperators.Proximity),
                type(DestroyOperators.Rens),
                type(DestroyOperators.Rins),
-               type(DestroyOperators.Zero_Objective))
+               type(DestroyOperators.Random_Objective))
 
 RepairType = (type(RepairOperators.Repair))
 
@@ -142,49 +138,53 @@ class Balans:
         """
         self._validate_solve_args(instance_path)
 
+        # read the problem and generate the original model (only once)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        model.setParam("limits/maxorigsol", 0)
+        model.setParam("randomization/randomseedshift", self.seed)
+
         # Create instance from mip file
-        self._instance = _Instance(instance_path, self.seed)
+        self._instance = _Instance(model, self.seed)
 
-        # TODO
-        # Run initial solve here, get a copy of model and variables (don't free the model)
-        # Give the model to the initial_state below
-        # Implement a state.__copy()__ operator with reference to instance and model without copy
-        # Change all deep copies with state.copy()
-        # Initial solution
+        self._initial_index_to_val, self._initial_obj_val = self._instance.initial_solve(index_to_val=index_to_val)
 
-        self._instance.initial_solve(index_to_val=index_to_val)
-        self._initial_index_to_val, self._initial_obj_val = self._instance.solve(is_initial_solve=True,
-                                                                                 index_to_val=index_to_val)
         print(">>> START objective:", self._initial_obj_val)
-        print(">>> START objective index:", self._initial_index_to_val)
+        # print(">>> START objective index:", self._initial_index_to_val)
 
         # Initial state and solution
         initial_state = _State(self._instance, self.initial_index_to_val,
                                self.initial_obj_val, previous_index_to_val=self._initial_index_to_val)
 
         self.alns = ALNS(np.random.RandomState(self.alns_seed))
+
+        count = 0
         # If the problem has no binary, remove Local Branching and Proximity
         if len(self._instance.binary_indexes) == 0:
             for op in self.destroy_ops:
                 if op != DestroyOperators.Local_Branching and op != DestroyOperators.Proximity:
                     self.alns.add_destroy_operator(op)
-            self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy-2,
-                                        num_repair=self.selector.num_repair,
-                                        learning_policy=self.selector.learning_policy, seed=self.seed)
+                else:
+                    count += 1
         # If the problem has no integer, remove Dins and Rens
         elif len(self._instance.integer_indexes) == 0:
             for op in self.destroy_ops:
                 if op != DestroyOperators.Dins and op != DestroyOperators.Rens:
                     self.alns.add_destroy_operator(op)
-            self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy-2,
-                                        num_repair=self.selector.num_repair,
-                                        learning_policy=self.selector, seed=self.seed)
+                else:
+                    count += 1
         else:
             for op in self.destroy_ops:
                 self.alns.add_destroy_operator(op)
 
         for op in self.repair_ops:
             self.alns.add_repair_operator(op)
+
+        if isinstance(self.selector, MABSelector):
+            self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy - count,
+                                        num_repair=self.selector.num_repair,
+                                        learning_policy=self.selector.mab.learning_policy)
 
         result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
 
@@ -229,72 +229,3 @@ class Balans:
         check_false(instance_path == "", ValueError("Instance cannot be empty" + str(instance_path)))
         check_false(instance_path is None, ValueError("Instance cannot be None" + str(instance_path)))
         check_true(os.path.isfile(instance_path), ValueError("Instance must exist" + str(instance_path)))
-
-        # if gap is not None:
-        #     check_true(isinstance(gap, int), TypeError("Gap must be an integer." + str(gap)))
-        #     check_true(gap >= 0, ValueError("Gap must be non-negative" + str(gap)))
-        #
-        # if time is not None:
-        #     check_true(isinstance(time, int), TypeError("Time must be an integer." + str(time)))
-        #     check_true(time >= 0, ValueError("Time must be non-negative" + str(gap)))
-
-
-
-# class DestroyOperators(NamedTuple):
-#     class Crossover(NamedTuple):
-#         """Crossover Operator
-#         This operator..
-#         """
-#         pass
-#
-#     class Dins(NamedTuple):
-#         """ DINS Operator
-#         This operator ..
-#
-#         is_random: bool
-#             Whether the destroy is random
-#
-#         delta: Num
-#            If int, represents the number of variables to destroy
-#            If float, represents the percentage of variables to destroy (0.0, 1.0]
-#         """
-#         is_random: bool = False
-#         delta: Num = 0.25
-#
-#         def _validate(self):
-#             check_true(isinstance(self.is_random, bool), TypeError("Is_random must be an boolean."))
-#             check_true(isinstance(self.delta, (int, float)), TypeError("Delta must be an integer or float."))
-#             check_true(0 <= self.delta, ValueError("Delta must be between positive."))
-#
-#     class LocalBranching(NamedTuple):
-#         """ Local Branching Operator
-#         This operator ..
-#
-#         delta: Num
-#            If int, represents the number of variables to destroy
-#            If float, represents the percentage of variables to destroy (0.0, 1.0]
-#         """
-#         delta: Num = 0.25
-#
-#         def _validate(self):
-#             check_true(isinstance(self.delta, (int, float)), TypeError("Delta must be an integer or float."))
-#             check_true(0 <= self.delta, ValueError("Delta must be between positive."))
-#
-#         class Mutation(NamedTuple):
-#             """ Mutation Operator
-#             This operator ..
-#
-#             is_binary: bool
-#                 Whether the destroy operates on binary variables only
-#
-#             delta: Num
-#                If int, represents the number of variables to destroy
-#                If float, represents the percentage of variables to destroy (0.0, 1.0]
-#             """
-#             is_binary: bool = False
-#             delta: Num = 0.25
-#
-#             def _validate(self):
-#                 check_true(isinstance(self.is_binary, bool), TypeError("Is_binary must be an boolean."))
-#                 check_true(isinstance(self.delta, (int, float)), TypeError("Delta must be an integer or float."))
-#                 check_true(0 <= self.delta, ValueError("Delta must be between positive."))

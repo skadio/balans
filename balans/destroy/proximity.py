@@ -1,6 +1,7 @@
 import copy
 
 from balans.base_state import _State
+from balans.utils import Constants
 
 
 def proximity(current: _State, rnd_state) -> _State:
@@ -19,8 +20,7 @@ def proximity(current: _State, rnd_state) -> _State:
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
 
-    return _State(next_state.instance,
-                  next_state.index_to_val,
-                  next_state.obj_val,
-                  is_proximity=True)
+    next_state.is_proximity = True
+
+    return next_state
 
