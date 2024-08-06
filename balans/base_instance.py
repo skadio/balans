@@ -139,6 +139,7 @@ class _Instance:
             # print("\t index_to_val: ", index_to_val)
             return index_to_val, obj_val
 
+        # TODO add to constants
         if local_branching_size > 0:
             self.model.setParam("limits/time", 600)
         else:
@@ -149,6 +150,7 @@ class _Instance:
 
         index_to_val, obj_val = get_index_to_val_and_objective(self.model)
 
+        # TODO add undo_solve() method
         # Get back the original model
         self.model.freeTransform()
         self.model.setParam("limits/bestsol", -1)
@@ -183,7 +185,7 @@ class _Instance:
         self.extract_base_features(self.model, variables)
         self.extract_lp_features(self.model)
 
-        # TODO: Do we want to change the problem to minimize all the time?
+        # TODO: Revert before existing
         if self.sense == Constants.maximize:
             self.model.setObjective(-self.model.getObjective())
             self.sense = Constants.minimize
@@ -196,6 +198,7 @@ class _Instance:
                 if index_to_val[var.getIndex()] is not None:
                     constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
+        # TODO: move constants to utils.Constants
         self.model.setParam("limits/time", 20)
         # Solve to get initial solution
         self.model.optimize()
@@ -207,6 +210,8 @@ class _Instance:
         for ct in constraints:
             self.model.delCons(ct)
 
+        # If no feasible initial solution found within time limit
+        # then, solve for first feasible solution without time limit
         if len(index_to_val) == 0:
             self.model.setParam("limits/bestsol", 1)
             # Solve to get initial solution

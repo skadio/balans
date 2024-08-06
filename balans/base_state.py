@@ -43,6 +43,9 @@ class _State:
 
     # We don't need to copy instance when create a deepcopy of state object, so we share the instance between the copy
     def __deepcopy__(self, memo):
+        # TODO remove this method and implement here..
+        # Add lots of commentary here
+        # Goal is to not copy instance? but copy all else?
         return deepcopy_with_sharing(self, shared_attribute_names=["instance"], memo=memo)
 
     def solution(self):

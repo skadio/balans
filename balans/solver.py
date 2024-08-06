@@ -2,12 +2,10 @@ import os
 from typing import List, Optional, Dict
 from typing import NamedTuple
 
-import alns.select.RandomSelect
 import pyscipopt as scip
 
 import numpy as np
 from alns.ALNS import ALNS
-from alns.select import MABSelector
 from alns.accept import MovingAverageThreshold, GreatDeluge, HillClimbing
 from alns.accept import LateAcceptanceHillClimbing, NonLinearGreatDeluge, AlwaysAccept
 from alns.accept import RecordToRecordTravel, SimulatedAnnealing, RandomAccept
@@ -159,6 +157,8 @@ class Balans:
 
         self.alns = ALNS(np.random.RandomState(self.alns_seed))
 
+        # TODO create a method to set operators
+        # TODO rename count to num_destroy_removed
         count = 0
         # If the problem has no binary, remove Local Branching and Proximity
         if len(self._instance.binary_indexes) == 0:
