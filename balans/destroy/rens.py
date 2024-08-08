@@ -25,5 +25,13 @@ def _rens(current: _State, rnd_state, delta) -> _State:
     return next_state
 
 
+def rens_25(current: _State, rnd_state) -> _State:
+    return _rens(current, rnd_state, delta=0.25)
+
+
 def rens_50(current: _State, rnd_state) -> _State:
     return _rens(current, rnd_state, delta=0.50)
+
+
+def rens_75(current: _State, rnd_state) -> _State:
+    return _rens(current, rnd_state, delta=0.75)

@@ -101,7 +101,7 @@ class _Instance:
             # add cutoff constraint depending on sense, so that next state is better quality
             # a slack variable z to prevent infeasible solution, \theta = 1
             z = self.model.addVar(vtype=Constants.continuous, lb=0)
-            constraints.append(self.model.addCons(self.model.getObjective() <= obj_val * (1 - Constants.theta) + z))
+            constraints.append(self.model.addCons(self.model.getObjective() <= obj_val * (1 - is_proximity) + z))
             # M * z is to make sure model does not use z, unless needed to avoid infeasibility
             self.model.setObjective(zero_expr + one_expr + Constants.M * z, Constants.minimize)
 
@@ -189,7 +189,7 @@ class _Instance:
         if self.sense == Constants.maximize:
             self.model.setObjective(-self.model.getObjective())
             self.sense = Constants.minimize
-        
+
         # Record the constraints we added to the model
         constraints = []
         # If a solution is given fix it. Can be partial (denoted by None value)

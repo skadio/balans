@@ -30,5 +30,13 @@ def _rins(current: _State, rnd_state, delta) -> _State:
     return next_state
 
 
+def rins_25(current: _State, rnd_state) -> _State:
+    return _rins(current, rnd_state, delta=0.25)
+
+
 def rins_50(current: _State, rnd_state) -> _State:
     return _rins(current, rnd_state, delta=0.50)
+
+
+def rins_75(current: _State, rnd_state) -> _State:
+    return _rins(current, rnd_state, delta=0.75)

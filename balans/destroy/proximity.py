@@ -4,7 +4,7 @@ from balans.base_state import _State
 from balans.utils import Constants
 
 
-def proximity(current: _State, rnd_state) -> _State:
+def proximity(current: _State, rnd_state, delta=0.005) -> _State:
     # Objective function modification
     # Change the objective coefficients of the original
     # problem based on the current solution value.
@@ -20,7 +20,18 @@ def proximity(current: _State, rnd_state) -> _State:
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
 
-    next_state.is_proximity = True
+    next_state.is_proximity = delta
 
     return next_state
 
+
+def proximity_05(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.005)
+
+
+def proximity_15(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.015)
+
+
+def proximity_30(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.03)

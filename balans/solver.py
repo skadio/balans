@@ -2,10 +2,12 @@ import os
 from typing import List, Optional, Dict
 from typing import NamedTuple
 
+import alns.select.RandomSelect
 import pyscipopt as scip
 
 import numpy as np
 from alns.ALNS import ALNS
+from alns.select import MABSelector
 from alns.accept import MovingAverageThreshold, GreatDeluge, HillClimbing
 from alns.accept import LateAcceptanceHillClimbing, NonLinearGreatDeluge, AlwaysAccept
 from alns.accept import RecordToRecordTravel, SimulatedAnnealing, RandomAccept
@@ -16,12 +18,13 @@ from balans.base_instance import _Instance
 from balans.base_state import _State
 from balans.destroy.crossover import crossover
 from balans.destroy.dins import dins
-from balans.destroy.local_branching import local_branching
+from balans.destroy.local_branching import local_branching_10, local_branching_25, local_branching_50
 from balans.destroy.mutation import mutation_25, mutation_50, mutation_75
-from balans.destroy.proximity import proximity
-from balans.destroy.rens import rens_50
-from balans.destroy.rins import rins_50
+from balans.destroy.proximity import proximity_05, proximity_15, proximity_30
+from balans.destroy.rens import rens_25, rens_50, rens_75
+from balans.destroy.rins import rins_25, rins_50, rins_75
 from balans.destroy.random_objective import random_objective
+from balans.destroy.local_branching_relax import local_branching_relax_10, local_branching_relax_25
 from balans.repair.repair import repair
 from balans.utils import Constants, check_false, check_true, create_rng
 
@@ -29,13 +32,23 @@ from balans.utils import Constants, check_false, check_true, create_rng
 class DestroyOperators(NamedTuple):
     Crossover = crossover
     Dins = dins
-    Local_Branching = local_branching
+    Local_Branching = local_branching_10
+    Local_Branching2 = local_branching_25
+    Local_Branching3 = local_branching_50
+    Local_Branching_Relax = local_branching_relax_10
+    Local_Branching_Relax2 = local_branching_relax_25
     Mutation = mutation_25
     Mutation2 = mutation_50
     Mutation3 = mutation_75
-    Proximity = proximity
-    Rens = rens_50
-    Rins = rins_50
+    Proximity = proximity_05
+    Proximity2 = proximity_15
+    Proximity3 = proximity_30
+    Rens = rens_25
+    Rens2 = rens_50
+    Rens3 = rens_75
+    Rins = rins_25
+    Rins2 = rins_50
+    Rins3 = rins_75
     Random_Objective = random_objective
 
 
@@ -47,10 +60,22 @@ class RepairOperators(NamedTuple):
 DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Dins),
                type(DestroyOperators.Local_Branching),
+               type(DestroyOperators.Local_Branching2),
+               type(DestroyOperators.Local_Branching3),
+               type(DestroyOperators.Local_Branching_Relax),
+               type(DestroyOperators.Local_Branching_Relax2),
                type(DestroyOperators.Mutation),
+               type(DestroyOperators.Mutation2),
+               type(DestroyOperators.Mutation3),
                type(DestroyOperators.Proximity),
+               type(DestroyOperators.Proximity2),
+               type(DestroyOperators.Proximity3),
                type(DestroyOperators.Rens),
+               type(DestroyOperators.Rens2),
+               type(DestroyOperators.Rens3),
                type(DestroyOperators.Rins),
+               type(DestroyOperators.Rins2),
+               type(DestroyOperators.Rins3),
                type(DestroyOperators.Random_Objective))
 
 RepairType = (type(RepairOperators.Repair))
@@ -136,7 +161,6 @@ class Balans:
         """
         self._validate_solve_args(instance_path)
 
-        # read the problem and generate the original model (only once)
         model = scip.Model()
         model.hideOutput()
         model.readProblem(instance_path)
@@ -157,8 +181,6 @@ class Balans:
 
         self.alns = ALNS(np.random.RandomState(self.alns_seed))
 
-        # TODO create a method to set operators
-        # TODO rename count to num_destroy_removed
         count = 0
         # If the problem has no binary, remove Local Branching and Proximity
         if len(self._instance.binary_indexes) == 0:
@@ -170,7 +192,7 @@ class Balans:
         # If the problem has no integer, remove Dins and Rens
         elif len(self._instance.integer_indexes) == 0:
             for op in self.destroy_ops:
-                if op != DestroyOperators.Dins and op != DestroyOperators.Rens:
+                if op != DestroyOperators.Dins:
                     self.alns.add_destroy_operator(op)
                 else:
                     count += 1
@@ -181,15 +203,16 @@ class Balans:
         for op in self.repair_ops:
             self.alns.add_repair_operator(op)
 
-        if isinstance(self.selector, MABSelector):
-            self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy - count,
-                                        num_repair=self.selector.num_repair,
-                                        learning_policy=self.selector.mab.learning_policy)
+        if self.selector.num_destroy - count > 0:
+            if isinstance(self.selector, MABSelector):
+                self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy - count,
+                                            num_repair=self.selector.num_repair,
+                                            learning_policy=self.selector.mab.learning_policy)
 
-        result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
-
-        print(">>> FINISH objective:", result.best_state.objective())
-
+            result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
+            print(">>> FINISH objective:", result.best_state.objective())
+        else:
+            result = None
         # Result run
         return result
 
