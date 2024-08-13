@@ -20,6 +20,7 @@ def proximity(current: _State, rnd_state, delta=0.005) -> _State:
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
 
+    # TODO rename to proximity_delta (it is not a boolean anymore)
     next_state.is_proximity = delta
 
     return next_state

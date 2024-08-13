@@ -103,6 +103,33 @@ StopType = (MaxIterations,
 
 
 class Balans:
+    """
+    High-Level Architecture:
+
+    From the input MIP file, an Instance() is created.
+    The Instance() provides:
+        - Seed
+        - MIP model
+        - LP solution and objective
+        - Indices for binary, discrete variables
+        - solve(operator_settings)
+        - undo_solve()
+
+    From an Instance(), a State() is created.
+    The State() provides:
+        - Instance
+        - Solution
+        - Previous solution
+        - Operator settings
+        - solve_and_update()
+            - calls Instance.solve(operator_settings)
+    From initial state, ALNS() is created.
+    ALNS iterates by calling a pair of destroy_repair on State()
+
+    Operators takes a State()
+        - Destory operators updates States.operator_settings
+        - Repair operator calls State.solve_and_update()
+    """
 
     def __init__(self,
                  destroy_ops: List,
