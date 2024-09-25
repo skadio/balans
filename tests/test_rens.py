@@ -12,6 +12,7 @@ from balans.base_state import _State
 from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
+import pyscipopt as scip
 
 
 class RensTest(BaseTest):
@@ -76,7 +77,10 @@ class RensTest(BaseTest):
         # Parameters
         seed = Constants.default_seed
 
-        instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
         print("initial index to val:", index_to_val)
@@ -84,7 +88,7 @@ class RensTest(BaseTest):
         initial2 = _State(instance, index_to_val,  -30)
 
         # Initial solution
-        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
@@ -102,7 +106,7 @@ class RensTest(BaseTest):
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
         # self.assertEqual(result.best_state.objective(), -60)
-        self.assertIsBetter(-30, result.best_state.objective(), "minimize")
+        self.is_not_worse(-30, result.best_state.objective(), "minimize")
 
     def test_rens_t4(self):
         # Input
@@ -112,7 +116,10 @@ class RensTest(BaseTest):
         # Parameters
         seed = Constants.default_seed
 
-        instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
         print("initial index to val:", index_to_val)
@@ -120,7 +127,7 @@ class RensTest(BaseTest):
         initial2 = _State(instance, index_to_val,  -30)
 
         # Initial solution
-        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))

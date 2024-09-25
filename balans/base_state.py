@@ -23,7 +23,7 @@ class _State:
                  has_random_obj=False,
                  previous_index_to_val=None,
                  local_branching_size=0,
-                 is_proximity=None):
+                 proximity_delta=None):
 
         # State holds an instance and its solution and objective
         # Instance holds features and the solve() logic dictated by operators
@@ -39,14 +39,36 @@ class _State:
         self.has_random_obj = has_random_obj
         self.previous_index_to_val = previous_index_to_val
         self.local_branching_size = local_branching_size
-        self.is_proximity = is_proximity
+        self.proximity_delta = proximity_delta
 
     # We don't need to copy instance when create a deepcopy of state object, so we share the instance between the copy
     def __deepcopy__(self, memo):
-        # TODO remove this method and implement here..
-        # Add lots of commentary here
-        # Goal is to not copy instance? but copy all else?
-        return deepcopy_with_sharing(self, shared_attribute_names=["instance"], memo=memo)
+        shared_attribute_names = ["instance"]
+        assert isinstance(shared_attribute_names, (list, tuple))
+        shared_attributes = {k: getattr(self, k) for k in shared_attribute_names}
+
+        deepcopy_method = None
+
+        if hasattr(self, '__deepcopy__'):
+            # Do hack to prevent infinite recursion in call to deepcopy
+            deepcopy_method = self.__deepcopy__
+            self.__deepcopy__ = None
+
+        for attr in shared_attribute_names:
+            del self.__dict__[attr]
+
+        clone = deepcopy(self)
+
+        for attr, val in shared_attributes.items():
+            setattr(self, attr, val)
+            setattr(clone, attr, val)
+
+        if hasattr(self, '__deepcopy__'):
+            # Undo hack
+            self.__deepcopy__ = deepcopy_method
+            del clone.__deepcopy__
+
+        return clone
 
     def solution(self):
         return self.index_to_val
@@ -60,7 +82,7 @@ class _State:
         self.rens_float_set = None
         self.has_random_obj = False
         self.local_branching_size = 0
-        self.is_proximity = False
+        self.proximity_delta = False
 
     def solve_and_update(self):
         # Solve the current state with the destroyed variables and update
@@ -71,32 +93,32 @@ class _State:
                                                              rens_float_set=self.rens_float_set,
                                                              has_random_obj=self.has_random_obj,
                                                              local_branching_size=self.local_branching_size,
-                                                             is_proximity=self.is_proximity)
+                                                             proximity_delta=self.proximity_delta)
 
 
-def deepcopy_with_sharing(obj, shared_attribute_names, memo=None):
-    assert isinstance(shared_attribute_names, (list, tuple))
-    shared_attributes = {k: getattr(obj, k) for k in shared_attribute_names}
-
-    deepcopy_method = None
-
-    if hasattr(obj, '__deepcopy__'):
-        # Do hack to prevent infinite recursion in call to deepcopy
-        deepcopy_method = obj.__deepcopy__
-        obj.__deepcopy__ = None
-
-    for attr in shared_attribute_names:
-        del obj.__dict__[attr]
-
-    clone = deepcopy(obj)
-
-    for attr, val in shared_attributes.items():
-        setattr(obj, attr, val)
-        setattr(clone, attr, val)
-
-    if hasattr(obj, '__deepcopy__'):
-        # Undo hack
-        obj.__deepcopy__ = deepcopy_method
-        del clone.__deepcopy__
-
-    return clone
+# def deepcopy_with_sharing(obj, shared_attribute_names, memo=None):
+#     assert isinstance(shared_attribute_names, (list, tuple))
+#     shared_attributes = {k: getattr(obj, k) for k in shared_attribute_names}
+#
+#     deepcopy_method = None
+#
+#     if hasattr(obj, '__deepcopy__'):
+#         # Do hack to prevent infinite recursion in call to deepcopy
+#         deepcopy_method = obj.__deepcopy__
+#         obj.__deepcopy__ = None
+#
+#     for attr in shared_attribute_names:
+#         del obj.__dict__[attr]
+#
+#     clone = deepcopy(obj)
+#
+#     for attr, val in shared_attributes.items():
+#         setattr(obj, attr, val)
+#         setattr(clone, attr, val)
+#
+#     if hasattr(obj, '__deepcopy__'):
+#         # Undo hack
+#         obj.__deepcopy__ = deepcopy_method
+#         del clone.__deepcopy__
+#
+#     return clone

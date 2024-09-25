@@ -194,6 +194,13 @@ class Balans:
         model.setParam("limits/maxorigsol", 0)
         model.setParam("randomization/randomseedshift", self.seed)
 
+        # change the problem to minimize problem and record the change use flag to flip the answer when exit
+        max_sense_flag = 0
+        if model.getObjectiveSense() == Constants.maximize:
+            model.setObjective(-model.getObjective())
+            model.setMinimize()
+            max_sense_flag = 1
+
         # Create instance from mip file
         self._instance = _Instance(model, self.seed)
 
@@ -237,7 +244,16 @@ class Balans:
                                             learning_policy=self.selector.mab.learning_policy)
 
             result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
-            print(">>> FINISH objective:", result.best_state.objective())
+
+            if max_sense_flag == 1:
+                obj_list = []
+                for obj in result.statistics.objectives:
+                    obj_list.append(-obj)
+                result.statistics._objectives = obj_list
+
+                print(">>> FINISH objective:", -result.best_state.objective())
+            else:
+                print(">>> FINISH objective:", result.best_state.objective())
         else:
             result = None
         # Result run

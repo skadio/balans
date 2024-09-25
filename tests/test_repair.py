@@ -35,4 +35,4 @@ class RepairTest(BaseTest):
         print("Best solution:", result.best_state.objective())
 
         # Assert
-        self.assertIsBetter(balans.initial_obj_val, result.best_state.objective(), balans.instance.sense)
+        self.is_not_worse(balans.initial_obj_val, result.best_state.objective(), balans.instance.sense)

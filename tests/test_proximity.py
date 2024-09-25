@@ -12,6 +12,7 @@ from balans.base_state import _State
 from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
+import pyscipopt as scip
 
 
 class ProximityTest(BaseTest):
@@ -49,8 +50,12 @@ class ProximityTest(BaseTest):
         # Parameters
         seed = 123456
 
-        instance = _Instance(instance_path)
-        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
+
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Here is a different solution than the initial
         index_to_val = {0: 1.0, 1: 1.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}

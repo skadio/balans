@@ -26,6 +26,13 @@ class Constants(NamedTuple):
     var_lb = "var_lb"
     var_ub = "var_ub"
 
+    # initial solve time to get feasible solution as a starting point for ALNS
+    initial_solve_time = 20
+
+    # time limit for one iteration is ALNS, local branching has longer time because hard problem created
+    time_limit = 120
+    local_branching_time_limit = 600
+
     # for Big-M constraint, currently used in Proximity
     M = 1000
 

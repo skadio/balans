@@ -93,3 +93,15 @@ def split_binary_vars(variables, binary_indexes, index_to_val):
                 one_binary_vars.append(var)
 
     return zero_binary_vars, one_binary_vars
+
+def undo_solve(model, constraints=None, org_objective=None, sense=None, proximity_delta=None, z=None):
+    model.freeTransform()
+    model.setParam("limits/bestsol", -1)
+    model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
+    if constraints:
+        for ct in constraints:
+            model.delCons(ct)
+    if org_objective and sense:
+        model.setObjective(org_objective, sense)
+    if proximity_delta > 0 and z:
+        model.delVar(z)

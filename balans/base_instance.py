@@ -5,7 +5,7 @@ from typing import Tuple, Dict, Any
 from pyscipopt import quicksum, Expr
 import pyscipopt as scip
 
-from balans.utils_scip import get_index_to_val_and_objective, lp_solve
+from balans.utils_scip import get_index_to_val_and_objective, lp_solve, undo_solve
 from balans.utils_scip import is_binary, is_discrete, split_binary_vars
 from balans.utils import Constants
 
@@ -37,7 +37,7 @@ class _Instance:
               rens_float_set=None,
               has_random_obj=False,
               local_branching_size=0,
-              is_proximity=False) -> Tuple[Dict[Any, float], float]:
+              proximity_delta=0) -> Tuple[Dict[Any, float], float]:
 
         print("\t Solve")
         # has_destroy to identify if any constraint added or objective function changed
@@ -51,6 +51,7 @@ class _Instance:
         org_obj_val = obj_val
         # Record the constraints we added to the model
         constraints = []
+        z = None
 
         # DESTROY used for Crossover, Mutation, RINS
         if destroy_set:
@@ -89,7 +90,7 @@ class _Instance:
             constraints.append(self.model.addCons(zero_expr + one_expr <= local_branching_size))
 
         # Proximity: Binary variables, modify objective, add new constraint
-        if is_proximity:
+        if proximity_delta > 0:
             has_destroy = True
             zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
             # if x_inc=0, new objective expression is x_inc.
@@ -101,7 +102,7 @@ class _Instance:
             # add cutoff constraint depending on sense, so that next state is better quality
             # a slack variable z to prevent infeasible solution, \theta = 1
             z = self.model.addVar(vtype=Constants.continuous, lb=0)
-            constraints.append(self.model.addCons(self.model.getObjective() <= obj_val * (1 - is_proximity) + z))
+            constraints.append(self.model.addCons(self.model.getObjective() <= obj_val * (1 - proximity_delta) + z))
             # M * z is to make sure model does not use z, unless needed to avoid infeasibility
             self.model.setObjective(zero_expr + one_expr + Constants.M * z, Constants.minimize)
 
@@ -139,27 +140,19 @@ class _Instance:
             # print("\t index_to_val: ", index_to_val)
             return index_to_val, obj_val
 
-        # TODO add to constants
         if local_branching_size > 0:
-            self.model.setParam("limits/time", 600)
+            self.model.setParam("limits/time", Constants.local_branching_time_limit)
         else:
-            self.model.setParam("limits/time", 120)
+            self.model.setParam("limits/time", Constants.time_limit)
 
         # destroy, solve for next state
         self.model.optimize()
 
         index_to_val, obj_val = get_index_to_val_and_objective(self.model)
 
-        # TODO add undo_solve() method
         # Get back the original model
-        self.model.freeTransform()
-        self.model.setParam("limits/bestsol", -1)
-        self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
-        for ct in constraints:
-            self.model.delCons(ct)
-        self.model.setObjective(org_objective, self.sense)
-        if is_proximity:
-            self.model.delVar(z)
+        undo_solve(self.model, constraints=constraints, org_objective=org_objective, sense=self.sense,
+                   proximity_delta=proximity_delta, z=z)
 
         if len(index_to_val) == 0:
             print("Go back to previous state")
@@ -167,7 +160,7 @@ class _Instance:
             return org_index_to_val, org_obj_val
 
         # Need to find the original obj value for transformed objectives
-        if is_proximity or has_random_obj:
+        if proximity_delta > 0 or has_random_obj:
             # Objective value of the solution found in transformed
             print("\t Transformed obj: ", obj_val)
 
@@ -178,17 +171,12 @@ class _Instance:
         print("\t Solve DONE!", obj_val)
         return index_to_val, obj_val
 
-    def initial_solve(self, index_to_val) -> Tuple[Dict[Any, float], float]:
+    def initial_solve(self, index_to_val=None) -> Tuple[Dict[Any, float], float]:
         variables = self.model.getVars()
 
         # Initial solve extracts static instance features
         self.extract_base_features(self.model, variables)
         self.extract_lp_features(self.model)
-
-        # TODO: Revert before existing
-        if self.sense == Constants.maximize:
-            self.model.setObjective(-self.model.getObjective())
-            self.sense = Constants.minimize
 
         # Record the constraints we added to the model
         constraints = []
@@ -198,8 +186,7 @@ class _Instance:
                 if index_to_val[var.getIndex()] is not None:
                     constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
-        # TODO: move constants to utils.Constants
-        self.model.setParam("limits/time", 20)
+        self.model.setParam("limits/time", Constants.initial_solve_time)
         # Solve to get initial solution
         self.model.optimize()
         index_to_val, obj_val = get_index_to_val_and_objective(self.model)

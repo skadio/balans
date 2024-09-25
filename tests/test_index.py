@@ -12,6 +12,7 @@ from balans.base_state import _State
 from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
+import pyscipopt as scip
 
 SEED = 42
 np.random.seed(SEED)
@@ -76,12 +77,15 @@ class IndexTest(BaseTest):
         destroy_ops = [DestroyOperators.Mutation]
         repair_ops = [RepairOperators.Repair]
 
-        _instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
         # Initial solution
-        initial_index_to_val, initial_obj_val = _instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Initial state and solution
-        initial_state = _State(_instance, initial_index_to_val, initial_obj_val)
+        initial_state = _State(instance, initial_index_to_val, initial_obj_val)
         # Assert
         self.assertEqual(initial_obj_val, 8)
 
@@ -96,12 +100,15 @@ class IndexTest(BaseTest):
         destroy_ops = [DestroyOperators.Mutation]
         repair_ops = [RepairOperators.Repair]
 
-        _instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
         # Initial solution
-        initial_index_to_val, initial_obj_val = _instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Initial state and solution
-        initial_state = _State(_instance, initial_index_to_val, initial_obj_val)
+        initial_state = _State(instance, initial_index_to_val, initial_obj_val)
 
         # Assert
         self.assertEqual(initial_state.destroy_set, None)

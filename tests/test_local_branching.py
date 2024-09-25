@@ -12,6 +12,7 @@ from balans.base_state import _State
 from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
+import pyscipopt as scip
 
 
 class LocalBranchingTest(BaseTest):
@@ -24,7 +25,10 @@ class LocalBranchingTest(BaseTest):
         # Parameters
         seed = 123456
 
-        instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
 
         index_to_val = {0: 0.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
         print("initial index to val:", index_to_val)
@@ -32,7 +36,7 @@ class LocalBranchingTest(BaseTest):
         initial2 = _State(instance, index_to_val, -40)
 
         # Initial solution
-        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
@@ -60,7 +64,10 @@ class LocalBranchingTest(BaseTest):
         # Parameters
         seed = 123456
 
-        instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
 
         index_to_val = {0: 1.0, 1: 1.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
         print("initial index to val:", index_to_val)
@@ -68,7 +75,7 @@ class LocalBranchingTest(BaseTest):
         initial2 = _State(instance, index_to_val, -42)
 
         # Initial solution
-        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
@@ -95,7 +102,10 @@ class LocalBranchingTest(BaseTest):
         # Parameters
         seed = 123456
 
-        instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
 
         index_to_val = {0: 1.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
         print("initial index to val:", index_to_val)
@@ -103,7 +113,7 @@ class LocalBranchingTest(BaseTest):
         initial2 = _State(instance, index_to_val, -41)
 
         # Initial solution
-        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))

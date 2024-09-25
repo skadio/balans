@@ -2,6 +2,7 @@ import os
 from balans.utils import Constants
 from tests.test_base import BaseTest
 from balans.base_instance import _Instance
+import pyscipopt as scip
 
 
 class IndexExtractionTest(BaseTest):
@@ -11,7 +12,10 @@ class IndexExtractionTest(BaseTest):
         instance = "test5.5.cip"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
-        instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
         instance.initial_solve(None)
 
         print("Discrete index:", instance.discrete_indexes)

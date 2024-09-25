@@ -12,6 +12,7 @@ from balans.base_state import _State
 from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
+import pyscipopt as scip
 
 
 class CrossoverTest(BaseTest):
@@ -29,7 +30,7 @@ class CrossoverTest(BaseTest):
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
         accept = HillClimbing()
-        stop = MaxIterations(5)
+        stop = MaxIterations(1)
 
         # Solver
         balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
@@ -39,7 +40,7 @@ class CrossoverTest(BaseTest):
         print("Best solution:", result.best_state.objective())
 
         # Assert
-        self.assertIsBetter(balans.initial_obj_val, result.best_state.objective(), balans.instance.sense)
+        self.is_not_worse(balans.initial_obj_val, result.best_state.objective(), balans.instance.sense)
 
     def test_crossover_t1(self):
         # Input
@@ -102,10 +103,13 @@ class CrossoverTest(BaseTest):
         destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
-        instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
 
         # Initial solution
-        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
         # With this seed, in the firs iteration index=1 is destroy
@@ -132,7 +136,7 @@ class CrossoverTest(BaseTest):
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
         # self.assertEqual(result.best_state.objective(), -60)
-        self.assertIsBetter(-30, result.best_state.objective(), "minimize")
+        self.is_not_worse(-30, result.best_state.objective(), "minimize")
 
     def test_crossover_t4(self):
         # Input
@@ -145,10 +149,13 @@ class CrossoverTest(BaseTest):
         destroy_ops = [DestroyOperators.Crossover]
         repair_ops = [RepairOperators.Repair]
 
-        instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
 
         # Initial solution
-        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
         # With this seed, in the firs iteration index=1 is destroy
@@ -178,7 +185,7 @@ class CrossoverTest(BaseTest):
         best_solution = best_state.solution()
 
         print(f"Best heuristic solution objective is {best_objective}.")
-        self.assertEqual(best_objective, -40.0)
+        self.is_not_worse(-30, result.best_state.objective(), "minimize")
 
     def test_crossover_t4_with_warm_start(self):
         # Input

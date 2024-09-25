@@ -12,6 +12,7 @@ from balans.base_state import _State
 from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
+import pyscipopt as scip
 
 
 class MutationTest(BaseTest):
@@ -39,7 +40,7 @@ class MutationTest(BaseTest):
         print("Best solution:", result.best_state.objective())
 
         # Assert
-        self.assertIsBetter(balans.initial_obj_val, result.best_state.objective(), balans.instance.sense)
+        self.is_not_worse(balans.initial_obj_val, result.best_state.objective(), balans.instance.sense)
 
     def test_mutation_t1(self):
         # Input
@@ -104,10 +105,13 @@ class MutationTest(BaseTest):
         destroy_ops = [DestroyOperators.Mutation2]
         repair_ops = [RepairOperators.Repair]
 
-        instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
 
         # Initial solution
-        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
         # With this seed, in the firs iteration index=1 is destroy
@@ -134,7 +138,7 @@ class MutationTest(BaseTest):
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
         # self.assertEqual(result.best_state.objective(), -60)
-        self.assertIsBetter(-30, result.best_state.objective(), "minimize")
+        self.is_not_worse(-30, result.best_state.objective(), "minimize")
 
     def test_mutation_t4(self):
         # Input
@@ -147,10 +151,13 @@ class MutationTest(BaseTest):
         destroy_ops = [DestroyOperators.Mutation2]
         repair_ops = [RepairOperators.Repair]
 
-        instance = _Instance(instance_path)
+        model = scip.Model()
+        model.hideOutput()
+        model.readProblem(instance_path)
+        instance = _Instance(model)
 
         # Initial solution
-        initial_index_to_val, initial_obj_val = instance.solve(is_initial_solve=True)
+        initial_index_to_val, initial_obj_val = instance.initial_solve()
 
         # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
         # With this seed, in the firs iteration index=1 is destroy
