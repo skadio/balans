@@ -2,12 +2,10 @@ import os
 from typing import List, Optional, Dict
 from typing import NamedTuple
 
-import alns.select.RandomSelect
 import pyscipopt as scip
 
 import numpy as np
 from alns.ALNS import ALNS
-from alns.select import MABSelector
 from alns.accept import MovingAverageThreshold, GreatDeluge, HillClimbing
 from alns.accept import LateAcceptanceHillClimbing, NonLinearGreatDeluge, AlwaysAccept
 from alns.accept import RecordToRecordTravel, SimulatedAnnealing, RandomAccept
@@ -32,23 +30,23 @@ from balans.utils import Constants, check_false, check_true, create_rng
 class DestroyOperators(NamedTuple):
     Crossover = crossover
     Dins = dins
-    Local_Branching = local_branching_10
-    Local_Branching2 = local_branching_25
-    Local_Branching3 = local_branching_50
-    Local_Branching_Relax = local_branching_relax_10
-    Local_Branching_Relax2 = local_branching_relax_25
-    Mutation = mutation_25
-    Mutation2 = mutation_50
-    Mutation3 = mutation_75
-    Proximity = proximity_05
-    Proximity2 = proximity_15
-    Proximity3 = proximity_30
-    Rens = rens_25
-    Rens2 = rens_50
-    Rens3 = rens_75
-    Rins = rins_25
-    Rins2 = rins_50
-    Rins3 = rins_75
+    Local_Branching_10 = local_branching_10
+    Local_Branching_25 = local_branching_25
+    Local_Branching_50 = local_branching_50
+    Local_Branching_Relax_10 = local_branching_relax_10
+    Local_Branching_Relax_25 = local_branching_relax_25
+    Mutation_25 = mutation_25
+    Mutation_50 = mutation_50
+    Mutation_75 = mutation_75
+    Proximity_05 = proximity_05
+    Proximity_15 = proximity_15
+    Proximity_30 = proximity_30
+    Rens_25 = rens_25
+    Rens_50 = rens_50
+    Rens_75 = rens_75
+    Rins_25 = rins_25
+    Rins_50 = rins_50
+    Rins_75 = rins_75
     Random_Objective = random_objective
 
 
@@ -59,23 +57,23 @@ class RepairOperators(NamedTuple):
 # Type Declarations
 DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Dins),
-               type(DestroyOperators.Local_Branching),
-               type(DestroyOperators.Local_Branching2),
-               type(DestroyOperators.Local_Branching3),
-               type(DestroyOperators.Local_Branching_Relax),
-               type(DestroyOperators.Local_Branching_Relax2),
-               type(DestroyOperators.Mutation),
-               type(DestroyOperators.Mutation2),
-               type(DestroyOperators.Mutation3),
-               type(DestroyOperators.Proximity),
-               type(DestroyOperators.Proximity2),
-               type(DestroyOperators.Proximity3),
-               type(DestroyOperators.Rens),
-               type(DestroyOperators.Rens2),
-               type(DestroyOperators.Rens3),
-               type(DestroyOperators.Rins),
-               type(DestroyOperators.Rins2),
-               type(DestroyOperators.Rins3),
+               type(DestroyOperators.Local_Branching_10),
+               type(DestroyOperators.Local_Branching_25),
+               type(DestroyOperators.Local_Branching_50),
+               type(DestroyOperators.Local_Branching_Relax_10),
+               type(DestroyOperators.Local_Branching_Relax_25),
+               type(DestroyOperators.Mutation_25),
+               type(DestroyOperators.Mutation_50),
+               type(DestroyOperators.Mutation_75),
+               type(DestroyOperators.Proximity_05),
+               type(DestroyOperators.Proximity_15),
+               type(DestroyOperators.Proximity_30),
+               type(DestroyOperators.Rens_25),
+               type(DestroyOperators.Rens_50),
+               type(DestroyOperators.Rens_75),
+               type(DestroyOperators.Rins_25),
+               type(DestroyOperators.Rins_50),
+               type(DestroyOperators.Rins_75),
                type(DestroyOperators.Random_Objective))
 
 RepairType = (type(RepairOperators.Repair))
@@ -127,7 +125,7 @@ class Balans:
     ALNS iterates by calling a pair of destroy_repair on State()
 
     Operators takes a State()
-        - Destory operators updates States.operator_settings
+        - Destroy operators updates States.operator_settings
         - Repair operator calls State.solve_and_update()
     """
 
@@ -219,7 +217,7 @@ class Balans:
         # If the problem has no binary, remove Local Branching and Proximity
         if len(self._instance.binary_indexes) == 0:
             for op in self.destroy_ops:
-                if op != DestroyOperators.Local_Branching and op != DestroyOperators.Proximity:
+                if op != DestroyOperators.Local_Branching_10 and op != DestroyOperators.Proximity_05:
                     self.alns.add_destroy_operator(op)
                 else:
                     count += 1
@@ -291,7 +289,7 @@ class Balans:
     @staticmethod
     def _validate_solve_args(instance_path):
 
-        check_true(isinstance(instance_path, str), TypeError("Instance path must be a string" + str(instance_path)))
-        check_false(instance_path == "", ValueError("Instance cannot be empty" + str(instance_path)))
-        check_false(instance_path is None, ValueError("Instance cannot be None" + str(instance_path)))
-        check_true(os.path.isfile(instance_path), ValueError("Instance must exist" + str(instance_path)))
+        check_true(isinstance(instance_path, str), TypeError("Instance path must be a string: " + str(instance_path)))
+        check_false(instance_path == "", ValueError("Instance cannot be empty: " + str(instance_path)))
+        check_false(instance_path is None, ValueError("Instance cannot be None: " + str(instance_path)))
+        check_true(os.path.isfile(instance_path), ValueError("Instance must exist: " + str(instance_path)))

@@ -15,7 +15,7 @@ class InvalidTest(BaseTest):
         with self.assertRaises(TypeError):
             # Parameters
             seed = Constants.default_seed
-            destroy_ops = [DestroyOperators.Mutation, "NOT VALID"]
+            destroy_ops = [DestroyOperators.Mutation_25, "NOT VALID"]
             repair_ops = [RepairOperators.Repair]
             selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
                                    learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -29,7 +29,7 @@ class InvalidTest(BaseTest):
         with self.assertRaises(TypeError):
             # Parameters
             seed = Constants.default_seed
-            destroy_ops = [DestroyOperators.Mutation, None]
+            destroy_ops = [DestroyOperators.Mutation_25, None]
             repair_ops = [RepairOperators.Repair]
             selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
                                    learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -43,7 +43,7 @@ class InvalidTest(BaseTest):
         with self.assertRaises(TypeError):
             # Parameters
             seed = Constants.default_seed
-            destroy_ops = [DestroyOperators.Mutation]
+            destroy_ops = [DestroyOperators.Mutation_25]
             repair_ops = [RepairOperators.Repair, "NOT VALID"]
             selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
                                    learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -57,7 +57,7 @@ class InvalidTest(BaseTest):
         with self.assertRaises(TypeError):
             # Parameters
             seed = Constants.default_seed
-            destroy_ops = [DestroyOperators.Mutation]
+            destroy_ops = [DestroyOperators.Mutation_25]
             repair_ops = [RepairOperators.Repair, None]
             selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
                                    learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -71,7 +71,7 @@ class InvalidTest(BaseTest):
         with self.assertRaises(ValueError):
             # Parameters
             seed = -1
-            destroy_ops = [DestroyOperators.Mutation]
+            destroy_ops = [DestroyOperators.Mutation_25]
             repair_ops = [RepairOperators.Repair]
             selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
                                    learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -85,7 +85,7 @@ class InvalidTest(BaseTest):
         with self.assertRaises(TypeError):
             # Parameters
             seed = -1
-            destroy_ops = [DestroyOperators.Mutation]
+            destroy_ops = [DestroyOperators.Mutation_25]
             repair_ops = [RepairOperators.Repair]
             selector = None
             accept = HillClimbing()
@@ -98,7 +98,7 @@ class InvalidTest(BaseTest):
         with self.assertRaises(TypeError):
             # Parameters
             seed = -1
-            destroy_ops = [DestroyOperators.Mutation]
+            destroy_ops = [DestroyOperators.Mutation_25]
             repair_ops = [RepairOperators.Repair]
             selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
                                    learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -112,7 +112,7 @@ class InvalidTest(BaseTest):
         with self.assertRaises(TypeError):
             # Parameters
             seed = -1
-            destroy_ops = [DestroyOperators.Mutation]
+            destroy_ops = [DestroyOperators.Mutation_25]
             repair_ops = [RepairOperators.Repair]
             selector = None
             accept = HillClimbing()
@@ -125,7 +125,7 @@ class InvalidTest(BaseTest):
         with self.assertRaises(ValueError):
             # Parameters
             seed = Constants.default_seed
-            destroy_ops = [DestroyOperators.Mutation]
+            destroy_ops = [DestroyOperators.Mutation_25]
             repair_ops = [RepairOperators.Repair]
             selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
                                    learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -141,7 +141,7 @@ class InvalidTest(BaseTest):
         with self.assertRaises(ValueError):
             # Parameters
             seed = Constants.default_seed
-            destroy_ops = [DestroyOperators.Mutation]
+            destroy_ops = [DestroyOperators.Mutation_25]
             repair_ops = [RepairOperators.Repair]
             selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
                                    learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))

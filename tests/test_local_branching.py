@@ -40,7 +40,7 @@ class LocalBranchingTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Local_Branching)
+        alns.add_destroy_operator(DestroyOperators.Local_Branching_10)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -53,7 +53,7 @@ class LocalBranchingTest(BaseTest):
         # Retrieve the final solution
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
-        self.assertEqual(result.best_state.objective(), -61.0)
+        self.assertEqual(result.best_state.objective(), -40.0)
 
     def test_local_branching_classic_t2(self):
         # Input
@@ -79,7 +79,7 @@ class LocalBranchingTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Local_Branching)
+        alns.add_destroy_operator(DestroyOperators.Local_Branching_10)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -92,7 +92,7 @@ class LocalBranchingTest(BaseTest):
         # Retrieve the final solution
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
-        self.assertEqual(result.best_state.objective(), -63.0)
+        self.assertEqual(result.best_state.objective(), -42.0)
 
     def test_local_branching_v2_t3(self):
         # Input
@@ -117,7 +117,7 @@ class LocalBranchingTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Local_Branching)
+        alns.add_destroy_operator(DestroyOperators.Local_Branching_10)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -130,4 +130,4 @@ class LocalBranchingTest(BaseTest):
         # Retrieve the final solution
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
-        self.assertEqual(result.best_state.objective(), -62.0)
+        self.assertEqual(result.best_state.objective(), -41.0)

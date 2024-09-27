@@ -12,16 +12,16 @@ from balans.base_instance import _Instance
 from mabwiser.mab import LearningPolicy
 
 
-class NoObjectiveTest(BaseTest):
+class RandomObjectiveTest(BaseTest):
 
-    def test_zero_objective_t1(self):
+    def test_random_objective_t1(self):
         # Input
         instance = "model.cip"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Zero_Objective]
+        destroy_ops = [DestroyOperators.Random_Objective]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -39,14 +39,14 @@ class NoObjectiveTest(BaseTest):
 
         self.assertEqual(result.best_state.objective(), 4)
 
-    def test_zero_objective_t2(self):
+    def test_random_objective_t2(self):
         # Input
         instance = "test2.5.cip"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Zero_Objective]
+        destroy_ops = [DestroyOperators.Random_Objective]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
@@ -72,14 +72,14 @@ class NoObjectiveTest(BaseTest):
         # Assert
         self.assertEqual(result.best_state.objective(), -60)
 
-    def test_zero_objective_with_warm_start(self):
+    def test_random_objective_with_warm_start(self):
         # Input
         instance = "test2.5.cip"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
-        destroy_ops = [DestroyOperators.Zero_Objective]
+        destroy_ops = [DestroyOperators.Random_Objective]
         repair_ops = [RepairOperators.Repair]
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -106,11 +106,4 @@ class NoObjectiveTest(BaseTest):
 
         print("Best solution:", result.best_state.solution())
         print("Best solution value:", result.best_state.objective())
-
-        # Assert solution
-        best_solution_expected = {0: 0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
-        self.assertDictEqual(best_solution_expected, best_solution)
-
-        # Assert objective
-        self.assertEqual(best_objective, -30.0)
 

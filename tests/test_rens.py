@@ -24,7 +24,7 @@ class RensTest(BaseTest):
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Rens]
+        destroy_ops = [DestroyOperators.Rens_25]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -49,7 +49,7 @@ class RensTest(BaseTest):
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Rens]
+        destroy_ops = [DestroyOperators.Rens_25]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
@@ -92,7 +92,7 @@ class RensTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Rens)
+        alns.add_destroy_operator(DestroyOperators.Rens_25)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -131,7 +131,7 @@ class RensTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Rens)
+        alns.add_destroy_operator(DestroyOperators.Rens_25)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -144,4 +144,4 @@ class RensTest(BaseTest):
         # Retrieve the final solution
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
-        self.assertEqual(result.best_state.objective(), -60.0)
+        self.assertEqual(result.best_state.objective(), -30.0)

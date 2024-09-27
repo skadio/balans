@@ -13,8 +13,8 @@ The framework integrates [MABWiser](https://github.com/fidelity/mabwiser/) for c
 ```python
 # Adaptive large neigborhood
 from alns.select import MABSelector
-from alns.accept import HillClimbing
-from alns.stop import MaxIterations
+from alns.accept import HillClimbing, SimulatedAnnealing
+from alns.stop import MaxIterations, MaxRuntime
 
 # Contextual multi-armed bandits
 from mabwiser.mab import LearningPolicy
@@ -22,25 +22,47 @@ from mabwiser.mab import LearningPolicy
 # Meta-solver built on top of SCIP
 from balans.solver import Balans, DestroyOperators, RepairOperators
 
+# Destroy operators
+destroy_ops = [DestroyOperators.Crossover,
+               DestroyOperators.Dins,
+               DestroyOperators.Mutation_25,
+               DestroyOperators.Local_Branching_10,
+               DestroyOperators.Rins_25,
+               DestroyOperators.Proximity_05,
+               DestroyOperators.Rens_25,
+               DestroyOperators.Random_Objective]
+
+# Repair operators
+repair_ops = [RepairOperators.Repair]
+
+# Rewards
+best, better, accept, reject = 4, 3, 2, 1
+
+# Bandit selector
+selector = MABSelector(scores=[best, better, accept, reject],
+                       num_destroy=len(destroy_ops),
+                       num_repair=len(repair_ops),
+                       learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50))
+
+# Acceptance criterion
+# accept = HillClimbing()
+accept = SimulatedAnnealing(start_temperature=20, end_temperature=1, step=0.1)
+
+# Stopping condition
+# stop = MaxRuntime(100)
+stop = MaxIterations(10)
+
 # Balans
-balans = Balans(destroy_ops=[DestroyOperators.Crossover,
-                             DestroyOperators.Dins, 
-                             DestroyOperators.Mutation, 
-                             DestroyOperators.Local_Branching,
-                             DestroyOperators.Proximity,
-                             DestroyOperators.Rens, 
-                             DestroyOperators.Rins,
-                             DestroyOperators.Zero_Objective],
-                repair_ops=[RepairOperators.Repair],
-                selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=8, num_repair=1,
-                                     learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15)),
-                accept=HillClimbing(),
-                stop=MaxIterations(100))
+balans = Balans(destroy_ops=destroy_ops,
+                repair_ops=repair_ops,
+                selector=selector,
+                accept=accept,
+                stop=stop)
 
 # Run
-result = balans.solve("noswot.mps")
+instance_path = "data/miplib/noswot.mps"
+result = balans.solve(instance_path)
 
-# Result
 print("Best solution:", result.best_state.solution())
 print("Best solution objective:", result.best_state.objective())
 ```

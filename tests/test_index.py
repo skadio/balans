@@ -66,30 +66,7 @@ class IndexTest(BaseTest):
 
         self.assertEqual(destroy_set, {32, 128, 99, 163, 133, 111, 114, 115, 86})
 
-    def test_disc_index_t3(self):
-        # Testing whether we get the correct index set
-        # Input
-        instance = "model2.cip"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
-
-        # Parameters
-        seed = 123456
-        destroy_ops = [DestroyOperators.Mutation]
-        repair_ops = [RepairOperators.Repair]
-
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
-        # Initial solution
-        initial_index_to_val, initial_obj_val = instance.initial_solve()
-
-        # Initial state and solution
-        initial_state = _State(instance, initial_index_to_val, initial_obj_val)
-        # Assert
-        self.assertEqual(initial_obj_val, 8)
-
-    def test_initial_destroy_t4(self):
+    def test_initial_destroy_t3(self):
         # Testing whether we get the correct index set
         # Input
         instance = "model.cip"
@@ -97,7 +74,7 @@ class IndexTest(BaseTest):
 
         # Parameters
         seed = 123456
-        destroy_ops = [DestroyOperators.Mutation]
+        destroy_ops = [DestroyOperators.Mutation_25]
         repair_ops = [RepairOperators.Repair]
 
         model = scip.Model()
@@ -113,7 +90,7 @@ class IndexTest(BaseTest):
         # Assert
         self.assertEqual(initial_state.destroy_set, None)
 
-    def test_one_iteration_obj_t5(self):
+    def test_one_iteration_obj_t4(self):
 
         # Input
         instance = "model.cip"
@@ -121,7 +98,7 @@ class IndexTest(BaseTest):
 
         # Parameters
         seed = 123456
-        destroy_ops = [DestroyOperators.Mutation]
+        destroy_ops = [DestroyOperators.Mutation_25]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,

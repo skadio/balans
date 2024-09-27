@@ -24,7 +24,7 @@ class MutationTest(BaseTest):
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Mutation]
+        destroy_ops = [DestroyOperators.Mutation_25]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -49,7 +49,7 @@ class MutationTest(BaseTest):
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Mutation]
+        destroy_ops = [DestroyOperators.Mutation_25]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -74,7 +74,7 @@ class MutationTest(BaseTest):
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Mutation2]
+        destroy_ops = [DestroyOperators.Mutation_50]
         repair_ops = [RepairOperators.Repair]
 
         instance = _Instance(instance_path)
@@ -102,7 +102,7 @@ class MutationTest(BaseTest):
         # Parameters
         seed = 123456
 
-        destroy_ops = [DestroyOperators.Mutation2]
+        destroy_ops = [DestroyOperators.Mutation_50]
         repair_ops = [RepairOperators.Repair]
 
         model = scip.Model()
@@ -124,7 +124,7 @@ class MutationTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Mutation2)
+        alns.add_destroy_operator(DestroyOperators.Mutation_50)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -148,7 +148,7 @@ class MutationTest(BaseTest):
         # Parameters
         seed = 123456
 
-        destroy_ops = [DestroyOperators.Mutation2]
+        destroy_ops = [DestroyOperators.Mutation_50]
         repair_ops = [RepairOperators.Repair]
 
         model = scip.Model()
@@ -170,7 +170,7 @@ class MutationTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Mutation2)
+        alns.add_destroy_operator(DestroyOperators.Mutation_50)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -186,7 +186,7 @@ class MutationTest(BaseTest):
         best_objective = best_state.objective()
 
         print(f"Best heuristic solution objective is {best_objective}.")
-        self.assertEqual(best_objective, -50.0)
+        self.assertEqual(best_objective, -30.0)
 
     def test_mutation_t4_with_warm_start(self):
         # Input
@@ -195,7 +195,7 @@ class MutationTest(BaseTest):
 
         # Parameters
         seed = 123456
-        destroy_ops = [DestroyOperators.Mutation2]
+        destroy_ops = [DestroyOperators.Mutation_50]
         repair_ops = [RepairOperators.Repair]
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
@@ -208,7 +208,7 @@ class MutationTest(BaseTest):
         # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
         # With this seed, in the firs iteration index=1 is destroy
         # Hence var0 and var2 must remain fixed and only the other variables can change
-        # Objective in the next iteration is 50 (minus since sense is minimization)
+        # Objective in the next iteration is -30 (minus since sense is minimization)
         initial_index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
         print("initial index to val:", initial_index_to_val)
 
@@ -224,8 +224,8 @@ class MutationTest(BaseTest):
         print("Best solution value:", result.best_state.objective())
 
         # Assert solution
-        best_solution_expected = {0: 0.0, 1: 10.0, 2: -0.0, 3: 0.0, 4: 50.0}
+        best_solution_expected = {0: 0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
         self.assertDictEqual(best_solution_expected, best_solution)
 
         # Assert objective
-        self.assertEqual(best_objective, -60.0)
+        self.assertEqual(best_objective, -30.0)
