@@ -63,11 +63,11 @@ result = balans.solve(instance_path)
 print("Best solution:", result.best_state.solution())
 print("Best solution objective:", result.best_state.objective())
 
-# Check for optimality
-from pyscipopt import Model
-model = Model("scip")
-model.readProblem(instance_path)
-model.optimize()
-solution = model.getBestSol()
-print(solution)
-print("Optimal value:", model.getObjVal())
+# Check for optimality using SCIP
+# from pyscipopt import Model
+# model = Model("scip")
+# model.readProblem(instance_path)
+# model.optimize()
+# solution = model.getBestSol()
+# print(solution)
+# print("Optimal value:", model.getObjVal())
