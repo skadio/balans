@@ -12,7 +12,7 @@ from balans.base_state import _State
 from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
-import pyscipopt as scip
+from balans.base_mip import create_mip_solver
 
 
 class RinsTest(BaseTest):
@@ -52,8 +52,6 @@ class RinsTest(BaseTest):
         destroy_ops = [DestroyOperators.Rins_25]
         repair_ops = [RepairOperators.Repair]
 
-        instance = _Instance(instance_path)
-
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
         accept = HillClimbing()
@@ -77,10 +75,8 @@ class RinsTest(BaseTest):
         # Parameters
         seed = Constants.default_seed
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
         print("initial index_to_val:", index_to_val)
@@ -116,10 +112,8 @@ class RinsTest(BaseTest):
         # Parameters
         seed = Constants.default_seed
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
         print("initial index to val:", index_to_val)

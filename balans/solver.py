@@ -2,8 +2,6 @@ import os
 from typing import List, Optional, Dict
 from typing import NamedTuple
 
-import pyscipopt as scip
-
 import numpy as np
 from alns.ALNS import ALNS
 from alns.accept import MovingAverageThreshold, GreatDeluge, HillClimbing
@@ -11,6 +9,7 @@ from alns.accept import LateAcceptanceHillClimbing, NonLinearGreatDeluge, Always
 from alns.accept import RecordToRecordTravel, SimulatedAnnealing, RandomAccept
 from alns.select import AlphaUCB, MABSelector, RandomSelect, RouletteWheel, SegmentedRouletteWheel
 from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterion
+from alns.Result import Result
 
 from balans.base_instance import _Instance
 from balans.base_state import _State
@@ -25,6 +24,7 @@ from balans.destroy.random_objective import random_objective
 from balans.destroy.local_branching_relax import local_branching_relax_10, local_branching_relax_25
 from balans.repair.repair import repair
 from balans.utils import Constants, check_false, check_true, create_rng
+from balans.base_mip import create_mip_solver
 
 
 class DestroyOperators(NamedTuple):
@@ -137,11 +137,11 @@ class Balans:
                  stop: StopType,
                  seed: int = Constants.default_seed,  # The random seed
                  n_jobs: int = 1,  # Number of parallel jobs
-                 backend: str = None  # Parallel backend implementation
+                 mip_solver: str = "scip"  # MIP solver scip/gurobi
                  ):
 
         # Validate arguments
-        self._validate_balans_args(destroy_ops, repair_ops, selector, accept, stop, seed, n_jobs, backend)
+        self._validate_balans_args(destroy_ops, repair_ops, selector, accept, stop, seed, n_jobs, mip_solver)
 
         # Parameters
         self.destroy_ops = destroy_ops
@@ -151,7 +151,7 @@ class Balans:
         self.stop = stop
         self.seed = seed
         self.n_jobs = n_jobs
-        self.backend = backend
+        self.mip_solver_str = mip_solver
 
         # RNG
         self._rng = create_rng(self.seed)
@@ -179,55 +179,87 @@ class Balans:
     def initial_obj_val(self) -> float:
         return self._initial_obj_val
 
-    def solve(self, instance_path, index_to_val=None):
+    def solve(self, instance_path, index_to_val=None) -> Result:
         """
         instance_path: the path to the MIP instance file
         index_to_val: initial (partial) solution to warm start the variables
+
+        Returns
+        -------
+        Result
+            ALNS result object, containing the best solution and some additional statistics.
+                result.best_state.solution()
+                result.best_state.objective()
         """
         self._validate_solve_args(instance_path)
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        model.setParam("limits/maxorigsol", 0)
-        model.setParam("randomization/randomseedshift", self.seed)
+        # MIP is an instance of _BaseMIP created from given mip instance
+        mip = create_mip_solver(instance_path, self.seed, self.mip_solver_str)
 
-        # change the problem to minimize problem and record the change use flag to flip the answer when exit
-        max_sense_flag = 0
-        if model.getObjectiveSense() == Constants.maximize:
-            model.setObjective(-model.getObjective())
-            model.setMinimize()
-            max_sense_flag = 1
-
-        # Create instance from mip file
-        self._instance = _Instance(model, self.seed)
+        # Create instance with mip model created from mip instance
+        self._instance = _Instance(mip, self.seed)
 
         self._initial_index_to_val, self._initial_obj_val = self._instance.initial_solve(index_to_val=index_to_val)
 
         print(">>> START objective:", self._initial_obj_val)
-        # print(">>> START objective index:", self._initial_index_to_val)
+        # print(">>> START values:", self._initial_index_to_val)
 
         # Initial state and solution
-        initial_state = _State(self._instance, self.initial_index_to_val,
-                               self.initial_obj_val, previous_index_to_val=self._initial_index_to_val)
+        initial_state = _State(self.instance, self.initial_index_to_val, self.initial_obj_val,
+                               previous_index_to_val=self.initial_index_to_val)
 
+        # Create ALNS
         self.alns = ALNS(np.random.RandomState(self.alns_seed))
 
-        count = 0
+        # Set ALNS operators according to MIP type, and if successful, start iterating ALNS
+        if self._set_alns_operators():
+
+            # Iterate ALNS
+            result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
+
+            # Restore the original objective results, if max problem is reversed
+            if self.instance.mip.is_obj_sense_changed:
+                obj_list = []
+                for obj in result.statistics.objectives:
+                    obj_list.append(-obj)
+                result.statistics._objectives = obj_list
+
+            print(">>> FINISH objective:", result.best_state.objective())
+        else:
+            result = None
+
+        # Result run
+        return result
+
+    @staticmethod
+    def _is_local_branching(op):
+        return (op == DestroyOperators.Local_Branching_10 or
+                op == DestroyOperators.Local_Branching_25 or
+                op == DestroyOperators.Local_Branching_50)
+
+    @staticmethod
+    def _is_proximity(op):
+        return (op == DestroyOperators.Proximity_05 or
+                op == DestroyOperators.Proximity_15 or
+                op == DestroyOperators.Proximity_30)
+
+    def _set_alns_operators(self):
+
+        num_destroy_removed = 0
         # If the problem has no binary, remove Local Branching and Proximity
-        if len(self._instance.binary_indexes) == 0:
+        if len(self.instance.binary_indexes) == 0:
             for op in self.destroy_ops:
-                if op != DestroyOperators.Local_Branching_10 and op != DestroyOperators.Proximity_05:
-                    self.alns.add_destroy_operator(op)
-                else:
-                    count += 1
-        # If the problem has no integer, remove Dins and Rens
-        elif len(self._instance.integer_indexes) == 0:
+                if self._is_local_branching(op) or self._is_proximity(op):
+                    num_destroy_removed += 1
+                    continue
+                self.alns.add_destroy_operator(op)
+        # If the problem has no integer, remove Dins
+        elif len(self.instance.integer_indexes) == 0:
             for op in self.destroy_ops:
-                if op != DestroyOperators.Dins:
-                    self.alns.add_destroy_operator(op)
-                else:
-                    count += 1
+                if op == DestroyOperators.Dins:
+                    num_destroy_removed += 1
+                    continue
+                self.alns.add_destroy_operator(op)
         else:
             for op in self.destroy_ops:
                 self.alns.add_destroy_operator(op)
@@ -235,30 +267,25 @@ class Balans:
         for op in self.repair_ops:
             self.alns.add_repair_operator(op)
 
-        if self.selector.num_destroy - count > 0:
+        num_remaining_destroy = self.selector.num_destroy - num_destroy_removed
+
+        # No more operators left, return failure
+        if num_remaining_destroy == 0:
+            return False
+
+        # If ops are removed, re-create bandit selector with adjusted arm counter
+        if num_destroy_removed > 0:
             if isinstance(self.selector, MABSelector):
-                self.selector = MABSelector(scores=self.selector.scores, num_destroy=self.selector.num_destroy - count,
+                self.selector = MABSelector(scores=self.selector.scores,
+                                            num_destroy=num_remaining_destroy,
                                             num_repair=self.selector.num_repair,
                                             learning_policy=self.selector.mab.learning_policy)
 
-            result = self.alns.iterate(initial_state, self.selector, self.accept, self.stop)
-
-            if max_sense_flag == 1:
-                obj_list = []
-                for obj in result.statistics.objectives:
-                    obj_list.append(-obj)
-                result.statistics._objectives = obj_list
-
-                print(">>> FINISH objective:", -result.best_state.objective())
-            else:
-                print(">>> FINISH objective:", result.best_state.objective())
-        else:
-            result = None
-        # Result run
-        return result
+        # Ops added successfully
+        return True
 
     @staticmethod
-    def _validate_balans_args(destroy_ops, repair_ops, selector, accept, stop, seed, n_jobs, backend):
+    def _validate_balans_args(destroy_ops, repair_ops, selector, accept, stop, seed, n_jobs, mip_solver):
 
         # Destroy Type
         for op in destroy_ops:
@@ -283,8 +310,11 @@ class Balans:
         # Parallel jobs
         check_true(isinstance(n_jobs, int), TypeError("Number of parallel jobs must be an integer." + str(n_jobs)))
         check_true(n_jobs != 0, ValueError("Number of parallel jobs cannot be zero." + str(n_jobs)))
-        if backend is not None:
-            check_true(isinstance(backend, str), TypeError("Parallel backend must be a string." + str(backend)))
+
+        # MIP solver
+        check_true(isinstance(mip_solver, str), TypeError("MIP solver backend must be a string." + str(mip_solver)))
+        check_true(mip_solver in ["scip", "gurobi"],
+                   ValueError("MIP solver backend must be a scip or gurobi." + str(mip_solver)))
 
     @staticmethod
     def _validate_solve_args(instance_path):

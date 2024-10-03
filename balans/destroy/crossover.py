@@ -1,7 +1,6 @@
 import copy
 import math
 
-from balans.utils_scip import get_random_solution
 from balans.base_state import _State
 
 
@@ -18,7 +17,7 @@ def crossover(current: _State, rnd_state) -> _State:
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
 
-    r1_index_to_val, _ = get_random_solution(current.instance.model)
+    r1_index_to_val, _ = current.instance.mip.solve_random_and_undo()
 
     # If we don't find a random feasible solution
     if len(r1_index_to_val) == 0:

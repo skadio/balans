@@ -12,7 +12,7 @@ from balans.base_state import _State
 from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
-import pyscipopt as scip
+from balans.base_mip import create_mip_solver
 
 
 class MutationTest(BaseTest):
@@ -40,7 +40,7 @@ class MutationTest(BaseTest):
         print("Best solution:", result.best_state.objective())
 
         # Assert
-        self.is_not_worse(balans.initial_obj_val, result.best_state.objective(), balans.instance.sense)
+        self.is_not_worse(balans.initial_obj_val, result.best_state.objective(), balans.instance.mip.org_objective_sense)
 
     def test_mutation_t1(self):
         # Input
@@ -77,8 +77,6 @@ class MutationTest(BaseTest):
         destroy_ops = [DestroyOperators.Mutation_50]
         repair_ops = [RepairOperators.Repair]
 
-        instance = _Instance(instance_path)
-
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
         accept = HillClimbing()
@@ -105,10 +103,8 @@ class MutationTest(BaseTest):
         destroy_ops = [DestroyOperators.Mutation_50]
         repair_ops = [RepairOperators.Repair]
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
 
         # Initial solution
         initial_index_to_val, initial_obj_val = instance.initial_solve()
@@ -151,10 +147,8 @@ class MutationTest(BaseTest):
         destroy_ops = [DestroyOperators.Mutation_50]
         repair_ops = [RepairOperators.Repair]
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
 
         # Initial solution
         initial_index_to_val, initial_obj_val = instance.initial_solve()

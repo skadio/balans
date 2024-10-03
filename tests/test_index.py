@@ -12,7 +12,8 @@ from balans.base_state import _State
 from balans.base_instance import _Instance
 
 from mabwiser.mab import LearningPolicy
-import pyscipopt as scip
+from balans.base_mip import create_mip_solver
+
 
 SEED = 42
 np.random.seed(SEED)
@@ -77,10 +78,10 @@ class IndexTest(BaseTest):
         destroy_ops = [DestroyOperators.Mutation_25]
         repair_ops = [RepairOperators.Repair]
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        # MIP is an instance of _BaseMIP created from given mip instance
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
+
         # Initial solution
         initial_index_to_val, initial_obj_val = instance.initial_solve()
 
