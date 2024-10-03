@@ -42,10 +42,7 @@ class _SCIP(_BaseMIP):
     def calc_obj_value(self, index_to_val) -> float:
         obj_val = 0
         for key, item in self.org_objective_fn.terms.items():
-            print(key, key[0].getIndex())
-            print(item)
             obj_val += item * index_to_val[key[0].getIndex()]
-        print("calc_obj_value", obj_val)
         return obj_val
 
     def extract_indexes(self) -> Tuple[List[Any], List[Any], List[Any]]:
@@ -114,28 +111,20 @@ class _SCIP(_BaseMIP):
         self.is_obj_transformed = True
 
         zero_binary_vars, one_binary_vars = self.split_binary_vars(self.variables, binary_indexes, index_to_val)
-        print("zero_binary_vars:", zero_binary_vars)
-        print("one_binary_vars:", one_binary_vars)
         # if x_inc=0, new objective expression is x_inc.
         # if x_inc=1, new objective expression is 1 - x_inc.
         # Drop all other vars (when not in the expr it is set to 0 by default)
         zero_expr = quicksum(zero_var for zero_var in zero_binary_vars)
         one_expr = quicksum(1 - one_var for one_var in one_binary_vars)
-        print("zero_expr:", zero_expr)
-        print("one_expr:", one_expr)
 
         # add cutoff constraint depending on sense, so that next state is better quality
         # a slack variable z to prevent infeasible solution, \theta = 1
         self.proximity_z = self.model.addVar(vtype=Constants.continuous, lb=0)
-        print("proximity: ", self.proximity_z)
         self.constraints.append(self.model.addCons(self.model.getObjective() <=
                                                    obj_val * (1 - proximity_delta) + self.proximity_z))
-        print("constraint: ", self.constraints[-1])
 
         # M * z is to make sure model does not use z, unless needed to avoid infeasibility
         self.model.setObjective(zero_expr + one_expr + Constants.M * self.proximity_z, Constants.minimize)
-        print("prox objective: ", self.model.getObjective())
-        self.model.writeProblem("promixty.lp")
 
     def rens(self, index_to_val, rens_float_set, lp_index_to_val) -> None:
         for var in self.variables:

@@ -122,10 +122,9 @@ class _Instance:
         # If no solution found, go back
         if len(index_to_val) == 0:
             print("No solution found, go back to previous state")
-            # print("\t Current Obj:", starting_index_to_val)
+            # print("\t Current Obj:", starting_obj_val)
             return starting_index_to_val, starting_obj_val
 
-        print("\t solution found: ", index_to_val)
         # Solution found but for transformed objectives (random_obj and proximity), find the original obj value
         if proximity_delta > 0 or has_random_obj:
             # Objective value of the solution found in transformed

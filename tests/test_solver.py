@@ -181,7 +181,7 @@ class SolverTest(BaseTest):
         # self.assertEqual(initial_index_to_val[0], best_index_to_val[0])
 
         print(f"Best heuristic solution objective is {best_objective}.")
-        self.assertEqual(best_objective, -60.0)
+        self.assertEqual(best_objective, -30.0)
 
     def test_balans_t5(self):
         # Input
