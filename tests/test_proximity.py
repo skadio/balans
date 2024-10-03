@@ -55,10 +55,12 @@ class ProximityTest(BaseTest):
 
         initial_index_to_val, initial_obj_val = instance.initial_solve()
         print("initial index to val:", initial_index_to_val)
+        print("initial initial_obj_val:", initial_obj_val)
 
         # Here is a different solution than the initial
         index_to_val = {0: 1.0, 1: 1.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
         print("index to val:", index_to_val)
+        print("obj: ", mip.calc_obj_value(index_to_val))
 
         initial2 = _State(instance, index_to_val, -40)
 

@@ -90,6 +90,7 @@ class _Instance:
         # Proximity: Binary variables, modify objective, add new constraint
         if proximity_delta > 0:
             has_destroy = True
+            print("proximity_delta: ", proximity_delta)
             self.mip.proximity(index_to_val, obj_val, proximity_delta, self.binary_indexes)
 
         # RENS: Discrete variables, where the lp relaxation is not integral
@@ -124,6 +125,7 @@ class _Instance:
             # print("\t Current Obj:", starting_index_to_val)
             return starting_index_to_val, starting_obj_val
 
+        print("\t solution found: ", index_to_val)
         # Solution found but for transformed objectives (random_obj and proximity), find the original obj value
         if proximity_delta > 0 or has_random_obj:
             # Objective value of the solution found in transformed
