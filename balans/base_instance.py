@@ -1,11 +1,8 @@
-import math
-import random
 from typing import Tuple, Dict, Any
 
 # from pyscipopt import quicksum, Expr
 # import pyscipopt as scip
 from balans.base_mip import _BaseMIP
-
 from balans.utils import Constants
 
 
@@ -129,7 +126,7 @@ class _Instance:
         if proximity_delta > 0 or has_random_obj:
             # Objective value of the solution found in transformed
             print("\t Transformed obj: ", obj_val)
-            obj_val = self.mip.calc_obj_value(index_to_val)
+            obj_val = self.mip.get_obj_value(index_to_val)
 
         print("\t Solve DONE!", obj_val)
         return index_to_val, obj_val

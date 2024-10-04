@@ -19,11 +19,11 @@ class _BaseMIP(metaclass=abc.ABCMeta):
 
         # These are used for incremental solving
         self.constraints = []
-        self.proximity_z = None         # Used in proximity
-        self.is_obj_transformed = False # Used in proximity and random objective
+        self.proximity_z = None          # Used in proximity
+        self.is_obj_transformed = False  # Used in proximity and random objective
 
     @abc.abstractmethod
-    def calc_obj_value(self, index_to_val) -> float:
+    def get_obj_value(self, index_to_val) -> float:
         """ Given a solution, return objective value """
         pass
 

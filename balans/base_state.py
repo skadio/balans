@@ -1,9 +1,7 @@
+from copy import deepcopy
 from typing import Any, Dict
 
 from balans.base_instance import _Instance
-import pyscipopt as scip
-
-from copy import deepcopy
 
 
 class _State:
@@ -57,14 +55,14 @@ class _State:
 
     def solve_and_update(self):
         # Solve the current state with the destroyed variables and update solution and objective
-        self.index_to_val, self.obj_val= self.instance.solve(index_to_val=self.index_to_val,
-                                                             obj_val=self.obj_val,
-                                                             destroy_set=self.destroy_set,
-                                                             dins_set=self.dins_set,
-                                                             rens_float_set=self.rens_float_set,
-                                                             has_random_obj=self.has_random_obj,
-                                                             local_branching_size=self.local_branching_size,
-                                                             proximity_delta=self.proximity_delta)
+        self.index_to_val, self.obj_val = self.instance.solve(index_to_val=self.index_to_val,
+                                                              obj_val=self.obj_val,
+                                                              destroy_set=self.destroy_set,
+                                                              dins_set=self.dins_set,
+                                                              rens_float_set=self.rens_float_set,
+                                                              has_random_obj=self.has_random_obj,
+                                                              local_branching_size=self.local_branching_size,
+                                                              proximity_delta=self.proximity_delta)
 
     def __deepcopy__(self, memo):
         # No need to copy the instance when create a deepcopy of state object, share the instance between the copy

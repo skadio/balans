@@ -1,17 +1,18 @@
-import networkx as nx
+import os
 import random
+
+import networkx as nx
 import pyscipopt
 from pyscipopt import quicksum
-import os
 
 
 def gen_graph(n, g_type='barabasi_albert', edge=4):
     if g_type == 'barabasi_albert':
-        g = nx.barabasi_albert_graph(n = n, m = edge)
+        g = nx.barabasi_albert_graph(n=n, m=edge)
     for edge in nx.edges(g):
-        g[edge[0]][edge[1]]['weight'] = random.uniform(0,1)
+        g[edge[0]][edge[1]]['weight'] = random.uniform(0, 1)
     for node in g.nodes():
-        g.nodes[node]['weight'] = random.uniform(0,1)
+        g.nodes[node]['weight'] = random.uniform(0, 1)
     return g
 
 
@@ -19,16 +20,16 @@ def getEdgeVar(m, v1, v2, vert):
     u1 = min(v1, v2)
     u2 = max(v1, v2)
     if not ((u1, u2) in vert):
-        vert[(u1, u2)] = m.addVar(name='u%d_%d' %(u1, u2),
-                                   vtype='B')
+        vert[(u1, u2)] = m.addVar(name='u%d_%d' % (u1, u2),
+                                  vtype='B')
 
     return vert[(u1, u2)]
 
 
 def getNodeVar(m, v, node):
     if not v in node:
-        node[v] = m.addVar(name='v%d' %v,
-                            vtype='B')
+        node[v] = m.addVar(name='v%d' % v,
+                           vtype='B')
 
     return node[v]
 
@@ -43,7 +44,7 @@ def createOptVC(G):
 
         m.addCons((node1 + node2) >= 1)
 
-    m.setObjective(quicksum(G.nodes[v]['weight'] * getNodeVar(m, v, nodeVar) for v in G.nodes()), sense = "minimize")
+    m.setObjective(quicksum(G.nodes[v]['weight'] * getNodeVar(m, v, nodeVar) for v in G.nodes()), sense="minimize")
     return m
 
 
@@ -60,7 +61,7 @@ def main():
 
     for i in range(1, 101):
         filename = os.path.join('../mvc/', f'mvc_{i}.lp')
-        generate(filename, seed=i+8915, number_of_nodes=9000, param=5)
+        generate(filename, seed=i + 8915, number_of_nodes=9000, param=5)
 
 
 if __name__ == '__main__':

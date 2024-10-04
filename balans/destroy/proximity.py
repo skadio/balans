@@ -1,7 +1,6 @@
 import copy
 
 from balans.base_state import _State
-from balans.utils import Constants
 
 
 def proximity(current: _State, rnd_state, delta=0.005) -> _State:

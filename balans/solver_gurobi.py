@@ -10,7 +10,7 @@ class _Gurobi(_BaseMIP):
         # TODO implement gurobi model
         self.model = None
 
-    def calc_obj_value(self, index_to_val) -> float:
+    def get_obj_value(self, index_to_val) -> float:
         pass
 
     def extract_indexes(self) -> Tuple[List[Any], List[Any], List[Any]]:
@@ -40,5 +40,5 @@ class _Gurobi(_BaseMIP):
     def solve_and_undo(self, time_limit_in_sc=None, solution_limit=None) -> Tuple[Dict[Any, float], float]:
         pass
 
-    def solve_random_and_undo(self) -> Tuple[Dict[Any, float], float]:
+    def solve_random_and_undo(self, time_limit_in_sc=None) -> Tuple[Dict[Any, float], float]:
         pass

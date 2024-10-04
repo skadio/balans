@@ -1,14 +1,14 @@
 import os
+import unittest
+
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
+from mabwiser.mab import LearningPolicy
 
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 from tests.test_base import BaseTest
-
-from mabwiser.mab import LearningPolicy
-import unittest
 
 
 class CorrectnessTest(BaseTest):
@@ -38,7 +38,7 @@ class CorrectnessTest(BaseTest):
         # Run
         result = balans.solve(instance_path)
         objective = result.best_state.objective()
-        self.assertLess(objective, 4000) # iter_30 --> 3500
+        self.assertLess(objective, 4000)  # iter_30 --> 3500
         self.assertGreater(objective, 3311)
 
     @unittest.skipIf(is_skip, "Skipping correctness 2")
@@ -65,7 +65,7 @@ class CorrectnessTest(BaseTest):
         # Run
         result = balans.solve(instance_path)
         objective = result.best_state.objective()
-        self.assertLess(objective, 530) # iter_15 --> 500
+        self.assertLess(objective, 530)  # iter_15 --> 500
         self.assertGreater(objective, 301)
 
     @unittest.skipIf(is_skip, "Skipping correctness 3")
@@ -91,5 +91,5 @@ class CorrectnessTest(BaseTest):
         # Run
         result = balans.solve(instance_path)
         objective = result.best_state.objective()
-        self.assertLess(objective, 68500) # iter_30 --> 50000
+        self.assertLess(objective, 68500)  # iter_30 --> 50000
         self.assertGreater(objective, 24544)

@@ -1,8 +1,9 @@
 import os
-from balans.utils import Constants
-from tests.test_base import BaseTest
+
 from balans.base_instance import _Instance
 from balans.base_mip import create_mip_solver
+from balans.utils import Constants
+from tests.test_base import BaseTest
 
 
 class IndexExtractionTest(BaseTest):

@@ -4,27 +4,27 @@ from typing import NamedTuple
 
 import numpy as np
 from alns.ALNS import ALNS
-from alns.accept import MovingAverageThreshold, GreatDeluge, HillClimbing
+from alns.Result import Result
 from alns.accept import LateAcceptanceHillClimbing, NonLinearGreatDeluge, AlwaysAccept
+from alns.accept import MovingAverageThreshold, GreatDeluge, HillClimbing
 from alns.accept import RecordToRecordTravel, SimulatedAnnealing, RandomAccept
 from alns.select import AlphaUCB, MABSelector, RandomSelect, RouletteWheel, SegmentedRouletteWheel
 from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterion
-from alns.Result import Result
 
 from balans.base_instance import _Instance
+from balans.base_mip import create_mip_solver
 from balans.base_state import _State
 from balans.destroy.crossover import crossover
 from balans.destroy.dins import dins
 from balans.destroy.local_branching import local_branching_10, local_branching_25, local_branching_50
+from balans.destroy.local_branching_relax import local_branching_relax_10, local_branching_relax_25
 from balans.destroy.mutation import mutation_25, mutation_50, mutation_75
 from balans.destroy.proximity import proximity_05, proximity_15, proximity_30
+from balans.destroy.random_objective import random_objective
 from balans.destroy.rens import rens_25, rens_50, rens_75
 from balans.destroy.rins import rins_25, rins_50, rins_75
-from balans.destroy.random_objective import random_objective
-from balans.destroy.local_branching_relax import local_branching_relax_10, local_branching_relax_25
 from balans.repair.repair import repair
 from balans.utils import Constants, check_false, check_true, create_rng
-from balans.base_mip import create_mip_solver
 
 
 class DestroyOperators(NamedTuple):

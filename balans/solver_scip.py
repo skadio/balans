@@ -1,11 +1,12 @@
-from typing import Dict, List, Tuple, Any
 import math
 import random
+from typing import Dict, List, Tuple, Any
 
-from balans.utils import Constants
 import pyscipopt as scip
 from pyscipopt import quicksum, Expr
+
 from balans.base_mip import _BaseMIP
+from balans.utils import Constants
 
 
 class _SCIP(_BaseMIP):
@@ -39,7 +40,7 @@ class _SCIP(_BaseMIP):
         self.proximity_z = None
         self.is_obj_transformed = False
 
-    def calc_obj_value(self, index_to_val) -> float:
+    def get_obj_value(self, index_to_val) -> float:
         obj_val = 0
         for key, item in self.org_objective_fn.terms.items():
             obj_val += item * index_to_val[key[0].getIndex()]
@@ -195,7 +196,7 @@ class _SCIP(_BaseMIP):
             if self.proximity_z:  # if proximity_delta > 0
                 self.model.delVar(self.proximity_z)
                 self.proximity_z = None
-            else: # if random heuristic used, reset heuristics
+            else:  # if random heuristic used, reset heuristics
                 self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
 
         # Return solution

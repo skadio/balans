@@ -1,13 +1,13 @@
 import os
+
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
+from mabwiser.mab import LearningPolicy
 
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 from tests.test_base import BaseTest
-
-from mabwiser.mab import LearningPolicy
 
 
 class RepairTest(BaseTest):
@@ -35,4 +35,5 @@ class RepairTest(BaseTest):
         print("Best solution:", result.best_state.objective())
 
         # Assert
-        self.is_not_worse(balans.initial_obj_val, result.best_state.objective(), balans.instance.mip.org_objective_sense)
+        self.is_not_worse(balans.initial_obj_val, result.best_state.objective(),
+                          balans.instance.mip.org_objective_sense)

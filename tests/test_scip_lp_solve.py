@@ -1,7 +1,8 @@
 import os
+
+from balans.base_mip import create_mip_solver
 from balans.utils import Constants
 from tests.test_base import BaseTest
-from balans.base_mip import create_mip_solver
 
 
 class SCIPLPSolTest(BaseTest):

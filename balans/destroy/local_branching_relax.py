@@ -1,11 +1,7 @@
 import copy
 
-import math
-from pyscipopt import quicksum
-
 # from balans.utils_scip import get_index_to_val_and_objective, split_binary_vars
 from balans.base_state import _State
-from balans.utils import Constants
 
 
 # def sort_list_with_indices(lst):

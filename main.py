@@ -1,8 +1,7 @@
 # Adaptive large neigborhood
+from alns.accept import SimulatedAnnealing
 from alns.select import MABSelector
-from alns.accept import HillClimbing, SimulatedAnnealing
-from alns.stop import MaxIterations, MaxRuntime
-
+from alns.stop import MaxIterations
 # Contextual multi-armed bandits
 from mabwiser.mab import LearningPolicy
 
@@ -57,7 +56,7 @@ balans = Balans(destroy_ops=destroy_ops,
                 stop=stop)
 
 # Run
-instance_path = "data/miplib/noswot.mps" # data/miplib/30n20b8.mps"
+instance_path = "data/miplib/noswot.mps"  # data/miplib/30n20b8.mps"
 result = balans.solve(instance_path)
 
 print("Best solution:", result.best_state.solution())

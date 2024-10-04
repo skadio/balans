@@ -1,8 +1,9 @@
+import os
+import random
 from itertools import combinations
 
 import numpy as np
-import random
-import os
+
 
 class Graph:
     """
@@ -19,6 +20,7 @@ class Graph:
     neighbors : dictionary of type {int: set of ints}
         The neighbors of each node in the graph.
     """
+
     def __init__(self, number_of_nodes, edges, degrees, neighbors):
         self.number_of_nodes = number_of_nodes
         self.edges = edges
@@ -68,7 +70,7 @@ class Graph:
             The number of nodes in the graph.
         edge_probability : float in [0,1]
             The probability of generating each edge.
-        random : numpy.random.RandomState
+        rng : numpy.random.RandomState
             A random number generator.
 
         Returns
@@ -100,7 +102,7 @@ class Graph:
             The number of nodes in the graph.
         affinity : integer >= 1
             The number of nodes each new node will be attached to, in the sampling scheme.
-        random : numpy.random.RandomState
+        rng : numpy.random.RandomState
             A random number generator.
 
         Returns
@@ -119,7 +121,7 @@ class Graph:
                 neighborhood = np.arange(new_node)
             # remaining nodes are picked stochastically
             else:
-                neighbor_prob = degrees[:new_node] / (2*len(edges))
+                neighbor_prob = degrees[:new_node] / (2 * len(edges))
                 neighborhood = random.choice(new_node, affinity, replace=False, p=neighbor_prob)
             for node in neighborhood:
                 edges.add((node, new_node))
@@ -143,7 +145,7 @@ def generate(filename, seed=1, gtype="barabasi_albert", number_of_nodes=500, par
         Path to the file to save.
     """
     rng = np.random.RandomState(seed)
-    if gtype=="barabasi_albert":
+    if gtype == "barabasi_albert":
         graph = Graph.barabasi_albert(rng=rng, number_of_nodes=number_of_nodes, affinity=param)
     else:
         raise NotImplementedError(f"graph {gtype} not implemented")
@@ -167,11 +169,11 @@ def generate(filename, seed=1, gtype="barabasi_albert", number_of_nodes=500, par
             inequalities.add((node,))
 
     with open(filename, 'w') as lp_file:
-        lp_file.write("maximize\nOBJ:" + "".join([f" + 1 x{node+1}" for node in range(len(graph))]) + "\n")
+        lp_file.write("maximize\nOBJ:" + "".join([f" + 1 x{node + 1}" for node in range(len(graph))]) + "\n")
         lp_file.write("\nsubject to\n")
         for count, group in enumerate(inequalities):
-            lp_file.write(f"C{count+1}:" + "".join([f" + x{node+1}" for node in sorted(group)]) + " <= 1\n")
-        lp_file.write("\nbinary\n" + " ".join([f"x{node+1}" for node in range(len(graph))]) + "\n")
+            lp_file.write(f"C{count + 1}:" + "".join([f" + x{node + 1}" for node in sorted(group)]) + " <= 1\n")
+        lp_file.write("\nbinary\n" + " ".join([f"x{node + 1}" for node in range(len(graph))]) + "\n")
 
 
 def main():
@@ -181,7 +183,7 @@ def main():
 
     for i in range(1, 101):
         filename = os.path.join('../mis/', f'mis_{i}.lp')
-        generate(filename, seed=i+8965, number_of_nodes=9000, param=5)
+        generate(filename, seed=i + 8965, number_of_nodes=9000, param=5)
 
 
 if __name__ == '__main__':

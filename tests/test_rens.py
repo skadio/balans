@@ -1,18 +1,18 @@
 import os
+
+import numpy as np
+from alns.ALNS import ALNS
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-import numpy as np
-from alns.ALNS import ALNS
+from mabwiser.mab import LearningPolicy
 
+from balans.base_instance import _Instance
+from balans.base_mip import create_mip_solver
+from balans.base_state import _State
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 from tests.test_base import BaseTest
-from balans.base_state import _State
-from balans.base_instance import _Instance
-
-from mabwiser.mab import LearningPolicy
-from balans.base_mip import create_mip_solver
 
 
 class RensTest(BaseTest):
