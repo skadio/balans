@@ -70,3 +70,26 @@ print("Best solution objective:", result.best_state.objective())
 # solution = model.getBestSol()
 # print(solution)
 # print("Optimal value:", model.getObjVal())
+
+
+# Check for optimality using Gurobi
+# import gurobipy as grb
+# from gurobi_onboarder import init_gurobi
+#
+# gurobi_venv, GUROBI_FOUND = init_gurobi.initialize_gurobi()
+# gurobi_venv.setParam("OutputFlag", 1)
+# gurobi_venv.setParam("LogToConsole", 0)
+# gurobi_venv.setParam("LogFile", "asd.log")
+#
+# file_path = "data/miplib/noswot.mps"
+# model = grb.read(f'{file_path}',env=gurobi_venv)
+# # model = grb.Model(env=gurobi_venv)
+#
+# model.optimize()
+#
+# print('Best answers: ')
+# # for v in m.getVars():
+#     # print('%s %g' % (v.varName, v.x))
+#
+# print(model.objVal)
+
