@@ -1,7 +1,5 @@
 from typing import Tuple, Dict, Any
 
-# from pyscipopt import quicksum, Expr
-# import pyscipopt as scip
 from balans.base_mip import _BaseMIP
 from balans.utils import Constants
 
