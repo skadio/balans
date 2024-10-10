@@ -1,12 +1,11 @@
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
+from mabwiser.mab import LearningPolicy
 
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 from tests.test_base import BaseTest
-
-from mabwiser.mab import LearningPolicy
 
 
 class InvalidTest(BaseTest):

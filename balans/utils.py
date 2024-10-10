@@ -9,8 +9,13 @@ class Constants(NamedTuple):
     Constant values used by the modules.
     """
 
+    # Default seed
     default_seed = 123456
-    """The default random seed."""
+
+    # Default MIP Solver
+    scip_solver = "scip"
+    gurobi_solver = "gurobi"
+    default_solver = scip_solver
 
     # Optimization sense
     minimize = "minimize"
@@ -26,12 +31,15 @@ class Constants(NamedTuple):
     var_lb = "var_lb"
     var_ub = "var_ub"
 
-    # initial solve time to get feasible solution as a starting point for ALNS
-    initial_solve_time = 20
+    # Time limit for the initial solution to get feasible solution as a starting point for ALNS
+    timelimit_first_solution = 20
 
     # time limit for one iteration is ALNS, local branching has longer time because hard problem created
-    time_limit = 120
-    local_branching_time_limit = 600
+    timelimit_alns_iteration = 120
+
+    # time limit for one local branching iteration.
+    # TODO paper says  Each LNS iteration is limited to 1 minute, except for Local Branching with 2.5 minutes.
+    timelimit_local_branching_iteration = 600
 
     # for Big-M constraint, currently used in Proximity
     M = 1000

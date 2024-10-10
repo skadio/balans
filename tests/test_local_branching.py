@@ -1,18 +1,18 @@
 import os
+
+import numpy as np
+from alns.ALNS import ALNS
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-import numpy as np
-from alns.ALNS import ALNS
+from mabwiser.mab import LearningPolicy
 
-from balans.solver import Balans, DestroyOperators, RepairOperators
+from balans.base_instance import _Instance
+from balans.base_mip import create_mip_solver
+from balans.base_state import _State
+from balans.solver import DestroyOperators, RepairOperators
 from balans.utils import Constants
 from tests.test_base import BaseTest
-from balans.base_state import _State
-from balans.base_instance import _Instance
-
-from mabwiser.mab import LearningPolicy
-import pyscipopt as scip
 
 
 class LocalBranchingTest(BaseTest):
@@ -25,10 +25,8 @@ class LocalBranchingTest(BaseTest):
         # Parameters
         seed = 123456
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
 
         index_to_val = {0: 0.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
         print("initial index to val:", index_to_val)
@@ -64,10 +62,8 @@ class LocalBranchingTest(BaseTest):
         # Parameters
         seed = 123456
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
 
         index_to_val = {0: 1.0, 1: 1.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
         print("initial index to val:", index_to_val)
@@ -102,10 +98,8 @@ class LocalBranchingTest(BaseTest):
         # Parameters
         seed = 123456
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
 
         index_to_val = {0: 1.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
         print("initial index to val:", index_to_val)

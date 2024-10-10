@@ -1,18 +1,18 @@
 import os
+
+import numpy as np
+from alns.ALNS import ALNS
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-import numpy as np
-from alns.ALNS import ALNS
+from mabwiser.mab import LearningPolicy
 
+from balans.base_instance import _Instance
+from balans.base_mip import create_mip_solver
+from balans.base_state import _State
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 from tests.test_base import BaseTest
-from balans.base_state import _State
-from balans.base_instance import _Instance
-
-from mabwiser.mab import LearningPolicy
-import pyscipopt as scip
 
 
 class RensTest(BaseTest):
@@ -52,8 +52,6 @@ class RensTest(BaseTest):
         destroy_ops = [DestroyOperators.Rens_25]
         repair_ops = [RepairOperators.Repair]
 
-        instance = _Instance(instance_path)
-
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
         accept = HillClimbing()
@@ -77,10 +75,8 @@ class RensTest(BaseTest):
         # Parameters
         seed = Constants.default_seed
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
         print("initial index to val:", index_to_val)
@@ -116,10 +112,8 @@ class RensTest(BaseTest):
         # Parameters
         seed = Constants.default_seed
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
         print("initial index to val:", index_to_val)

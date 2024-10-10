@@ -1,4 +1,4 @@
 alns[mabwiser]
 mabwiser
-numpy==1.26.4 # Because some function in numpy we are using is changed after numpy 2.0, so we decide to keep to original version
+numpy
 pyscipopt

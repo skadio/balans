@@ -1,4 +1,3 @@
-import os
 from tests.test_base import BaseTest
 
 

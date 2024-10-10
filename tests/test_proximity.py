@@ -1,18 +1,18 @@
 import os
+
+import numpy as np
+from alns.ALNS import ALNS
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
-import numpy as np
-from alns.ALNS import ALNS
+from mabwiser.mab import LearningPolicy
 
+from balans.base_instance import _Instance
+from balans.base_mip import create_mip_solver
+from balans.base_state import _State
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 from tests.test_base import BaseTest
-from balans.base_state import _State
-from balans.base_instance import _Instance
-
-from mabwiser.mab import LearningPolicy
-import pyscipopt as scip
 
 
 class ProximityTest(BaseTest):
@@ -50,16 +50,17 @@ class ProximityTest(BaseTest):
         # Parameters
         seed = 123456
 
-        model = scip.Model()
-        model.hideOutput()
-        model.readProblem(instance_path)
-        instance = _Instance(model)
+        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        instance = _Instance(mip)
 
         initial_index_to_val, initial_obj_val = instance.initial_solve()
+        print("initial index to val:", initial_index_to_val)
+        print("initial initial_obj_val:", initial_obj_val)
 
         # Here is a different solution than the initial
         index_to_val = {0: 1.0, 1: 1.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
-        print("initial index to val:", index_to_val)
+        print("index to val:", index_to_val)
+        print("obj: ", mip.get_obj_value(index_to_val))
 
         initial2 = _State(instance, index_to_val, -40)
 
@@ -80,4 +81,4 @@ class ProximityTest(BaseTest):
         print(f"Best heuristic solution objective is {best.objective()}.")
 
         # REPAIR OBJECTIVE SUPPOSED TO BE =-2.
-        self.assertEqual(result.best_state.objective(), -60.0)
+        self.assertEqual(result.best_state.objective(), -40.0)

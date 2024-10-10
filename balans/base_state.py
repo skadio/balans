@@ -1,9 +1,7 @@
+from copy import deepcopy
 from typing import Any, Dict
 
 from balans.base_instance import _Instance
-import pyscipopt as scip
-
-from copy import deepcopy
 
 
 class _State:
@@ -41,8 +39,33 @@ class _State:
         self.local_branching_size = local_branching_size
         self.proximity_delta = proximity_delta
 
-    # We don't need to copy instance when create a deepcopy of state object, so we share the instance between the copy
+    def solution(self):
+        return self.index_to_val
+
+    def objective(self):
+        return self.obj_val
+
+    def reset_solve_settings(self):
+        self.destroy_set = None
+        self.dins_set = None
+        self.rens_float_set = None
+        self.has_random_obj = False
+        self.local_branching_size = 0
+        self.proximity_delta = False
+
+    def solve_and_update(self):
+        # Solve the current state with the destroyed variables and update solution and objective
+        self.index_to_val, self.obj_val = self.instance.solve(index_to_val=self.index_to_val,
+                                                              obj_val=self.obj_val,
+                                                              destroy_set=self.destroy_set,
+                                                              dins_set=self.dins_set,
+                                                              rens_float_set=self.rens_float_set,
+                                                              has_random_obj=self.has_random_obj,
+                                                              local_branching_size=self.local_branching_size,
+                                                              proximity_delta=self.proximity_delta)
+
     def __deepcopy__(self, memo):
+        # No need to copy the instance when create a deepcopy of state object, share the instance between the copy
         shared_attribute_names = ["instance"]
         assert isinstance(shared_attribute_names, (list, tuple))
         shared_attributes = {k: getattr(self, k) for k in shared_attribute_names}
@@ -69,56 +92,3 @@ class _State:
             del clone.__deepcopy__
 
         return clone
-
-    def solution(self):
-        return self.index_to_val
-
-    def objective(self):
-        return self.obj_val
-
-    def reset_solve_settings(self):
-        self.destroy_set = None
-        self.dins_set = None
-        self.rens_float_set = None
-        self.has_random_obj = False
-        self.local_branching_size = 0
-        self.proximity_delta = False
-
-    def solve_and_update(self):
-        # Solve the current state with the destroyed variables and update
-        self.index_to_val, self.obj_val= self.instance.solve(index_to_val=self.index_to_val,
-                                                             obj_val=self.obj_val,
-                                                             destroy_set=self.destroy_set,
-                                                             dins_set=self.dins_set,
-                                                             rens_float_set=self.rens_float_set,
-                                                             has_random_obj=self.has_random_obj,
-                                                             local_branching_size=self.local_branching_size,
-                                                             proximity_delta=self.proximity_delta)
-
-
-# def deepcopy_with_sharing(obj, shared_attribute_names, memo=None):
-#     assert isinstance(shared_attribute_names, (list, tuple))
-#     shared_attributes = {k: getattr(obj, k) for k in shared_attribute_names}
-#
-#     deepcopy_method = None
-#
-#     if hasattr(obj, '__deepcopy__'):
-#         # Do hack to prevent infinite recursion in call to deepcopy
-#         deepcopy_method = obj.__deepcopy__
-#         obj.__deepcopy__ = None
-#
-#     for attr in shared_attribute_names:
-#         del obj.__dict__[attr]
-#
-#     clone = deepcopy(obj)
-#
-#     for attr, val in shared_attributes.items():
-#         setattr(obj, attr, val)
-#         setattr(clone, attr, val)
-#
-#     if hasattr(obj, '__deepcopy__'):
-#         # Undo hack
-#         obj.__deepcopy__ = deepcopy_method
-#         del clone.__deepcopy__
-#
-#     return clone

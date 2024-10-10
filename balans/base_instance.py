@@ -1,12 +1,6 @@
-import math
-import random
 from typing import Tuple, Dict, Any
 
-from pyscipopt import quicksum, Expr
-import pyscipopt as scip
-
-from balans.utils_scip import get_index_to_val_and_objective, lp_solve, undo_solve
-from balans.utils_scip import is_binary, is_discrete, split_binary_vars
+from balans.base_mip import _BaseMIP
 from balans.utils import Constants
 
 
@@ -15,19 +9,40 @@ class _Instance:
     Instance from a given MIP file with solve operations on top, subject to operator
     """
 
-    def __init__(self, model, seed=Constants.default_seed):
-        # SCIP model
-        self.model = model
+    def __init__(self, mip: _BaseMIP, seed=Constants.default_seed):
+        # MIP Model initialized from the original mip instance
+        self.mip: _BaseMIP = mip
         self.seed = seed
 
         # Static, set once and for all
         self.discrete_indexes = None    # all discrete: binary + integer
-        self.binary_indexes = None      # discrete binary
-        self.integer_indexes = None       # discrete but not binary
-        self.sense = None
+        self.binary_indexes = None      # discrete and binary
+        self.integer_indexes = None     # discrete but not binary
         self.lp_index_to_val = None
         self.lp_obj_val = None
         self.lp_floating_discrete_indexes = None
+
+    def initial_solve(self, index_to_val=None) -> Tuple[Dict[Any, float], float]:
+
+        # Extracts static instance features (sense must be minimization now, after adjustment)
+        self.discrete_indexes, self.binary_indexes, self.integer_indexes = self.mip.extract_indexes()
+
+        # Extract static lp features for root instance
+        self.lp_index_to_val, self.lp_obj_val, self.lp_floating_discrete_indexes = self.mip.extract_lp(self.discrete_indexes)
+
+        # If a solution is given fix it. It can be partial (denoted by None value). Appends mip.constraints
+        self.mip.fix_vars(index_to_val)
+
+        # Solve with some time limit to get an initial solution
+        index_to_val, obj_val = self.mip.solve_and_undo(time_limit_in_sc=Constants.timelimit_first_solution)
+
+        # If no feasible initial solution found within time limit
+        if len(index_to_val) == 0:
+            # Solve for the first feasible solution without time limit and without fixing the given solution
+            index_to_val, obj_val = self.mip.solve_and_undo(solution_limit=1)
+
+        # Return solution
+        return index_to_val, obj_val
 
     def solve(self,
               index_to_val=None,
@@ -40,197 +55,76 @@ class _Instance:
               proximity_delta=0) -> Tuple[Dict[Any, float], float]:
 
         print("\t Solve")
+
         # has_destroy to identify if any constraint added or objective function changed
         # If has_destroy = True, optimize the problem and get new sol and obj
         # If has_destroy = False, return the current sol and obj, do not optimize
         has_destroy = False
-        # Build model and variables
-        variables = self.model.getVars()
-        org_objective = self.model.getObjective()
-        org_index_to_val = index_to_val
-        org_obj_val = obj_val
-        # Record the constraints we added to the model
-        constraints = []
-        z = None
+
+        # Starting solution and objective value
+        starting_index_to_val = index_to_val
+        starting_obj_val = obj_val
 
         # DESTROY used for Crossover, Mutation, RINS
         if destroy_set:
             if len(destroy_set) > 0:
                 has_destroy = True
-                for var in variables:
-                    # IF not in destroy, fix it
-                    if var.getIndex() not in destroy_set:
-                        # fix the variable
-                        constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
+                self.mip.fix_vars(index_to_val, skip_indexes=destroy_set)
 
         # DINS: Discrete Variables, where incumbent and lp relaxation have distance more than 0.5
         if dins_set:
             if len(dins_set) > 0:
                 has_destroy = True
-                for var in variables:
-                    if var.getIndex() in dins_set:
-                        # Add bounding constraint around initial lp solution
-                        index = var.getIndex()
-                        current_lp_diff = abs(index_to_val[index] - self.lp_index_to_val[index])
-                        constraints.append(self.model.addCons(abs(var - self.lp_index_to_val[index]) <= current_lp_diff))
-                    else:
-                        # fix the variable
-                        constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
+                self.mip.dins(index_to_val, dins_set, self.lp_index_to_val)
 
         # Local Branching: Binary variables, flip a limited subset (can come from DINS with delta)
         if local_branching_size > 0:
             has_destroy = True
-            # Only change a subset of the binary variables, keep others fixed. e.g.,
-            zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
-
-            # if current binary var is 0, flip to 1 consumes 1 unit of budget
-            # if current binary var is 1, flip to 0 consumes 1 unit of budget by (1-x)
-            zero_expr = quicksum(zero_var for zero_var in zero_binary_vars)
-            one_expr = quicksum(1 - one_var for one_var in one_binary_vars)
-            constraints.append(self.model.addCons(zero_expr + one_expr <= local_branching_size))
+            self.mip.local_branching(index_to_val, local_branching_size, self.binary_indexes)
 
         # Proximity: Binary variables, modify objective, add new constraint
         if proximity_delta > 0:
             has_destroy = True
-            zero_binary_vars, one_binary_vars = split_binary_vars(variables, self.binary_indexes, index_to_val)
-            # if x_inc=0, new objective expression is x_inc.
-            # if x_inc=1, new objective expression is 1 - x_inc.
-            # Drop all other vars (when not in the expr it is set to 0 by default)
-            zero_expr = quicksum(zero_var for zero_var in zero_binary_vars)
-            one_expr = quicksum(1 - one_var for one_var in one_binary_vars)
-
-            # add cutoff constraint depending on sense, so that next state is better quality
-            # a slack variable z to prevent infeasible solution, \theta = 1
-            z = self.model.addVar(vtype=Constants.continuous, lb=0)
-            constraints.append(self.model.addCons(self.model.getObjective() <= obj_val * (1 - proximity_delta) + z))
-            # M * z is to make sure model does not use z, unless needed to avoid infeasibility
-            self.model.setObjective(zero_expr + one_expr + Constants.M * z, Constants.minimize)
+            print("proximity_delta: ", proximity_delta)
+            self.mip.proximity(index_to_val, obj_val, proximity_delta, self.binary_indexes)
 
         # RENS: Discrete variables, where the lp relaxation is not integral
         if rens_float_set:
             if len(rens_float_set) > 0:
                 has_destroy = True
-                for var in variables:
-                    if var.getIndex() in rens_float_set:
-                        # Restrict discrete vars to round up and down integer version of the lp
-                        # EX: If var = 3.5, the constraint is var >= 3 and var <= 4
-                        constraints.append(self.model.addCons(var >= math.floor(self.lp_index_to_val[var.getIndex()])))
-                        constraints.append(self.model.addCons(var <= math.ceil(self.lp_index_to_val[var.getIndex()])))
-                    else:
-                        # If not in the set, fix the var to the current state
-                        constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
+                self.mip.rens(index_to_val, rens_float_set, self.lp_index_to_val)
 
         # Random Objective
         if has_random_obj:
             has_destroy = True
-            objective = Expr()
-            for var in variables:
-                coeff = random.uniform(-1,1)
-                if coeff != 0:
-                    objective += coeff * var
-            objective.normalize()
-            self.model.setObjective(objective, self.sense)
-            self.model.setParam("limits/bestsol", 1)
-            self.model.setHeuristics(scip.SCIP_PARAMSETTING.OFF)
+            self.mip.random_objective()
 
         # If no destroy, don't solve, quit with previous objective
+        # TODO: SK Question; when can this happen? when do we return with current sol/obj without optimizing?
         if not has_destroy:
             print("No destroy to apply, don't call optimize()")
-            print("\t Current Obj:", obj_val)
-            # print("\t index_to_val: ", index_to_val)
-            return index_to_val, obj_val
+            print("\t Current Obj:", starting_obj_val)
+            # print("\t starting_index_to_val: ", starting_index_to_val)
+            return starting_index_to_val, starting_obj_val
 
-        if local_branching_size > 0:
-            self.model.setParam("limits/time", Constants.local_branching_time_limit)
-        else:
-            self.model.setParam("limits/time", Constants.time_limit)
+        # Solve mip and undo with some timelimit
+        # Set time limit per alns iteration or overwrite with local branching iteration
+        time_limit = Constants.timelimit_alns_iteration
+        if local_branching_size:
+            time_limit = Constants.timelimit_local_branching_iteration
+        index_to_val, obj_val = self.mip.solve_and_undo(time_limit_in_sc=time_limit)
 
-        # destroy, solve for next state
-        self.model.optimize()
-
-        index_to_val, obj_val = get_index_to_val_and_objective(self.model)
-
-        # Get back the original model
-        undo_solve(self.model, constraints=constraints, org_objective=org_objective, sense=self.sense,
-                   proximity_delta=proximity_delta, z=z)
-
+        # If no solution found, go back
         if len(index_to_val) == 0:
-            print("Go back to previous state")
-            print("\t Current Obj:", org_obj_val)
-            return org_index_to_val, org_obj_val
+            print("No solution found, go back to previous state")
+            # print("\t Current Obj:", starting_obj_val)
+            return starting_index_to_val, starting_obj_val
 
-        # Need to find the original obj value for transformed objectives
+        # Solution found but for transformed objectives (random_obj and proximity), find the original obj value
         if proximity_delta > 0 or has_random_obj:
             # Objective value of the solution found in transformed
             print("\t Transformed obj: ", obj_val)
-
-            obj_val = 0
-            for key, item in org_objective.terms.items():
-                obj_val += item * index_to_val[key[0].getIndex()]
+            obj_val = self.mip.get_obj_value(index_to_val)
 
         print("\t Solve DONE!", obj_val)
         return index_to_val, obj_val
-
-    def initial_solve(self, index_to_val=None) -> Tuple[Dict[Any, float], float]:
-        variables = self.model.getVars()
-
-        # Initial solve extracts static instance features
-        self.extract_base_features(self.model, variables)
-        self.extract_lp_features(self.model)
-
-        # Record the constraints we added to the model
-        constraints = []
-        # If a solution is given fix it. Can be partial (denoted by None value)
-        if index_to_val is not None:
-            for var in variables:
-                if index_to_val[var.getIndex()] is not None:
-                    constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
-
-        self.model.setParam("limits/time", Constants.initial_solve_time)
-        # Solve to get initial solution
-        self.model.optimize()
-        index_to_val, obj_val = get_index_to_val_and_objective(self.model)
-
-        # Get back the original model
-        self.model.freeTransform()
-        self.model.setParam("limits/time", 1e+20)
-        for ct in constraints:
-            self.model.delCons(ct)
-
-        # If no feasible initial solution found within time limit
-        # then, solve for first feasible solution without time limit
-        if len(index_to_val) == 0:
-            self.model.setParam("limits/bestsol", 1)
-            # Solve to get initial solution
-            self.model.optimize()
-            index_to_val, obj_val = get_index_to_val_and_objective(self.model)
-
-            # Get back the original model
-            self.model.freeTransform()
-            self.model.setParam("limits/bestsol", -1)
-
-        # Return solution
-        return index_to_val, obj_val
-
-    def extract_base_features(self, model, variables):
-
-        # Set indexes
-        self.discrete_indexes = []
-        self.binary_indexes = []
-        self.integer_indexes = []
-
-        for var in variables:
-            if is_discrete(var.vtype()):
-                self.discrete_indexes.append(var.getIndex())
-                if is_binary(var.vtype()):
-                    self.binary_indexes.append(var.getIndex())
-                else:
-                    self.integer_indexes.append(var.getIndex())
-
-        # Optimization direction
-        self.sense = model.getObjectiveSense()
-
-    def extract_lp_features(self, model):
-        self.lp_index_to_val, self.lp_obj_val = lp_solve(model)
-        self.lp_floating_discrete_indexes = [i for i in self.discrete_indexes if
-                                             not self.lp_index_to_val[i].is_integer()]
