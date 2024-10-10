@@ -93,3 +93,54 @@ class CorrectnessTest(BaseTest):
         objective = result.best_state.objective()
         self.assertLess(objective, 68500)  # iter_30 --> 50000
         self.assertGreater(objective, 24544)
+
+    # TODO: implement the exact configs/runs below
+    # to run on these instances.
+    # Best configs of Balans_Softmax and Balans_TS
+    # from the paper ran for 1 hour.
+
+    @unittest.skipIf(is_skip, "Skipping correctness 1")
+    def test_correctness_gisp_102(self):
+        # gisp_102.lp
+        # Minimize
+        # SCIP: -2246
+        # Balans_Softmax: -2318
+        # Balans_TS: -2322
+        #
+        pass
+
+    @unittest.skipIf(is_skip, "Skipping correctness 1")
+    def test_correctness_mis_2(self):
+        # mis_2.lp
+        # Maximize
+        # SCIP: 3602
+        # Balans_Softmax: 3732
+        # Balans_TS: 3757
+        pass
+
+    @unittest.skipIf(is_skip, "Skipping correctness 1")
+    def test_correctness_mk_5(self):
+        # mk_5.lp
+        # Maximize
+        # SCIP: 3718
+        # Balans_Softmax: 3749
+        # Balans_TS: 3752
+        pass
+
+    @unittest.skipIf(is_skip, "Skipping correctness 1")
+    def test_correctness_mvc_8(self):
+        # mvc_8.lp
+        # Minimize
+        # SCIP: 2377
+        # Balans_Softmax: 2365
+        # Balans_TS: 2373
+        pass
+
+    @unittest.skipIf(is_skip, "Skipping correctness 1")
+    def test_correctness_sc_3(self):
+        # sc_3.lp
+        # Minimize
+        # SCIP: 172
+        # Balans_Softmax: 171
+        # Balans_TS: 171
+        pass
