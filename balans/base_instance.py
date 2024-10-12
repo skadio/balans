@@ -100,7 +100,6 @@ class _Instance:
             self.mip.random_objective()
 
         # If no destroy, don't solve, quit with previous objective
-        # TODO: SK Question; when can this happen? when do we return with current sol/obj without optimizing?
         if not has_destroy:
             print("No destroy to apply, don't call optimize()")
             print("\t Current Obj:", starting_obj_val)

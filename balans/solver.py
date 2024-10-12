@@ -137,7 +137,7 @@ class Balans:
                  stop: StopType,
                  seed: int = Constants.default_seed,  # The random seed
                  n_jobs: int = 1,  # Number of parallel jobs
-                 mip_solver: str = "scip"  # MIP solver scip/gurobi
+                 mip_solver: str = "gurobi"  # MIP solver scip/gurobi
                  ):
 
         # Validate arguments

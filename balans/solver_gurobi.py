@@ -1,44 +1,301 @@
+import math
+import random
 from typing import Tuple, Dict, Any, List
 
+import gurobipy as gp
+from gurobipy import GRB, quicksum
+
 from balans.base_mip import _BaseMIP
+from balans.utils import Constants
 
 
 class _Gurobi(_BaseMIP):
 
     def __init__(self, instance_path: str, seed: int):
         super().__init__(seed)
-        # TODO implement gurobi model
-        self.model = None
+
+        # Create Gurobi model
+        self.model = gp.read(instance_path)
+        # self.model.Params.OutputFlag = 0
+        self.model.Params.Seed = self.seed
+
+        # Set variables
+        self.variables = self.model.getVars()
+
+        # Set original objective and flag if we changed from max to min.
+        # We always minimize
+        self.org_objective_fn = self.model.getObjective()
+        self.org_objective_sense = self.model.ModelSense  # 1 for minimize, -1 for maximize
+        self.is_obj_sense_changed = False
+        # objective sense naming different
+        if self.org_objective_sense == -1:
+            self.model.setObjective(-1 * self.org_objective_fn, GRB.MINIMIZE)
+            self.is_obj_sense_changed = True
+
+        # Set constraints, proximity z, and a flag for objective transformation
+        # These are used for incremental solve and undo solve
+        self.constraints = []
+        self.aux_vars = []
+        self.proximity_z = None
+        self.is_obj_transformed = False
 
     def get_obj_value(self, index_to_val) -> float:
-        pass
+        expr = self.org_objective_fn
+        obj_val = 0
+        for i in range(expr.size()):
+            var = expr.getVar(i)
+            coeff = expr.getCoeff(i)
+            obj_val += coeff * index_to_val[var.index]
+
+        return obj_val
 
     def extract_indexes(self) -> Tuple[List[Any], List[Any], List[Any]]:
-        pass
+        # Set indexes
+        discrete_indexes = []
+        binary_indexes = []
+        integer_indexes = []
+
+        for var in self.variables:
+            # Variable types naming different
+            if var.VType != "C":
+                discrete_indexes.append(var.index)
+                if var.VType == "B":
+                    binary_indexes.append(var.index)
+                else:
+                    integer_indexes.append(var.index)
+
+        return discrete_indexes, binary_indexes, integer_indexes
 
     def extract_lp(self, discrete_indexes) -> Tuple[Dict[Any, float], float, List[Any]]:
-        pass
+        lp_index_to_val, lp_obj_val = self.solve_lp_and_undo()
+        lp_floating_discrete_indexes = [i for i in discrete_indexes if not math.isclose(lp_index_to_val[i] % 1, 0.0)]
+        return lp_index_to_val, lp_obj_val, lp_floating_discrete_indexes
 
     def fix_vars(self, index_to_val, skip_indexes=None) -> None:
-        pass
+        # If no solution given, do nothing
+        if index_to_val is None:
+            return
+
+        # Walk the variables
+        for var in self.variables:
+            # If a value for this variable is not given, do nothing
+            if var.index not in index_to_val or index_to_val[var.index] is None:
+                continue
+            # if skip list given, and the variable is in there, do nothing
+            if skip_indexes and var.index in skip_indexes:
+                continue
+
+            # Variable has a value, and it's not in the skip set, FIX
+            self.constraints.append(self.model.addConstr(var == index_to_val[var.index]))
 
     def dins(self, index_to_val, dins_set, lp_index_to_val) -> None:
-        pass
+        for var in self.variables:
+            index = var.index
+            if index in dins_set:
+                # Add bounding constraint around initial lp solution
+                current_lp_diff = abs(index_to_val[index] - lp_index_to_val[index])
+                # Create an auxiliary variable for the absolute value
+                abs_var = self.model.addVar(lb=0.0, name=f'abs_{var.VarName}')
+                self.aux_vars.append(abs_var)
+                self.model.update()  # Update model to include new variable
+                self.constraints.append(self.model.addConstr(abs_var >= var - lp_index_to_val[index]))
+                self.constraints.append(self.model.addConstr(abs_var >= -(var - lp_index_to_val[index])))
+                self.constraints.append(self.model.addConstr(abs_var <= current_lp_diff))
+            else:
+                # fix the variable
+                self.constraints.append(self.model.addConstr(var == index_to_val[index]))
 
     def local_branching(self, index_to_val, local_branching_size, binary_indexes) -> None:
-        pass
+        zero_binary_vars, one_binary_vars = self.split_binary_vars(self.variables, binary_indexes, index_to_val)
+        # For zero_binary_vars, we add x_i
+        # For one_binary_vars, we add (1 - x_i)
+        zero_expr = quicksum(zero_binary_vars)
+        one_expr = quicksum(1 - var for var in one_binary_vars)
+        total_expr = zero_expr + one_expr
+        self.constraints.append(self.model.addConstr(total_expr <= local_branching_size))
 
     def proximity(self, index_to_val, obj_val, proximity_delta, binary_indexes) -> None:
-        pass
+        # Set the flag so we can undo
+        self.is_obj_transformed = True
+
+        zero_binary_vars, one_binary_vars = self.split_binary_vars(self.variables, binary_indexes, index_to_val)
+        # Build the new objective
+        zero_expr = quicksum(zero_binary_vars)
+        one_expr = quicksum(1 - var for var in one_binary_vars)
+        new_obj = zero_expr + one_expr
+
+        # Add a slack variable z
+        self.proximity_z = self.model.addVar(vtype=GRB.CONTINUOUS, lb=0, name='proximity_z')
+        self.model.update()  # Update model to include new variable
+
+        # Add the cutoff constraint
+        self.constraints.append(self.model.addConstr(self.model.getObjective() <=
+                                                     obj_val * (1 - proximity_delta) + self.proximity_z))
+
+        # Set the new objective: zero_expr + one_expr + M * proximity_z
+        self.model.setObjective(new_obj + Constants.M * self.proximity_z, GRB.MINIMIZE)
 
     def rens(self, index_to_val, rens_float_set, lp_index_to_val) -> None:
-        pass
+        for var in self.variables:
+            index = var.index
+            if index in rens_float_set:
+                # Restrict discrete vars to floor and ceil of lp solution
+                lb = math.floor(lp_index_to_val[index])
+                ub = math.ceil(lp_index_to_val[index])
+                self.constraints.append(self.model.addConstr(var >= lb))
+                self.constraints.append(self.model.addConstr(var <= ub))
+            else:
+                # Fix variable
+                self.constraints.append(self.model.addConstr(var == index_to_val[index]))
 
     def random_objective(self) -> None:
-        pass
+        # Set the flag so we can undo
+        self.is_obj_transformed = True
+
+        objective = gp.LinExpr()
+        for var in self.variables:
+            coeff = random.uniform(-1, 1)
+            if coeff != 0:
+                objective.addTerms(coeff, var)
+        self.model.setObjective(objective, GRB.MINIMIZE)
+
+        # Set limits
+        self.model.Params.SolutionLimit = 1
+        self.model.Params.Heuristics = 0
 
     def solve_and_undo(self, time_limit_in_sc=None, solution_limit=None) -> Tuple[Dict[Any, float], float]:
-        pass
+        # Set limits
+        if time_limit_in_sc is not None:
+            #self.model.Params.TimeLimit = time_limit_in_sc
+            self.model.Params.TimeLimit = 1
+        if solution_limit is not None:
+            self.model.Params.SolutionLimit = solution_limit
+
+        self.model.update()
+        # Optimize
+        self.model.optimize()
+
+        # Get solution
+        index_to_val, obj_val = self.get_index_to_val_and_objective()
+
+        self.model.reset(0)
+
+        # Undo limits
+        if time_limit_in_sc is not None:
+            self.model.Params.TimeLimit = GRB.INFINITY
+        if solution_limit is not None:
+            self.model.Params.SolutionLimit = 2000000000
+
+        # Remove constraints
+        for ct in self.constraints:
+            self.model.remove(ct)
+        self.constraints = []
+
+        # Remove auxiliary variables, if any
+        for var in getattr(self, 'aux_vars', []):
+            self.model.remove(var)
+        self.aux_vars = []
+
+        # Reset to original objective (random objective and proximity change objective)
+        if self.is_obj_transformed:
+            self.is_obj_transformed = False
+
+            # Reset back to original minimize objective
+            if self.is_obj_sense_changed:
+                self.model.setObjective(-1 * self.org_objective_fn, GRB.MINIMIZE)
+            else:
+                self.model.setObjective(self.org_objective_fn, GRB.MINIMIZE)
+
+            # if proximity_z variable is added, remove it
+            if self.proximity_z:  # if proximity_delta > 0
+                self.model.remove(self.proximity_z)
+                self.proximity_z = None
+            else:  # if random heuristic used, reset heuristics
+                self.model.Params.Heuristics = 0.05  # Reset to default value
+
+        self.model.update()  # Update model after removals
+
+        # Return solution
+        return index_to_val, obj_val
 
     def solve_random_and_undo(self, time_limit_in_sc=None) -> Tuple[Dict[Any, float], float]:
-        pass
+        # Set limits
+        if time_limit_in_sc is not None:
+            self.model.Params.TimeLimit = time_limit_in_sc
+
+        # Set random objective
+        objective = gp.LinExpr()
+        for var in self.variables:
+            coeff = random.uniform(-1, 1)
+            if coeff != 0:
+                objective.addTerms(coeff, var)
+        self.model.setObjective(objective, GRB.MINIMIZE)
+
+        # Set limits
+        self.model.Params.SolutionLimit = 1
+        self.model.Params.Heuristics = 0
+
+        self.model.update()
+        # Solve
+        self.model.optimize()
+
+        r1_index_to_val, r1_obj_val = self.get_index_to_val_and_objective()
+
+        self.model.reset(0)
+
+        # Restore original objective
+        self.model.setObjective(self.org_objective_fn, GRB.MINIMIZE)
+        self.model.Params.SolutionLimit = 2000000000
+        self.model.Params.Heuristics = 0.05  # Reset to default
+        if time_limit_in_sc is not None:
+            self.model.Params.TimeLimit = GRB.INFINITY
+
+        return r1_index_to_val, r1_obj_val
+
+    def solve_lp_and_undo(self) -> Tuple[Dict[Any, float], float]:
+        #TODO: consider use model.relax()
+        # Solve LP relaxation
+        int_vars = []
+        bin_vars = []
+        variables = self.model.getVars()
+        for var in variables:
+            if var.VType == "B":
+                var.VType = "C"
+                bin_vars.append(var)
+            elif var.VType == "I":
+                var.VType = "C"
+                int_vars.append(var)
+
+        self.model.update()
+        self.model.optimize()
+        lp_index_to_val, lp_obj_val = self.get_index_to_val_and_objective()
+
+        self.model.reset(0)
+        # Revert variable types
+        for var in int_vars:
+            var.VType = "I"
+        for var in bin_vars:
+            var.VType = "B"
+        self.model.update()
+
+        return lp_index_to_val, lp_obj_val
+
+    def get_index_to_val_and_objective(self) -> Tuple[Dict[Any, float], float]:
+        if self.model.SolCount == 0 or self.model.Status == GRB.INFEASIBLE:
+            return dict(), 9999999
+        else:
+            index_to_val = dict([(var.index, var.X) for var in self.model.getVars()])
+            obj_value = self.model.ObjVal
+            return index_to_val, obj_value
+
+    @staticmethod
+    def split_binary_vars(variables, binary_indexes, index_to_val) -> Tuple[List[Any], List[Any]]:
+        zero_binary_vars = []
+        one_binary_vars = []
+        for var in variables:
+            if var.index in binary_indexes:
+                if math.isclose(index_to_val[var.index], 0.0):
+                    zero_binary_vars.append(var)
+                else:
+                    one_binary_vars.append(var)
+        return zero_binary_vars, one_binary_vars
