@@ -16,7 +16,7 @@ class _Gurobi(_BaseMIP):
 
         # Create Gurobi model
         self.model = gp.read(instance_path)
-        # self.model.Params.OutputFlag = 0
+        self.model.Params.OutputFlag = 0
         self.model.Params.Seed = self.seed
         # self.model.Params.Presolve = 0
 
