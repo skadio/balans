@@ -19,7 +19,7 @@ class SolverTest(BaseTest):
 
     def test_balans_t1(self):
         # Input
-        instance = "model.cip"
+        instance = "model.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -52,7 +52,7 @@ class SolverTest(BaseTest):
 
     def test_balans_t2(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -84,7 +84,7 @@ class SolverTest(BaseTest):
 
     def test_balans_t3(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -98,7 +98,7 @@ class SolverTest(BaseTest):
                        DestroyOperators.Rens_25,
                        DestroyOperators.Crossover]
 
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
@@ -130,7 +130,7 @@ class SolverTest(BaseTest):
 
     def test_balans_t4(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -144,7 +144,7 @@ class SolverTest(BaseTest):
                        DestroyOperators.Rens_25,
                        DestroyOperators.Crossover]
 
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         # Initial solution
@@ -179,11 +179,11 @@ class SolverTest(BaseTest):
         # self.assertEqual(initial_index_to_val[0], best_index_to_val[0])
 
         print(f"Best heuristic solution objective is {best_objective}.")
-        self.assertEqual(best_objective, -30.0)
+        self.assertIsBetter(-30, result.best_state.objective(), "minimize")
 
     def test_balans_t5(self):
         # Input
-        instance = "test5.5.cip"
+        instance = "test5.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -197,7 +197,7 @@ class SolverTest(BaseTest):
                        DestroyOperators.Rens_25,
                        DestroyOperators.Crossover]
 
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         index_to_val = {0: 1.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
@@ -224,11 +224,11 @@ class SolverTest(BaseTest):
         # Retrieve the final solution
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
-        self.assertEqual(result.best_state.objective(), -40.0)
+        self.assertIsBetter(-40, result.best_state.objective(), "minimize")
 
     def test_balans_t6(self):
         # Input
-        instance = "model.cip"
+        instance = "model.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters

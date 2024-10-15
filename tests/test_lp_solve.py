@@ -5,16 +5,16 @@ from balans.utils import Constants
 from tests.test_base import BaseTest
 
 
-class SCIPLPSolTest(BaseTest):
+class LPSolTest(BaseTest):
 
     def test_lp_t1(self):
         # Input
 
         # 3 DISCRETE DECISION VARIABLES > model.cip
-        instance = "model.cip"
+        instance = "model.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
-        mip = create_mip_solver(instance_path, 123, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, 123)
 
         # LP solution
         lp_index_to_val, lp_obj_val = mip.solve_lp_and_undo()
@@ -28,7 +28,7 @@ class SCIPLPSolTest(BaseTest):
         instance = "10teams.mps"
         instance_path = os.path.join(Constants.DATA_MIP, instance)
 
-        mip = create_mip_solver(instance_path, 123, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, 123)
 
         # LP solution
         lp_index_to_val, lp_obj_val = mip.solve_lp_and_undo()
@@ -42,7 +42,7 @@ class SCIPLPSolTest(BaseTest):
         instance = "30n20b8.mps"
         instance_path = os.path.join(Constants.DATA_MIP, instance)
 
-        mip = create_mip_solver(instance_path, 123, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, 123)
 
         # LP solution
         lp_index_to_val, lp_obj_val = mip.solve_lp_and_undo()

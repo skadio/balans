@@ -78,6 +78,13 @@ class _BaseMIP(metaclass=abc.ABCMeta):
         """
         pass
 
+    @abc.abstractmethod
+    def solve_lp_and_undo(self) -> Tuple[Dict[Any, float], float]:
+        """
+        Solve lp relaxation and undo.
+        """
+        pass
+
 
 def create_mip_solver(instance_path: str, seed: int = Constants.default_seed,
                       mip_solver_str: str = Constants.default_solver) -> _BaseMIP:

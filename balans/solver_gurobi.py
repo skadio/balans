@@ -18,6 +18,7 @@ class _Gurobi(_BaseMIP):
         self.model = gp.read(instance_path)
         # self.model.Params.OutputFlag = 0
         self.model.Params.Seed = self.seed
+        # self.model.Params.Presolve = 0
 
         # Set variables
         self.variables = self.model.getVars()
@@ -84,6 +85,10 @@ class _Gurobi(_BaseMIP):
             # if skip list given, and the variable is in there, do nothing
             if skip_indexes and var.index in skip_indexes:
                 continue
+
+            # TODO: think about how to deal with continuous variables
+            # if var.VType == "C":
+            #     continue
 
             # Variable has a value, and it's not in the skip set, FIX
             self.constraints.append(self.model.addConstr(var == index_to_val[var.index]))
@@ -152,22 +157,56 @@ class _Gurobi(_BaseMIP):
         # Set the flag so we can undo
         self.is_obj_transformed = True
 
-        objective = gp.LinExpr()
-        for var in self.variables:
-            coeff = random.uniform(-1, 1)
-            if coeff != 0:
-                objective.addTerms(coeff, var)
-        self.model.setObjective(objective, GRB.MINIMIZE)
+        # objective = gp.LinExpr()
+        # for var in self.variables:
+        #     coeff = random.uniform(-1, 1)
+        #     if coeff != 0:
+        #         objective.addTerms(coeff, var)
+        # self.model.setObjective(objective, GRB.MINIMIZE)
+
+        # Get original objective function
+        expr = self.org_objective_fn
+
+        # Extract variables and coefficients
+        vars = []
+        coeffs = []
+
+        for i in range(expr.size()):
+            vars.append(expr.getVar(i))
+            coeffs.append(expr.getCoeff(i))
+
+        num_vars = len(vars)
+        num_keep = max(1, int(0.25 * num_vars))  # Ensure at least one variable is kept
+
+        # Randomly select indices to keep
+        indices = list(range(num_vars))
+        random.shuffle(indices)
+        keep_indices = set(indices[:num_keep])
+
+        # Build new objective function with 25% coefficients
+        new_obj = gp.LinExpr()
+        for i in range(num_vars):
+            if i in keep_indices:
+                if self.is_obj_sense_changed:
+                    new_obj.addTerms(-coeffs[i], vars[i])
+                else:
+                    new_obj.addTerms(coeffs[i], vars[i])
+            else:
+                # Coefficient is zero, do not add term
+                pass
+
+        # Set the new objective function
+        self.model.setObjective(new_obj, GRB.MINIMIZE)
 
         # Set limits
         self.model.Params.SolutionLimit = 1
         self.model.Params.Heuristics = 0
 
+
     def solve_and_undo(self, time_limit_in_sc=None, solution_limit=None) -> Tuple[Dict[Any, float], float]:
         # Set limits
         if time_limit_in_sc is not None:
-            #self.model.Params.TimeLimit = time_limit_in_sc
-            self.model.Params.TimeLimit = 1
+            self.model.Params.TimeLimit = time_limit_in_sc
         if solution_limit is not None:
             self.model.Params.SolutionLimit = solution_limit
 
@@ -224,33 +263,31 @@ class _Gurobi(_BaseMIP):
             self.model.Params.TimeLimit = time_limit_in_sc
 
         # Set random objective
-        objective = gp.LinExpr()
-        for var in self.variables:
-            coeff = random.uniform(-1, 1)
-            if coeff != 0:
-                objective.addTerms(coeff, var)
-        self.model.setObjective(objective, GRB.MINIMIZE)
-
-        # Set limits
-        self.model.Params.SolutionLimit = 1
-        self.model.Params.Heuristics = 0
+        self.random_objective()
 
         self.model.update()
         # Solve
         self.model.optimize()
 
-        r1_index_to_val, r1_obj_val = self.get_index_to_val_and_objective()
+        index_to_val, obj_val = self.get_index_to_val_and_objective()
 
         self.model.reset(0)
 
         # Restore original objective
-        self.model.setObjective(self.org_objective_fn, GRB.MINIMIZE)
+        self.is_obj_transformed = False
+
+        # Reset back to original minimize objective
+        if self.is_obj_sense_changed:
+            self.model.setObjective(-1 * self.org_objective_fn, GRB.MINIMIZE)
+        else:
+            self.model.setObjective(self.org_objective_fn, GRB.MINIMIZE)
+
         self.model.Params.SolutionLimit = 2000000000
         self.model.Params.Heuristics = 0.05  # Reset to default
         if time_limit_in_sc is not None:
             self.model.Params.TimeLimit = GRB.INFINITY
 
-        return r1_index_to_val, r1_obj_val
+        return index_to_val, obj_val
 
     def solve_lp_and_undo(self) -> Tuple[Dict[Any, float], float]:
         #TODO: consider use model.relax()

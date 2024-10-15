@@ -19,7 +19,7 @@ class RensTest(BaseTest):
 
     def test_rens_t1(self):
         # Input
-        instance = "model.cip"
+        instance = "model.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -44,7 +44,7 @@ class RensTest(BaseTest):
 
     def test_rens_t2(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -69,13 +69,13 @@ class RensTest(BaseTest):
 
     def test_rens_t3(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
 
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
@@ -106,13 +106,13 @@ class RensTest(BaseTest):
 
     def test_rens_t4(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = Constants.default_seed
 
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}

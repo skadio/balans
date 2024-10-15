@@ -69,7 +69,7 @@ class IndexTest(BaseTest):
     def test_initial_destroy_t3(self):
         # Testing whether we get the correct index set
         # Input
-        instance = "model.cip"
+        instance = "model.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -78,7 +78,7 @@ class IndexTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         # Initial solution
@@ -93,7 +93,7 @@ class IndexTest(BaseTest):
     def test_one_iteration_obj_t4(self):
 
         # Input
-        instance = "model.cip"
+        instance = "model.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters

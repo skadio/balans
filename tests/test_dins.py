@@ -19,7 +19,7 @@ class DinsTest(BaseTest):
 
     def test_dins_t1(self):
         # Input
-        instance = "model.cip"
+        instance = "model.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -44,7 +44,7 @@ class DinsTest(BaseTest):
 
     def test_dins_t2(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -69,7 +69,7 @@ class DinsTest(BaseTest):
 
     def test_dins_t3(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -107,7 +107,7 @@ class DinsTest(BaseTest):
 
     def test_dins_t4(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -117,7 +117,7 @@ class DinsTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         # Initial solution
@@ -155,14 +155,14 @@ class DinsTest(BaseTest):
 
     def test_dins_t5(self):
         # Input
-        instance = "test5.5.cip"
+        instance = "test5.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         index_to_val = {0: 1.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
