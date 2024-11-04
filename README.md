@@ -6,7 +6,7 @@ multi-armed bandit-based adaptive large neighborhood search.
 
 The framework integrates [MABWiser](https://github.com/fidelity/mabwiser/) for contextual multi-armed bandits,
 [ALNS](https://github.com/N-Wouda/ALNS/) for adaptive large neighborhood search, and 
-[SCIP](https://scipopt.org/) for solving mixed-integer linear programming problems. 
+[SCIP](https://scipopt.org/) or [GUROBI](https://www.gurobi.com/) for solving mixed-integer linear programming problems. 
 
 ## Quick Start
 
@@ -96,7 +96,7 @@ Balans requires Python 3.8+ and SCIP Solver and can be installed from PyPI via `
 
 Balans depends on [MABWiser](https://github.com/fidelity/mabwiser/) for multi-armed bandits,
 [ALNS](https://github.com/N-Wouda/ALNS/) for adaptive large neighborhood search, and 
-[SCIP](https://scipopt.org/) for solving mixed-integer linear programming problems. 
+[SCIP](https://scipopt.org/) or [GUROBI](https://www.gurobi.com/) for solving mixed-integer linear programming problems. 
 While MABWiser and ALNS are pip-installable as shown in [requirements.txt](https://github.com/skadio/balans/blob/main/requirements.txt), 
 SCIP needs to be installed: 
 

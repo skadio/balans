@@ -83,6 +83,8 @@ class _SCIP(_BaseMIP):
             if skip_indexes and var.getIndex() in skip_indexes:
                 continue
 
+            # TODO: Do we always fix all the continuous variables
+
             # Variable has a value, and it's not in the skip set, FIX
             self.constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
@@ -138,12 +140,13 @@ class _SCIP(_BaseMIP):
                 # If not in the set, fix the var to the current state
                 self.constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
+    #TODO: modify random_objective to be consistent with Gurobi version, have a delta value which control how much
+    # coeffs you want to keep, and zero out others
     def random_objective(self) -> None:
         # Set the flag so we can undo
         self.is_obj_transformed = True
 
         objective = Expr()
-        # TODO consider adding a delta here?
         for var in self.variables:
             coeff = random.uniform(-1, 1)
             if coeff != 0:
@@ -177,7 +180,7 @@ class _SCIP(_BaseMIP):
         if solution_limit is not None:
             self.model.setParam("limits/bestsol", -1)
 
-        # Remove constraints, and rest
+        # Remove constraints, and reset
         for ct in self.constraints:
             self.model.delCons(ct)
         self.constraints = []
@@ -208,15 +211,7 @@ class _SCIP(_BaseMIP):
         if time_limit_in_sc is not None:
             self.model.setParam("limits/time", time_limit_in_sc)
 
-        objective = scip.Expr()
-        for var in self.variables:
-            coeff = random.uniform(-1, 1)
-            if coeff != 0:
-                objective += coeff * var
-        objective.normalize()
-        self.model.setObjective(objective, Constants.minimize)
-        self.model.setParam("limits/bestsol", 1)
-        self.model.setHeuristics(scip.SCIP_PARAMSETTING.OFF)
+        self.random_objective()
 
         # Solve
         self.model.optimize()
@@ -226,10 +221,19 @@ class _SCIP(_BaseMIP):
         # Get back the original model
         self.model.freeTransform()
         self.model.setParam("limits/bestsol", -1)
-        self.model.setObjective(self.org_objective_fn, Constants.minimize)
         self.model.setHeuristics(scip.SCIP_PARAMSETTING.DEFAULT)
         if time_limit_in_sc is not None:
             self.model.setParam("limits/time", 1e+20)
+
+        # Reset to original objective
+        self.is_obj_transformed = False
+
+        # Reset back to original minimize objective
+        if self.is_obj_sense_changed:
+            self.model.setObjective(-self.org_objective_fn, Constants.minimize)
+        else:
+            self.model.setObjective(self.org_objective_fn, Constants.minimize)
+
 
         return r1_index_to_val, r1_obj_val
 

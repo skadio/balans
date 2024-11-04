@@ -100,6 +100,7 @@ class _Instance:
             self.mip.random_objective()
 
         # If no destroy, don't solve, quit with previous objective
+        # e.g. destroy set is empty
         if not has_destroy:
             print("No destroy to apply, don't call optimize()")
             print("\t Current Obj:", starting_obj_val)

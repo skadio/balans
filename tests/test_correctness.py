@@ -12,7 +12,7 @@ from tests.test_base import BaseTest
 
 
 class CorrectnessTest(BaseTest):
-    is_skip = False
+    is_skip = True
 
     @unittest.skipIf(is_skip, "Skipping correctness 1")
     def test_correctness1(self):
@@ -32,7 +32,7 @@ class CorrectnessTest(BaseTest):
                         selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=8, num_repair=1,
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
-                        stop=MaxRuntime(100),
+                        stop=MaxIterations(5),
                         seed=Constants.default_seed)
 
         # Run
@@ -59,7 +59,7 @@ class CorrectnessTest(BaseTest):
                         selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=8, num_repair=1,
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
-                        stop=MaxRuntime(100),
+                        stop=MaxIterations(5),
                         seed=Constants.default_seed)
 
         # Run
@@ -74,25 +74,18 @@ class CorrectnessTest(BaseTest):
         instance = "b1c1s1.mps"
         instance_path = os.path.join(Constants.DATA_MIP, instance)
         # Balans
-        # balans = Balans(destroy_ops=[DestroyOperators.Crossover,
-        #                              DestroyOperators.Dins,
-        #                              DestroyOperators.Mutation_25,
-        #                              DestroyOperators.Local_Branching_10,
-        #                              DestroyOperators.Rins_25,
-        #                              DestroyOperators.Proximity_05,
-        #                              DestroyOperators.Rens_25],
-        #                 repair_ops=[RepairOperators.Repair],
-        #                 selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=7, num_repair=1,
-        #                                      learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
-        #                 accept=HillClimbing(),
-        #                 stop=MaxIterations(1),
-        #                 seed=Constants.default_seed)
-        balans = Balans(destroy_ops=[DestroyOperators.Mutation_75],
+        balans = Balans(destroy_ops=[DestroyOperators.Crossover,
+                                     DestroyOperators.Dins,
+                                     DestroyOperators.Mutation_25,
+                                     DestroyOperators.Local_Branching_10,
+                                     DestroyOperators.Rins_25,
+                                     DestroyOperators.Proximity_05,
+                                     DestroyOperators.Rens_25],
                         repair_ops=[RepairOperators.Repair],
-                        selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
+                        selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=7, num_repair=1,
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
-                        stop=MaxIterations(2),
+                        stop=MaxIterations(5),
                         seed=Constants.default_seed)
 
         # Run

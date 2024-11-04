@@ -2,3 +2,4 @@ alns[mabwiser]
 mabwiser
 numpy
 pyscipopt
+gurobipy

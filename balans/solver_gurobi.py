@@ -28,7 +28,6 @@ class _Gurobi(_BaseMIP):
         self.org_objective_fn = self.model.getObjective()
         self.org_objective_sense = self.model.ModelSense  # 1 for minimize, -1 for maximize
         self.is_obj_sense_changed = False
-        # objective sense naming different
         if self.org_objective_sense == -1:
             self.model.setObjective(-1 * self.org_objective_fn, GRB.MINIMIZE)
             self.is_obj_sense_changed = True
@@ -36,6 +35,7 @@ class _Gurobi(_BaseMIP):
         # Set constraints, proximity z, and a flag for objective transformation
         # These are used for incremental solve and undo solve
         self.constraints = []
+        #TODO: delete this list because it only holds one variable?
         self.aux_vars = []
         self.proximity_z = None
         self.is_obj_transformed = False
@@ -58,9 +58,9 @@ class _Gurobi(_BaseMIP):
 
         for var in self.variables:
             # Variable types naming different
-            if var.VType != "C":
+            if self.is_discrete(var.VType):
                 discrete_indexes.append(var.index)
-                if var.VType == "B":
+                if self.is_binary(var.VType):
                     binary_indexes.append(var.index)
                 else:
                     integer_indexes.append(var.index)
@@ -86,9 +86,7 @@ class _Gurobi(_BaseMIP):
             if skip_indexes and var.index in skip_indexes:
                 continue
 
-            # TODO: think about how to deal with continuous variables
-            # if var.VType == "C":
-            #     continue
+            # TODO: Do we always fix all the continuous variables
 
             # Variable has a value, and it's not in the skip set, FIX
             self.constraints.append(self.model.addConstr(var == index_to_val[var.index]))
@@ -124,45 +122,36 @@ class _Gurobi(_BaseMIP):
         self.is_obj_transformed = True
 
         zero_binary_vars, one_binary_vars = self.split_binary_vars(self.variables, binary_indexes, index_to_val)
-        # Build the new objective
+        # if x_inc=0, new objective expression is x_inc.
+        # if x_inc=1, new objective expression is 1 - x_inc.
+        # Drop all other vars (when not in the expr it is set to 0 by default)
         zero_expr = quicksum(zero_binary_vars)
         one_expr = quicksum(1 - var for var in one_binary_vars)
-        new_obj = zero_expr + one_expr
 
-        # Add a slack variable z
+        # add cutoff constraint depending on sense, so that next state is better quality
+        # a slack variable z to prevent infeasible solution, \theta = 1
         self.proximity_z = self.model.addVar(vtype=GRB.CONTINUOUS, lb=0, name='proximity_z')
         self.model.update()  # Update model to include new variable
-
-        # Add the cutoff constraint
         self.constraints.append(self.model.addConstr(self.model.getObjective() <=
                                                      obj_val * (1 - proximity_delta) + self.proximity_z))
 
-        # Set the new objective: zero_expr + one_expr + M * proximity_z
-        self.model.setObjective(new_obj + Constants.M * self.proximity_z, GRB.MINIMIZE)
+        # M * z is to make sure model does not use z, unless needed to avoid infeasibility
+        self.model.setObjective(zero_expr + one_expr + Constants.M * self.proximity_z, GRB.MINIMIZE)
 
     def rens(self, index_to_val, rens_float_set, lp_index_to_val) -> None:
         for var in self.variables:
-            index = var.index
-            if index in rens_float_set:
-                # Restrict discrete vars to floor and ceil of lp solution
-                lb = math.floor(lp_index_to_val[index])
-                ub = math.ceil(lp_index_to_val[index])
-                self.constraints.append(self.model.addConstr(var >= lb))
-                self.constraints.append(self.model.addConstr(var <= ub))
+            if var.index in rens_float_set:
+                # Restrict discrete vars to round up and down integer version of the lp
+                # EX: If var = 3.5, the constraint is var >= 3 and var <= 4
+                self.constraints.append(self.model.addConstr(var >= math.floor(lp_index_to_val[index])))
+                self.constraints.append(self.model.addConstr(var <= math.ceil(lp_index_to_val[index])))
             else:
-                # Fix variable
+                # If not in the set, fix the var to the current state
                 self.constraints.append(self.model.addConstr(var == index_to_val[index]))
 
     def random_objective(self) -> None:
         # Set the flag so we can undo
         self.is_obj_transformed = True
-
-        # objective = gp.LinExpr()
-        # for var in self.variables:
-        #     coeff = random.uniform(-1, 1)
-        #     if coeff != 0:
-        #         objective.addTerms(coeff, var)
-        # self.model.setObjective(objective, GRB.MINIMIZE)
 
         # Get original objective function
         expr = self.org_objective_fn
@@ -217,6 +206,7 @@ class _Gurobi(_BaseMIP):
         # Get solution
         index_to_val, obj_val = self.get_index_to_val_and_objective()
 
+        # Free the model
         self.model.reset(0)
 
         # Undo limits
@@ -225,12 +215,12 @@ class _Gurobi(_BaseMIP):
         if solution_limit is not None:
             self.model.Params.SolutionLimit = 2000000000
 
-        # Remove constraints
+        # Remove constraints, and reset
         for ct in self.constraints:
             self.model.remove(ct)
         self.constraints = []
 
-        # Remove auxiliary variables, if any
+        # Gurobi-specific: Remove auxiliary variables, if any
         for var in getattr(self, 'aux_vars', []):
             self.model.remove(var)
         self.aux_vars = []
@@ -252,7 +242,8 @@ class _Gurobi(_BaseMIP):
             else:  # if random heuristic used, reset heuristics
                 self.model.Params.Heuristics = 0.05  # Reset to default value
 
-        self.model.update()  # Update model after removals
+        # Gurobi specific: Update model after removals
+        self.model.update()
 
         # Return solution
         return index_to_val, obj_val
@@ -271,6 +262,7 @@ class _Gurobi(_BaseMIP):
 
         index_to_val, obj_val = self.get_index_to_val_and_objective()
 
+        # Free the model
         self.model.reset(0)
 
         # Restore original objective
@@ -307,6 +299,7 @@ class _Gurobi(_BaseMIP):
         self.model.optimize()
         lp_index_to_val, lp_obj_val = self.get_index_to_val_and_objective()
 
+        # Get back the original model
         self.model.reset(0)
         # Revert variable types
         for var in int_vars:
@@ -318,12 +311,21 @@ class _Gurobi(_BaseMIP):
         return lp_index_to_val, lp_obj_val
 
     def get_index_to_val_and_objective(self) -> Tuple[Dict[Any, float], float]:
+        # we check if the optimized model has solutions, feasible, and is in the solved state
         if self.model.SolCount == 0 or self.model.Status == GRB.INFEASIBLE:
             return dict(), 9999999
         else:
             index_to_val = dict([(var.index, var.X) for var in self.model.getVars()])
             obj_value = self.model.ObjVal
             return index_to_val, obj_value
+
+    @staticmethod
+    def is_discrete(var_type) -> bool:
+        return var_type in ("B","I")
+
+    @staticmethod
+    def is_binary(var_type) -> bool:
+        return var_type in "B"
 
     @staticmethod
     def split_binary_vars(variables, binary_indexes, index_to_val) -> Tuple[List[Any], List[Any]]:

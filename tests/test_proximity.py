@@ -80,5 +80,5 @@ class ProximityTest(BaseTest):
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
 
-        # REPAIR OBJECTIVE SUPPOSED TO BE =-2.
+        # Assert
         self.assertIsBetter(-40, result.best_state.objective(), "minimize")

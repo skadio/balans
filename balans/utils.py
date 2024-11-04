@@ -15,7 +15,7 @@ class Constants(NamedTuple):
     # Default MIP Solver
     scip_solver = "scip"
     gurobi_solver = "gurobi"
-    default_solver = gurobi_solver
+    default_solver = scip_solver
 
     # Optimization sense
     minimize = "minimize"
@@ -32,7 +32,7 @@ class Constants(NamedTuple):
     var_ub = "var_ub"
 
     # Time limit for the initial solution to get feasible solution as a starting point for ALNS
-    timelimit_first_solution = 3
+    timelimit_first_solution = 20
 
     # time limit for one iteration is ALNS, local branching has longer time because hard problem created
     timelimit_alns_iteration = 120
