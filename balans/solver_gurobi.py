@@ -143,11 +143,11 @@ class _Gurobi(_BaseMIP):
             if var.index in rens_float_set:
                 # Restrict discrete vars to round up and down integer version of the lp
                 # EX: If var = 3.5, the constraint is var >= 3 and var <= 4
-                self.constraints.append(self.model.addConstr(var >= math.floor(lp_index_to_val[index])))
-                self.constraints.append(self.model.addConstr(var <= math.ceil(lp_index_to_val[index])))
+                self.constraints.append(self.model.addConstr(var >= math.floor(lp_index_to_val[var.index])))
+                self.constraints.append(self.model.addConstr(var <= math.ceil(lp_index_to_val[var.index])))
             else:
                 # If not in the set, fix the var to the current state
-                self.constraints.append(self.model.addConstr(var == index_to_val[index]))
+                self.constraints.append(self.model.addConstr(var == index_to_val[var.index]))
 
     def random_objective(self) -> None:
         # Set the flag so we can undo
