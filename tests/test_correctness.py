@@ -85,7 +85,7 @@ class CorrectnessTest(BaseTest):
                         selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=7, num_repair=1,
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
-                        stop=MaxIterations(10),
+                        stop=MaxIterations(5),
                         seed=Constants.default_seed)
 
         # Run

@@ -45,7 +45,7 @@ class CrossoverTest(BaseTest):
 
     def test_crossover_t1(self):
         # Input
-        instance = "model.cip"
+        instance = "model.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -70,7 +70,7 @@ class CrossoverTest(BaseTest):
 
     def test_crossover_t2(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -95,7 +95,7 @@ class CrossoverTest(BaseTest):
 
     def test_crossover_t3(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -105,7 +105,7 @@ class CrossoverTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         # Initial solution
@@ -140,7 +140,7 @@ class CrossoverTest(BaseTest):
 
     def test_crossover_t4(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -150,7 +150,7 @@ class CrossoverTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         # Initial solution
@@ -188,7 +188,7 @@ class CrossoverTest(BaseTest):
 
     def test_crossover_t4_with_warm_start(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters

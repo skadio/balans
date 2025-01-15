@@ -19,13 +19,13 @@ class LocalBranchingTest(BaseTest):
 
     def test_local_branching_t1(self):
         # Input
-        instance = "test5.13.cip"
+        instance = "test5.13.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
 
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         index_to_val = {0: 0.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
@@ -55,14 +55,14 @@ class LocalBranchingTest(BaseTest):
 
     def test_local_branching_classic_t2(self):
         # Input
-        instance = "test5.13.cip"
+        instance = "test5.13.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
         print(instance_path)
 
         # Parameters
         seed = 123456
 
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         index_to_val = {0: 1.0, 1: 1.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
@@ -92,13 +92,13 @@ class LocalBranchingTest(BaseTest):
 
     def test_local_branching_v2_t3(self):
         # Input
-        instance = "test5.13.cip"
+        instance = "test5.13.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
 
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         index_to_val = {0: 1.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}

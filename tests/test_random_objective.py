@@ -16,7 +16,7 @@ class RandomObjectiveTest(BaseTest):
 
     def test_random_objective_t1(self):
         # Input
-        instance = "model.cip"
+        instance = "model.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -41,7 +41,7 @@ class RandomObjectiveTest(BaseTest):
 
     def test_random_objective_t2(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -70,7 +70,7 @@ class RandomObjectiveTest(BaseTest):
 
     def test_random_objective_with_warm_start(self):
         # Input
-        instance = "test2.5.cip"
+        instance = "test2.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters

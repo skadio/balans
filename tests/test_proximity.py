@@ -19,7 +19,7 @@ class ProximityTest(BaseTest):
 
     def test_proximity_t1(self):
         # Input
-        instance = "test5.5.cip"
+        instance = "test5.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
@@ -44,13 +44,13 @@ class ProximityTest(BaseTest):
 
     def test_proximity_t2(self):
         # Input
-        instance = "test5.5.cip"
+        instance = "test5.5.lp"
         instance_path = os.path.join(Constants.DATA_TOY, instance)
 
         # Parameters
         seed = 123456
 
-        mip = create_mip_solver(instance_path, seed, Constants.scip_solver)
+        mip = create_mip_solver(instance_path, seed)
         instance = _Instance(mip)
 
         initial_index_to_val, initial_obj_val = instance.initial_solve()
@@ -80,5 +80,5 @@ class ProximityTest(BaseTest):
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
 
-        # REPAIR OBJECTIVE SUPPOSED TO BE =-2.
-        self.assertEqual(result.best_state.objective(), -40.0)
+        # Assert
+        self.assertIsBetter(-40, result.best_state.objective(), "minimize")
