@@ -86,7 +86,8 @@ class _BaseMIP(metaclass=abc.ABCMeta):
         pass
 
 
-def create_mip_solver(instance_path: str, seed: int = Constants.default_seed,
+def create_mip_solver(instance_path: str,
+                      seed: int = Constants.default_seed,
                       mip_solver_str: str = Constants.default_solver) -> _BaseMIP:
     """ Returns a mip model of the given solver type for the given instance
 

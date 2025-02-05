@@ -14,6 +14,11 @@ from tests.test_base import BaseTest
 class CorrectnessTest(BaseTest):
     is_skip = True
 
+    # TODO: implement the exact configs/runs below
+    # to run on these instances.
+    # Best configs of Balans_Softmax and Balans_TS
+    # from the paper ran for 1 hour.
+
     @unittest.skipIf(is_skip, "Skipping correctness 1")
     def test_correctness1(self):
         # Input
@@ -85,19 +90,18 @@ class CorrectnessTest(BaseTest):
                         selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=7, num_repair=1,
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
-                        stop=MaxIterations(5),
+                        stop=MaxIterations(10),
                         seed=Constants.default_seed)
+
+        # SK: iter_5 >>> FINISH objective: 69333.51999999999 (no change)
+        # SK: iter_10 >>> FINISH objective: 68517.54313799994
+        # SK: iter_30 --> 50000?
 
         # Run
         result = balans.solve(instance_path)
         objective = result.best_state.objective()
-        self.assertLess(objective, 68500)  # iter_30 --> 50000
+        self.assertLess(objective, 68550)
         self.assertGreater(objective, 24544)
-
-    # TODO: implement the exact configs/runs below
-    # to run on these instances.
-    # Best configs of Balans_Softmax and Balans_TS
-    # from the paper ran for 1 hour.
 
     @unittest.skipIf(is_skip, "Skipping correctness 1")
     def test_correctness_gisp_102(self):

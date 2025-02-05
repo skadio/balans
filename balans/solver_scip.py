@@ -84,7 +84,6 @@ class _SCIP(_BaseMIP):
                 continue
 
             # TODO: Do we always fix all the continuous variables
-
             # Variable has a value, and it's not in the skip set, FIX
             self.constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
@@ -140,8 +139,10 @@ class _SCIP(_BaseMIP):
                 # If not in the set, fix the var to the current state
                 self.constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 
-    #TODO: modify random_objective to be consistent with Gurobi version, have a delta value which control how much
-    # coeffs you want to keep, and zero out others
+    # TODO: modify random_objective to be consistent with Gurobi version,
+    #  have a delta value which control how much
+    #  coeffs you want to keep, and zero out others
+    # SK: may be we can parameterize these? So there can be a few different ways to randomize? and we don't loose code
     def random_objective(self) -> None:
         # Set the flag so we can undo
         self.is_obj_transformed = True
@@ -233,7 +234,6 @@ class _SCIP(_BaseMIP):
             self.model.setObjective(-self.org_objective_fn, Constants.minimize)
         else:
             self.model.setObjective(self.org_objective_fn, Constants.minimize)
-
 
         return r1_index_to_val, r1_obj_val
 

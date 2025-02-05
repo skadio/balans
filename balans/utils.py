@@ -38,7 +38,7 @@ class Constants(NamedTuple):
     timelimit_alns_iteration = 120
 
     # time limit for one local branching iteration.
-    # TODO paper says  Each LNS iteration is limited to 1 minute, except for Local Branching with 2.5 minutes.
+    # TODO paper says Each LNS iteration is limited to 1 minute, except for Local Branching with 2.5 minutes.
     timelimit_local_branching_iteration = 600
 
     # for Big-M constraint, currently used in Proximity

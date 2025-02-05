@@ -35,7 +35,8 @@ class _Gurobi(_BaseMIP):
         # Set constraints, proximity z, and a flag for objective transformation
         # These are used for incremental solve and undo solve
         self.constraints = []
-        #TODO: delete this list because it only holds one variable?
+        # TODO: delete this list because it only holds one variable?
+        #  SK: yes please delete since it seems a "local" variable unless required in undo()?
         self.aux_vars = []
         self.proximity_z = None
         self.is_obj_transformed = False
@@ -86,8 +87,7 @@ class _Gurobi(_BaseMIP):
             if skip_indexes and var.index in skip_indexes:
                 continue
 
-            # TODO: Do we always fix all the continuous variables
-
+            # TODO: Do we always fix all the continuous variables?
             # Variable has a value, and it's not in the skip set, FIX
             self.constraints.append(self.model.addConstr(var == index_to_val[var.index]))
 
@@ -98,6 +98,10 @@ class _Gurobi(_BaseMIP):
                 # Add bounding constraint around initial lp solution
                 current_lp_diff = abs(index_to_val[index] - lp_index_to_val[index])
                 # Create an auxiliary variable for the absolute value
+                # Same constraint as in SCIP except that it is different to  represent the absolute value.
+                # In SCIP, we use abs() function
+                # In Gurobi, we split the absolute into two constraints and an additional variables.
+                # Standard way to linearize the abs function
                 abs_var = self.model.addVar(lb=0.0, name=f'abs_{var.VarName}')
                 self.aux_vars.append(abs_var)
                 self.model.update()  # Update model to include new variable
@@ -191,7 +195,6 @@ class _Gurobi(_BaseMIP):
         self.model.Params.SolutionLimit = 1
         self.model.Params.Heuristics = 0
 
-
     def solve_and_undo(self, time_limit_in_sc=None, solution_limit=None) -> Tuple[Dict[Any, float], float]:
         # Set limits
         if time_limit_in_sc is not None:
@@ -199,7 +202,10 @@ class _Gurobi(_BaseMIP):
         if solution_limit is not None:
             self.model.Params.SolutionLimit = solution_limit
 
+        # TODO It is not clear why this is needed?
+        # Gurobi specific: Update model after removals
         self.model.update()
+
         # Optimize
         self.model.optimize()
 
@@ -256,7 +262,9 @@ class _Gurobi(_BaseMIP):
         # Set random objective
         self.random_objective()
 
+        # Gurobi specific: Update model
         self.model.update()
+
         # Solve
         self.model.optimize()
 
@@ -282,11 +290,14 @@ class _Gurobi(_BaseMIP):
         return index_to_val, obj_val
 
     def solve_lp_and_undo(self) -> Tuple[Dict[Any, float], float]:
-        #TODO: consider use model.relax()
+
+        # TODO: consider using model.relax()
         # Solve LP relaxation
         int_vars = []
         bin_vars = []
         variables = self.model.getVars()
+
+        # TODO: we already have is_discrete(), is_binary functions, use them here
         for var in variables:
             if var.VType == "B":
                 var.VType = "C"
@@ -295,17 +306,23 @@ class _Gurobi(_BaseMIP):
                 var.VType = "C"
                 int_vars.append(var)
 
+        # Gurobi specific: Update model after removals
         self.model.update()
+
+        # Solve
         self.model.optimize()
         lp_index_to_val, lp_obj_val = self.get_index_to_val_and_objective()
 
         # Get back the original model
         self.model.reset(0)
+
         # Revert variable types
         for var in int_vars:
             var.VType = "I"
         for var in bin_vars:
             var.VType = "B"
+
+        # Gurobi specific: Update model after removals
         self.model.update()
 
         return lp_index_to_val, lp_obj_val
@@ -321,7 +338,7 @@ class _Gurobi(_BaseMIP):
 
     @staticmethod
     def is_discrete(var_type) -> bool:
-        return var_type in ("B","I")
+        return var_type in ("B", "I")
 
     @staticmethod
     def is_binary(var_type) -> bool:
