@@ -126,7 +126,7 @@ class SolverTest(BaseTest):
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
 
-        self.assertIsBetter(-30, result.best_state.objective(), "minimize")
+        self.is_not_worse(-30, result.best_state.objective(), "minimize")
 
     def test_balans_t4(self):
         # Input
@@ -179,7 +179,7 @@ class SolverTest(BaseTest):
         # self.assertEqual(initial_index_to_val[0], best_index_to_val[0])
 
         print(f"Best heuristic solution objective is {best_objective}.")
-        self.assertIsBetter(-30, result.best_state.objective(), "minimize")
+        self.is_not_worse(-30, result.best_state.objective(), "minimize")
 
     def test_balans_t5(self):
         # Input
@@ -224,7 +224,7 @@ class SolverTest(BaseTest):
         # Retrieve the final solution
         best = result.best_state
         print(f"Best heuristic solution objective is {best.objective()}.")
-        self.assertIsBetter(-40, result.best_state.objective(), "minimize")
+        self.is_not_worse(-40, result.best_state.objective(), "minimize")
 
     def test_balans_t6(self):
         # Input

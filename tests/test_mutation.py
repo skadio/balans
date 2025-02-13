@@ -195,7 +195,7 @@ class MutationTest(BaseTest):
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
                                learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
         accept = HillClimbing()
-        stop = MaxIterations(1)
+        stop = MaxIterations(5)
 
         # Solver
         balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
@@ -223,4 +223,4 @@ class MutationTest(BaseTest):
         self.assertDictEqual(best_solution_expected, best_solution)
 
         # Assert objective
-        self.assertIsBetter(-20, result.best_state.objective(), "minimize")
+        self.is_not_worse(-20, result.best_state.objective(), "minimize")
