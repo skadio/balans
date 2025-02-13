@@ -35,11 +35,11 @@ class Constants(NamedTuple):
     timelimit_first_solution = 20
 
     # time limit for one iteration is ALNS, local branching has longer time because hard problem created
-    timelimit_alns_iteration = 120
+    timelimit_alns_iteration = 60
 
     # time limit for one local branching iteration.
-    # TODO paper says Each LNS iteration is limited to 1 minute, except for Local Branching with 2.5 minutes.
-    timelimit_local_branching_iteration = 600
+    # paper says Each LNS iteration is limited to 1 minute, except for Local Branching with 2.5 minutes.
+    timelimit_local_branching_iteration = 150
 
     # for Big-M constraint, currently used in Proximity
     M = 1000

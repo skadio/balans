@@ -83,7 +83,6 @@ class _SCIP(_BaseMIP):
             if skip_indexes and var.getIndex() in skip_indexes:
                 continue
 
-            # TODO: Do we always fix all the continuous variables
             # Variable has a value, and it's not in the skip set, FIX
             self.constraints.append(self.model.addCons(var == index_to_val[var.getIndex()]))
 

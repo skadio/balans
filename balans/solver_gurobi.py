@@ -35,9 +35,7 @@ class _Gurobi(_BaseMIP):
         # Set constraints, proximity z, and a flag for objective transformation
         # These are used for incremental solve and undo solve
         self.constraints = []
-        # TODO: delete this list because it only holds one variable?
-        #  SK: yes please delete since it seems a "local" variable unless required in undo()?
-        self.aux_vars = []
+        self.dins_abs_var = None
         self.proximity_z = None
         self.is_obj_transformed = False
 
@@ -86,8 +84,7 @@ class _Gurobi(_BaseMIP):
             # if skip list given, and the variable is in there, do nothing
             if skip_indexes and var.index in skip_indexes:
                 continue
-
-            # TODO: Do we always fix all the continuous variables?
+                
             # Variable has a value, and it's not in the skip set, FIX
             self.constraints.append(self.model.addConstr(var == index_to_val[var.index]))
 
@@ -102,8 +99,7 @@ class _Gurobi(_BaseMIP):
                 # In SCIP, we use abs() function
                 # In Gurobi, we split the absolute into two constraints and an additional variables.
                 # Standard way to linearize the abs function
-                abs_var = self.model.addVar(lb=0.0, name=f'abs_{var.VarName}')
-                self.aux_vars.append(abs_var)
+                self.dins_abs_var = self.model.addVar(lb=0.0, name=f'abs_{var.VarName}')
                 self.model.update()  # Update model to include new variable
                 self.constraints.append(self.model.addConstr(abs_var >= var - lp_index_to_val[index]))
                 self.constraints.append(self.model.addConstr(abs_var >= -(var - lp_index_to_val[index])))
@@ -202,8 +198,7 @@ class _Gurobi(_BaseMIP):
         if solution_limit is not None:
             self.model.Params.SolutionLimit = solution_limit
 
-        # TODO It is not clear why this is needed?
-        # Gurobi specific: Update model after removals
+        # Gurobi specific: Update model after adding constraints and variables
         self.model.update()
 
         # Optimize
@@ -226,10 +221,10 @@ class _Gurobi(_BaseMIP):
             self.model.remove(ct)
         self.constraints = []
 
-        # Gurobi-specific: Remove auxiliary variables, if any
-        for var in getattr(self, 'aux_vars', []):
-            self.model.remove(var)
-        self.aux_vars = []
+        # if dins_abs_var variable is added, remove it
+        if self.dins_abs_var:
+            self.model.remove(self.dins_abs_var)
+            self.dins_abs_var = None
 
         # Reset to original objective (random objective and proximity change objective)
         if self.is_obj_transformed:
@@ -290,14 +285,13 @@ class _Gurobi(_BaseMIP):
         return index_to_val, obj_val
 
     def solve_lp_and_undo(self) -> Tuple[Dict[Any, float], float]:
-
-        # TODO: consider using model.relax()
         # Solve LP relaxation
         int_vars = []
         bin_vars = []
         variables = self.model.getVars()
 
         # TODO: we already have is_discrete(), is_binary functions, use them here
+        # Junyang comments: the is_discrete(), is_binary is for scip specific, we probably need another two functions for gurobi
         for var in variables:
             if var.VType == "B":
                 var.VType = "C"
