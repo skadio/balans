@@ -35,9 +35,11 @@ class _Gurobi(_BaseMIP):
         # Set constraints, proximity z, and a flag for objective transformation
         # These are used for incremental solve and undo solve
         self.constraints = []
-        self.dins_abs_var = None
         self.proximity_z = None
         self.is_obj_transformed = False
+
+        # Gurobi specific: this auxilary variable is needed for Gurobi the solver to handle abs() constraint in dins operator.
+        self.dins_abs_var = None
 
     def get_obj_value(self, index_to_val) -> float:
         expr = self.org_objective_fn
@@ -72,6 +74,8 @@ class _Gurobi(_BaseMIP):
         return lp_index_to_val, lp_obj_val, lp_floating_discrete_indexes
 
     def fix_vars(self, index_to_val, skip_indexes=None) -> None:
+        # Thinking problems: Do we always fix all the continuous variables?
+        
         # If no solution given, do nothing
         if index_to_val is None:
             return
@@ -290,13 +294,11 @@ class _Gurobi(_BaseMIP):
         bin_vars = []
         variables = self.model.getVars()
 
-        # TODO: we already have is_discrete(), is_binary functions, use them here
-        # Junyang comments: the is_discrete(), is_binary is for scip specific, we probably need another two functions for gurobi
         for var in variables:
-            if var.VType == "B":
+            if is_binary(var.VType):
                 var.VType = "C"
                 bin_vars.append(var)
-            elif var.VType == "I":
+            elif is_discrete(var.VType):
                 var.VType = "C"
                 int_vars.append(var)
 

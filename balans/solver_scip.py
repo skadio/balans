@@ -69,6 +69,7 @@ class _SCIP(_BaseMIP):
         return lp_index_to_val, lp_obj_val, lp_floating_discrete_indexes
 
     def fix_vars(self, index_to_val, skip_indexes=None):
+        # Thinking problems: Do we always fix all the continuous variables?
 
         # If no solution given, do nothing
         if index_to_val is None:
@@ -243,12 +244,12 @@ class _SCIP(_BaseMIP):
         count = 0
         variables = self.model.getVars()
         for var in variables:
-            if var.vtype() == Constants.integer:
-                self.model.chgVarType(var, Constants.continuous)
-                int_index.append(count)
-            if var.vtype() == Constants.binary:
+            if is_binary(var.vtype()):
                 self.model.chgVarType(var, Constants.continuous)
                 bin_index.append(count)
+            elif is_discrete(var.vtype():
+                self.model.chgVarType(var, Constants.continuous)
+                int_index.append(count)
             count += 1
 
         self.model.optimize()
