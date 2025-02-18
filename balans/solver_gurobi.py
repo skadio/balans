@@ -295,10 +295,10 @@ class _Gurobi(_BaseMIP):
         variables = self.model.getVars()
 
         for var in variables:
-            if is_binary(var.VType):
+            if self.is_binary(var.VType):
                 var.VType = "C"
                 bin_vars.append(var)
-            elif is_discrete(var.VType):
+            elif self.is_discrete(var.VType):
                 var.VType = "C"
                 int_vars.append(var)
 
