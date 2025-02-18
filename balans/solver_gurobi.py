@@ -105,9 +105,9 @@ class _Gurobi(_BaseMIP):
                 # Standard way to linearize the abs function
                 self.dins_abs_var = self.model.addVar(lb=0.0, name=f'abs_{var.VarName}')
                 self.model.update()  # Update model to include new variable
-                self.constraints.append(self.model.addConstr(abs_var >= var - lp_index_to_val[index]))
-                self.constraints.append(self.model.addConstr(abs_var >= -(var - lp_index_to_val[index])))
-                self.constraints.append(self.model.addConstr(abs_var <= current_lp_diff))
+                self.constraints.append(self.model.addConstr(self.dins_abs_var >= var - lp_index_to_val[index]))
+                self.constraints.append(self.model.addConstr(self.dins_abs_var >= -(var - lp_index_to_val[index])))
+                self.constraints.append(self.model.addConstr(self.dins_abs_var <= current_lp_diff))
             else:
                 # fix the variable
                 self.constraints.append(self.model.addConstr(var == index_to_val[index]))
