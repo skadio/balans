@@ -244,10 +244,10 @@ class _SCIP(_BaseMIP):
         count = 0
         variables = self.model.getVars()
         for var in variables:
-            if is_binary(var.vtype()):
+            if self.is_binary(var.vtype()):
                 self.model.chgVarType(var, Constants.continuous)
                 bin_index.append(count)
-            elif is_discrete(var.vtype()):
+            elif self.is_discrete(var.vtype()):
                 self.model.chgVarType(var, Constants.continuous)
                 int_index.append(count)
             count += 1
