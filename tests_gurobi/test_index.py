@@ -6,7 +6,6 @@ from alns.select import *
 from alns.stop import *
 from mabwiser.mab import LearningPolicy
 import gurobipy as grb
-from gurobi_onboarder import init_gurobi
 
 from balans.base_instance import _Instance
 from balans.base_mip import create_mip_solver
@@ -30,9 +29,7 @@ class IndexTest(BaseTest):
         instance_path = os.path.join(Constants.DATA_MIP, instance)
 
         # Initialize Gurobi model
-
-        gurobi_venv, GUROBI_FOUND = init_gurobi.initialize_gurobi()
-        model = grb.read(instance_path,env=gurobi_venv)
+        model = grb.read(instance_path)
         model.setParam("OutputFlag", 0)
         variables = model.getVars()
 
@@ -55,8 +52,7 @@ class IndexTest(BaseTest):
         instance_path = os.path.join(Constants.DATA_MIP, instance)
 
         # Initialize Gurobi model
-        gurobi_venv, GUROBI_FOUND = init_gurobi.initialize_gurobi()
-        model = grb.read(instance_path, env=gurobi_venv)
+        model = grb.read(instance_path)
         model.setParam("OutputFlag", 0)
         variables = model.getVars()
 
