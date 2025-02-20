@@ -4,8 +4,6 @@ from typing import Tuple, Dict, Any, List
 
 import gurobipy as gp
 from gurobipy import GRB, quicksum
-from gurobi_onboarder import init_gurobi
-
 from balans.base_mip import _BaseMIP
 from balans.utils import Constants
 
@@ -16,8 +14,7 @@ class _Gurobi(_BaseMIP):
         super().__init__(seed)
 
         # Create Gurobi model
-        gurobi_venv, GUROBI_FOUND = init_gurobi.initialize_gurobi()
-        self.model = gp.read(instance_path,env=gurobi_venv)
+        self.model = gp.read(instance_path)
         self.model.Params.OutputFlag = 0
         self.model.Params.Seed = self.seed
         # self.model.Params.Presolve = 0
