@@ -1,13 +1,11 @@
 from tests.test_base import BaseTest
+import pyscipopt as scip
 
 
 class UtilsTest(BaseTest):
 
     def test_basic_scip(self):
-
-        from pyscipopt import Model
-
-        model = Model("puzzle")
+        model = scip.Model("puzzle")
         x = model.addVar(vtype="I", name="octopusses")
         y = model.addVar(vtype="I", name="turtles")
         z = model.addVar(vtype="I", name="cranes")
@@ -30,3 +28,6 @@ class UtilsTest(BaseTest):
         print((x.name, y.name, z.name), " = ", (model.getVal(x), model.getVal(y), model.getVal(z)))
 
         self.assertTrue(True)
+
+
+
