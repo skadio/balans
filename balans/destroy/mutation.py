@@ -22,13 +22,18 @@ def _mutation(current: _State, rnd_state, delta) -> _State:
     return next_state
 
 
-def mutation_25(current: _State, rnd_state) -> _State:
-    return _mutation(current, rnd_state, delta=0.25)
+def mutation_10(current: _State, rnd_state) -> _State:
+    return _mutation(current, rnd_state, delta=0.10)
 
+def mutation_20(current: _State, rnd_state) -> _State:
+    return _mutation(current, rnd_state, delta=0.20)
+
+def mutation_30(current: _State, rnd_state) -> _State:
+    return _mutation(current, rnd_state, delta=0.30)
+
+def mutation_40(current: _State, rnd_state) -> _State:
+    return _mutation(current, rnd_state, delta=0.40)
 
 def mutation_50(current: _State, rnd_state) -> _State:
     return _mutation(current, rnd_state, delta=0.50)
 
-
-def mutation_75(current: _State, rnd_state) -> _State:
-    return _mutation(current, rnd_state, delta=0.75)

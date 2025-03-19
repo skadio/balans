@@ -27,10 +27,17 @@ def _local_branching(current: _State, rnd_state, delta) -> _State:
 def local_branching_10(current: _State, rnd_state) -> _State:
     return _local_branching(current, rnd_state, delta=0.10)
 
+def local_branching_20(current: _State, rnd_state) -> _State:
+    return _local_branching(current, rnd_state, delta=0.20)
 
-def local_branching_25(current: _State, rnd_state) -> _State:
-    return _local_branching(current, rnd_state, delta=0.25)
+def local_branching_30(current: _State, rnd_state) -> _State:
+    return _local_branching(current, rnd_state, delta=0.30)
 
+def local_branching_40(current: _State, rnd_state) -> _State:
+    return _local_branching(current, rnd_state, delta=0.40)
 
 def local_branching_50(current: _State, rnd_state) -> _State:
     return _local_branching(current, rnd_state, delta=0.50)
+
+
+

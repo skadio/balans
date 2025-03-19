@@ -16,13 +16,13 @@ from balans.base_mip import create_mip_solver
 from balans.base_state import _State
 from balans.destroy.crossover import crossover
 from balans.destroy.dins import dins
-from balans.destroy.local_branching import local_branching_10, local_branching_25, local_branching_50
+from balans.destroy.local_branching import local_branching_10, local_branching_20, local_branching_30, local_branching_40, local_branching_50
 from balans.destroy.local_branching_relax import local_branching_relax_10, local_branching_relax_25
-from balans.destroy.mutation import mutation_25, mutation_50, mutation_75
-from balans.destroy.proximity import proximity_05, proximity_15, proximity_30
+from balans.destroy.mutation import mutation_10, mutation_20, mutation_30, mutation_40, mutation_50
+from balans.destroy.proximity import proximity_10, proximity_20, proximity_30
 from balans.destroy.random_objective import random_objective
-from balans.destroy.rens import rens_25, rens_50, rens_75
-from balans.destroy.rins import rins_25, rins_50, rins_75
+from balans.destroy.rens import rens_10, rens_20, rens_30, rens_40, rens_50
+from balans.destroy.rins import rins_10, rins_20, rins_30, rins_40, rins_50
 from balans.repair.repair import repair
 from balans.utils import Constants, check_false, check_true, create_rng
 
@@ -31,22 +31,36 @@ class DestroyOperators(NamedTuple):
     Crossover = crossover
     Dins = dins
     Local_Branching_10 = local_branching_10
-    Local_Branching_25 = local_branching_25
+    Local_Branching_20 = local_branching_20
+    Local_Branching_30 = local_branching_30
+    Local_Branching_40 = local_branching_40
     Local_Branching_50 = local_branching_50
+
     Local_Branching_Relax_10 = local_branching_relax_10
     Local_Branching_Relax_25 = local_branching_relax_25
-    Mutation_25 = mutation_25
+
+    Mutation_10 = mutation_10
+    Mutation_20 = mutation_20
+    Mutation_30 = mutation_30
+    Mutation_40 = mutation_40
     Mutation_50 = mutation_50
-    Mutation_75 = mutation_75
-    Proximity_05 = proximity_05
-    Proximity_15 = proximity_15
+
+    Proximity_10 = proximity_10
+    Proximity_20 = proximity_20
     Proximity_30 = proximity_30
-    Rens_25 = rens_25
+
+    Rens_10 = rens_10
+    Rens_20 = rens_20
+    Rens_30 = rens_30
+    Rens_40 = rens_40
     Rens_50 = rens_50
-    Rens_75 = rens_75
-    Rins_25 = rins_25
+
+    Rins_10 = rins_10
+    Rins_20 = rins_20
+    Rins_30 = rins_30
+    Rins_40 = rins_40
     Rins_50 = rins_50
-    Rins_75 = rins_75
+
     Random_Objective = random_objective
 
 
@@ -58,22 +72,30 @@ class RepairOperators(NamedTuple):
 DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Dins),
                type(DestroyOperators.Local_Branching_10),
-               type(DestroyOperators.Local_Branching_25),
+               type(DestroyOperators.Local_Branching_20),
+               type(DestroyOperators.Local_Branching_30),
+               type(DestroyOperators.Local_Branching_40),
                type(DestroyOperators.Local_Branching_50),
                type(DestroyOperators.Local_Branching_Relax_10),
                type(DestroyOperators.Local_Branching_Relax_25),
-               type(DestroyOperators.Mutation_25),
+               type(DestroyOperators.Mutation_10),
+               type(DestroyOperators.Mutation_20),
+               type(DestroyOperators.Mutation_30),
+               type(DestroyOperators.Mutation_40),
                type(DestroyOperators.Mutation_50),
-               type(DestroyOperators.Mutation_75),
-               type(DestroyOperators.Proximity_05),
-               type(DestroyOperators.Proximity_15),
+               type(DestroyOperators.Proximity_10),
+               type(DestroyOperators.Proximity_20),
                type(DestroyOperators.Proximity_30),
-               type(DestroyOperators.Rens_25),
+               type(DestroyOperators.Rens_10),
+               type(DestroyOperators.Rens_20),
+               type(DestroyOperators.Rens_30),
+               type(DestroyOperators.Rens_40),
                type(DestroyOperators.Rens_50),
-               type(DestroyOperators.Rens_75),
-               type(DestroyOperators.Rins_25),
+               type(DestroyOperators.Rins_10),
+               type(DestroyOperators.Rins_20),
+               type(DestroyOperators.Rins_30),
+               type(DestroyOperators.Rins_40),
                type(DestroyOperators.Rins_50),
-               type(DestroyOperators.Rins_75),
                type(DestroyOperators.Random_Objective))
 
 RepairType = (type(RepairOperators.Repair))
@@ -234,13 +256,14 @@ class Balans:
     @staticmethod
     def _is_local_branching(op):
         return (op == DestroyOperators.Local_Branching_10 or
-                op == DestroyOperators.Local_Branching_25 or
+                op == DestroyOperators.Local_Branching_20 or
+                op == DestroyOperators.Local_Branching_30 or
+                op == DestroyOperators.Local_Branching_40 or
                 op == DestroyOperators.Local_Branching_50)
-
     @staticmethod
     def _is_proximity(op):
-        return (op == DestroyOperators.Proximity_05 or
-                op == DestroyOperators.Proximity_15 or
+        return (op == DestroyOperators.Proximity_10 or
+                op == DestroyOperators.Proximity_20 or
                 op == DestroyOperators.Proximity_30)
 
     def _set_alns_operators(self):

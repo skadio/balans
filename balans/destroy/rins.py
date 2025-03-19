@@ -30,13 +30,17 @@ def _rins(current: _State, rnd_state, delta) -> _State:
     return next_state
 
 
-def rins_25(current: _State, rnd_state) -> _State:
-    return _rins(current, rnd_state, delta=0.25)
+def rins_10(current: _State, rnd_state) -> _State:
+    return _rins(current, rnd_state, delta=0.10)
 
+def rins_20(current: _State, rnd_state) -> _State:
+    return _rins(current, rnd_state, delta=0.20)
+
+def rins_30(current: _State, rnd_state) -> _State:
+    return _rins(current, rnd_state, delta=0.30)
+
+def rins_40(current: _State, rnd_state) -> _State:
+    return _rins(current, rnd_state, delta=0.40)
 
 def rins_50(current: _State, rnd_state) -> _State:
     return _rins(current, rnd_state, delta=0.50)
-
-
-def rins_75(current: _State, rnd_state) -> _State:
-    return _rins(current, rnd_state, delta=0.75)
