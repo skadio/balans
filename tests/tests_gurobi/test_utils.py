@@ -1,15 +1,12 @@
 from tests.test_base import BaseTest
 import gurobipy as grb
-from gurobi_onboarder import init_gurobi
 
 class UtilsTest(BaseTest):
 
     def test_basic_gurobi(self):
 
-        gurobi_venv, GUROBI_FOUND = init_gurobi.initialize_gurobi()
-
         # Create a new model
-        m = grb.Model(env=gurobi_venv)
+        m = grb.Model()
         m.setParam("OutputFlag", 0)
 
         # Create variables
