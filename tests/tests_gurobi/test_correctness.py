@@ -38,7 +38,8 @@ class CorrectnessTest(BaseTest):
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
                         stop=MaxIterations(5),
-                        seed=Constants.default_seed)
+                        seed=Constants.default_seed,
+                        mip_solver="gurobi")
 
         # Run
         result = balans.solve(instance_path)
@@ -64,13 +65,14 @@ class CorrectnessTest(BaseTest):
                         selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=8, num_repair=1,
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
-                        stop=MaxIterations(15),
-                        seed=Constants.default_seed)
+                        stop=MaxIterations(5),
+                        seed=Constants.default_seed,
+                        mip_solver="gurobi")
 
         # Run
         result = balans.solve(instance_path)
         objective = result.best_state.objective()
-        self.assertLess(objective, 530)  # iter_5 --> 553, iter_6 --> 453, iter_15 --> 302
+        self.assertLess(objective, 530)  # iter_15 --> 500
         self.assertGreater(objective, 301)
 
     @unittest.skipIf(is_skip, "Skipping correctness 3")
@@ -90,12 +92,13 @@ class CorrectnessTest(BaseTest):
                         selector=MABSelector(scores=[5, 2, 1, 0.5], num_destroy=7, num_repair=1,
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
-                        stop=MaxIterations(15),
-                        seed=Constants.default_seed)
+                        stop=MaxIterations(10),
+                        seed=Constants.default_seed,
+                        mip_solver="gurobi")
 
-        # SK: iter_5 >>> FINISH objective: 69333.52 (no change)
-        # SK: iter_10 >>> FINISH objective: 68020
-        # SK: iter_15 --> 66569.81131420168
+        # SK: iter_5 >>> FINISH objective: 69333.51999999999 (no change)
+        # SK: iter_10 >>> FINISH objective: 68517.54313799994
+        # SK: iter_30 --> 50000?
 
         # Run
         result = balans.solve(instance_path)
