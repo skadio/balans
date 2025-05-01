@@ -28,6 +28,3 @@ class UtilsTest(BaseTest):
         print((x.name, y.name, z.name), " = ", (model.getVal(x), model.getVal(y), model.getVal(z)))
 
         self.assertTrue(True)
-
-
-

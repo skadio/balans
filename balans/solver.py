@@ -16,13 +16,13 @@ from balans.base_mip import create_mip_solver
 from balans.base_state import _State
 from balans.destroy.crossover import crossover
 from balans.destroy.dins import dins
-from balans.destroy.local_branching import local_branching_10, local_branching_20, local_branching_30, local_branching_40, local_branching_50
+from balans.destroy.local_branching import local_branching_05, local_branching_10, local_branching_15, local_branching_20, local_branching_25, local_branching_30, local_branching_35, local_branching_40,  local_branching_45,  local_branching_50, local_branching_55,  local_branching_60,  local_branching_65,  local_branching_70,  local_branching_75,  local_branching_80, local_branching_85,  local_branching_90,  local_branching_95
 from balans.destroy.local_branching_relax import local_branching_relax_10, local_branching_relax_25
-from balans.destroy.mutation import mutation_10, mutation_20, mutation_30, mutation_40, mutation_50
-from balans.destroy.proximity import proximity_10, proximity_20, proximity_30
+from balans.destroy.mutation import mutation_05, mutation_10, mutation_15, mutation_20, mutation_25, mutation_30, mutation_35, mutation_40, mutation_45, mutation_50, mutation_55, mutation_60, mutation_65, mutation_70, mutation_75, mutation_80, mutation_85, mutation_90, mutation_95
+from balans.destroy.proximity import proximity_05, proximity_10, proximity_15, proximity_20, proximity_25, proximity_30, proximity_35, proximity_40, proximity_45, proximity_50, proximity_55, proximity_60, proximity_65, proximity_70, proximity_75, proximity_80, proximity_85, proximity_90, proximity_95
 from balans.destroy.random_objective import random_objective
-from balans.destroy.rens import rens_10, rens_20, rens_30, rens_40, rens_50
-from balans.destroy.rins import rins_10, rins_20, rins_30, rins_40, rins_50
+from balans.destroy.rens import rens_05, rens_10, rens_15, rens_20, rens_25, rens_30, rens_35, rens_40, rens_45, rens_50, rens_55, rens_60, rens_65, rens_70, rens_75, rens_80, rens_85, rens_90, rens_95
+from balans.destroy.rins import rins_05, rins_10, rins_15, rins_20, rins_25, rins_30, rins_35, rins_40, rins_45, rins_50, rins_55, rins_60, rins_65, rins_70, rins_75, rins_80, rins_85, rins_90, rins_95
 from balans.repair.repair import repair
 from balans.utils import Constants, check_false, check_true, create_rng
 
@@ -30,36 +30,108 @@ from balans.utils import Constants, check_false, check_true, create_rng
 class DestroyOperators(NamedTuple):
     Crossover = crossover
     Dins = dins
+    Local_Branching_05 = local_branching_05
     Local_Branching_10 = local_branching_10
+    Local_Branching_15 = local_branching_15
     Local_Branching_20 = local_branching_20
+    Local_Branching_25 = local_branching_25
     Local_Branching_30 = local_branching_30
+    Local_Branching_35 = local_branching_35
     Local_Branching_40 = local_branching_40
+    Local_Branching_45 = local_branching_45
     Local_Branching_50 = local_branching_50
+    Local_Branching_55 = local_branching_55
+    Local_Branching_60 = local_branching_60
+    Local_Branching_65 = local_branching_65
+    Local_Branching_70 = local_branching_70
+    Local_Branching_75 = local_branching_75
+    Local_Branching_80 = local_branching_80
+    Local_Branching_85 = local_branching_85
+    Local_Branching_90 = local_branching_90
+    Local_Branching_95 = local_branching_95
 
     Local_Branching_Relax_10 = local_branching_relax_10
     Local_Branching_Relax_25 = local_branching_relax_25
 
+    Mutation_05 = mutation_05
     Mutation_10 = mutation_10
+    Mutation_15 = mutation_15
     Mutation_20 = mutation_20
+    Mutation_25 = mutation_25
     Mutation_30 = mutation_30
+    Mutation_35 = mutation_35
     Mutation_40 = mutation_40
+    Mutation_45 = mutation_45
     Mutation_50 = mutation_50
+    Mutation_55 = mutation_55
+    Mutation_60 = mutation_60
+    Mutation_65 = mutation_65
+    Mutation_70 = mutation_70
+    Mutation_75 = mutation_75
+    Mutation_80 = mutation_80
+    Mutation_85 = mutation_85
+    Mutation_90 = mutation_90
+    Mutation_95 = mutation_95
 
+    Proximity_05 = proximity_05
     Proximity_10 = proximity_10
+    Proximity_15 = proximity_15
     Proximity_20 = proximity_20
+    Proximity_25 = proximity_25
     Proximity_30 = proximity_30
+    Proximity_35 = proximity_35
+    Proximity_40 = proximity_40
+    Proximity_45 = proximity_45
+    Proximity_50 = proximity_50
+    Proximity_55 = proximity_55
+    Proximity_60 = proximity_60
+    Proximity_65 = proximity_65
+    Proximity_70 = proximity_70
+    Proximity_75 = proximity_75
+    Proximity_80 = proximity_80
+    Proximity_85 = proximity_85
+    Proximity_90 = proximity_90
+    Proximity_95 = proximity_95
 
+    Rens_05 = rens_05
     Rens_10 = rens_10
+    Rens_15 = rens_15
     Rens_20 = rens_20
+    Rens_25 = rens_25
     Rens_30 = rens_30
+    Rens_35 = rens_35
     Rens_40 = rens_40
+    Rens_45 = rens_45
     Rens_50 = rens_50
+    Rens_55 = rens_55
+    Rens_60 = rens_60
+    Rens_65 = rens_65
+    Rens_70 = rens_70
+    Rens_75 = rens_75
+    Rens_80 = rens_80
+    Rens_85 = rens_85
+    Rens_90 = rens_90
+    Rens_95 = rens_95
 
+    Rins_05 = rins_05
     Rins_10 = rins_10
+    Rins_15 = rins_15
     Rins_20 = rins_20
+    Rins_25 = rins_25
     Rins_30 = rins_30
+    Rins_35 = rins_35
     Rins_40 = rins_40
+    Rins_45 = rins_45
     Rins_50 = rins_50
+    Rins_55 = rins_55
+    Rins_60 = rins_60
+    Rins_65 = rins_65
+    Rins_70 = rins_70
+    Rins_75 = rins_75
+    Rins_80 = rins_80
+    Rins_85 = rins_85
+    Rins_90 = rins_90
+    Rins_95 = rins_95
 
     Random_Objective = random_objective
 
@@ -71,31 +143,103 @@ class RepairOperators(NamedTuple):
 # Type Declarations
 DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Dins),
+               type(DestroyOperators.Local_Branching_05),
                type(DestroyOperators.Local_Branching_10),
+               type(DestroyOperators.Local_Branching_15),
                type(DestroyOperators.Local_Branching_20),
+               type(DestroyOperators.Local_Branching_25),
                type(DestroyOperators.Local_Branching_30),
+               type(DestroyOperators.Local_Branching_35),
                type(DestroyOperators.Local_Branching_40),
+               type(DestroyOperators.Local_Branching_45),
                type(DestroyOperators.Local_Branching_50),
+               type(DestroyOperators.Local_Branching_55),
+               type(DestroyOperators.Local_Branching_60),
+               type(DestroyOperators.Local_Branching_65),
+               type(DestroyOperators.Local_Branching_70),
+               type(DestroyOperators.Local_Branching_75),
+               type(DestroyOperators.Local_Branching_80),
+               type(DestroyOperators.Local_Branching_85),
+               type(DestroyOperators.Local_Branching_90),
+               type(DestroyOperators.Local_Branching_95),
                type(DestroyOperators.Local_Branching_Relax_10),
                type(DestroyOperators.Local_Branching_Relax_25),
+               type(DestroyOperators.Mutation_05),
                type(DestroyOperators.Mutation_10),
+               type(DestroyOperators.Mutation_15),
                type(DestroyOperators.Mutation_20),
+               type(DestroyOperators.Mutation_25),
                type(DestroyOperators.Mutation_30),
+               type(DestroyOperators.Mutation_35),
                type(DestroyOperators.Mutation_40),
+               type(DestroyOperators.Mutation_45),
                type(DestroyOperators.Mutation_50),
+               type(DestroyOperators.Mutation_55),
+               type(DestroyOperators.Mutation_60),
+               type(DestroyOperators.Mutation_65),
+               type(DestroyOperators.Mutation_70),
+               type(DestroyOperators.Mutation_75),
+               type(DestroyOperators.Mutation_80),
+               type(DestroyOperators.Mutation_85),
+               type(DestroyOperators.Mutation_90),
+               type(DestroyOperators.Mutation_95),
+               type(DestroyOperators.Proximity_05),
                type(DestroyOperators.Proximity_10),
+               type(DestroyOperators.Proximity_15),
                type(DestroyOperators.Proximity_20),
+               type(DestroyOperators.Proximity_25),
                type(DestroyOperators.Proximity_30),
+               type(DestroyOperators.Proximity_35),
+               type(DestroyOperators.Proximity_40),
+               type(DestroyOperators.Proximity_45),
+               type(DestroyOperators.Proximity_50),
+               type(DestroyOperators.Proximity_55),
+               type(DestroyOperators.Proximity_60),
+               type(DestroyOperators.Proximity_65),
+               type(DestroyOperators.Proximity_70),
+               type(DestroyOperators.Proximity_75),
+               type(DestroyOperators.Proximity_80),
+               type(DestroyOperators.Proximity_85),
+               type(DestroyOperators.Proximity_90),
+               type(DestroyOperators.Proximity_95),
+               type(DestroyOperators.Rens_05),
                type(DestroyOperators.Rens_10),
+               type(DestroyOperators.Rens_15),
                type(DestroyOperators.Rens_20),
+               type(DestroyOperators.Rens_25),
                type(DestroyOperators.Rens_30),
+               type(DestroyOperators.Rens_35),
                type(DestroyOperators.Rens_40),
+               type(DestroyOperators.Rens_45),
                type(DestroyOperators.Rens_50),
+               type(DestroyOperators.Rens_55),
+               type(DestroyOperators.Rens_60),
+               type(DestroyOperators.Rens_65),
+               type(DestroyOperators.Rens_70),
+               type(DestroyOperators.Rens_75),
+               type(DestroyOperators.Rens_80),
+               type(DestroyOperators.Rens_85),
+               type(DestroyOperators.Rens_90),
+               type(DestroyOperators.Rens_95),
+               type(DestroyOperators.Rins_05),
                type(DestroyOperators.Rins_10),
+               type(DestroyOperators.Rins_15),
                type(DestroyOperators.Rins_20),
+               type(DestroyOperators.Rins_25),
                type(DestroyOperators.Rins_30),
+               type(DestroyOperators.Rins_35),
                type(DestroyOperators.Rins_40),
+               type(DestroyOperators.Rins_45),
                type(DestroyOperators.Rins_50),
+               type(DestroyOperators.Rins_55),
+               type(DestroyOperators.Rins_60),
+               type(DestroyOperators.Rins_65),
+               type(DestroyOperators.Rins_70),
+               type(DestroyOperators.Rins_75),
+               type(DestroyOperators.Rins_80),
+               type(DestroyOperators.Rins_85),
+               type(DestroyOperators.Rins_90),
+               type(DestroyOperators.Rins_95),
                type(DestroyOperators.Random_Objective))
 
 RepairType = (type(RepairOperators.Repair))
@@ -255,16 +399,46 @@ class Balans:
 
     @staticmethod
     def _is_local_branching(op):
-        return (op == DestroyOperators.Local_Branching_10 or
+        return (op == DestroyOperators.Local_Branching_05 or
+                op == DestroyOperators.Local_Branching_10 or
+                op == DestroyOperators.Local_Branching_15 or
                 op == DestroyOperators.Local_Branching_20 or
+                op == DestroyOperators.Local_Branching_25 or
                 op == DestroyOperators.Local_Branching_30 or
+                op == DestroyOperators.Local_Branching_35 or
                 op == DestroyOperators.Local_Branching_40 or
-                op == DestroyOperators.Local_Branching_50)
+                op == DestroyOperators.Local_Branching_45 or
+                op == DestroyOperators.Local_Branching_50 or
+                op == DestroyOperators.Local_Branching_55 or
+                op == DestroyOperators.Local_Branching_60 or
+                op == DestroyOperators.Local_Branching_65 or
+                op == DestroyOperators.Local_Branching_70 or
+                op == DestroyOperators.Local_Branching_75 or
+                op == DestroyOperators.Local_Branching_80 or
+                op == DestroyOperators.Local_Branching_85 or
+                op == DestroyOperators.Local_Branching_90 or
+                op == DestroyOperators.Local_Branching_95)
     @staticmethod
     def _is_proximity(op):
-        return (op == DestroyOperators.Proximity_10 or
+        return (op == DestroyOperators.Proximity_05 or
+                op == DestroyOperators.Proximity_10 or
+                op == DestroyOperators.Proximity_15 or
                 op == DestroyOperators.Proximity_20 or
-                op == DestroyOperators.Proximity_30)
+                op == DestroyOperators.Proximity_25 or
+                op == DestroyOperators.Proximity_30 or
+                op == DestroyOperators.Proximity_35 or
+                op == DestroyOperators.Proximity_40 or
+                op == DestroyOperators.Proximity_45 or
+                op == DestroyOperators.Proximity_50 or
+                op == DestroyOperators.Proximity_55 or
+                op == DestroyOperators.Proximity_60 or
+                op == DestroyOperators.Proximity_65 or
+                op == DestroyOperators.Proximity_70 or
+                op == DestroyOperators.Proximity_75 or
+                op == DestroyOperators.Proximity_80 or
+                op == DestroyOperators.Proximity_85 or
+                op == DestroyOperators.Proximity_90 or
+                op == DestroyOperators.Proximity_95)
 
     def _set_alns_operators(self):
 
