@@ -37,7 +37,7 @@ class _Gurobi(_BaseMIP):
         self.proximity_z = None
         self.is_obj_transformed = False
 
-        # Gurobi specific: this auxilary variable is needed for Gurobi the solver to handle abs() constraint in dins operator.
+        # Gurobi specific: this auxiliary var is needed for Gurobi to handle abs() constraint in dins operator.
         self.dins_abs_var = None
 
     def get_obj_value(self, index_to_val) -> float:

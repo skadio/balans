@@ -1,11 +1,12 @@
-# Adaptive large neigborhood
+# ALNS for adaptive large neigborhood
 from alns.accept import SimulatedAnnealing
 from alns.select import MABSelector
 from alns.stop import MaxIterations
-# Contextual multi-armed bandits
+
+# MABWiser for contextual multi-armed bandits
 from mabwiser.mab import LearningPolicy
 
-# Meta-solver built on top of SCIP
+# Balans meta-solver for solving mixed integer programming problems
 from balans.solver import Balans, DestroyOperators, RepairOperators
 
 # Destroy operators
@@ -56,7 +57,7 @@ balans = Balans(destroy_ops=destroy_ops,
                 stop=stop)
 
 # Run
-instance_path = "data/miplib/noswot.mps"  # data/miplib/30n20b8.mps"
+instance_path = "tests/data/noswot.mps"
 result = balans.solve(instance_path)
 
 print("Best solution:", result.best_state.solution())

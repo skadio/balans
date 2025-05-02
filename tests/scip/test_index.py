@@ -26,7 +26,7 @@ class IndexTest(BaseTest):
 
         # Input
         instance = "neos-5140963-mincio.mps"
-        instance_path = os.path.join(Constants.DATA_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         model = Model()
         model.hideOutput()
@@ -48,7 +48,7 @@ class IndexTest(BaseTest):
         # Testing whether we get the correct index set
         # Input
         instance = "neos-5140963-mincio.mps"
-        instance_path = os.path.join(Constants.DATA_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         model = Model()
         model.hideOutput()
@@ -70,7 +70,7 @@ class IndexTest(BaseTest):
         # Testing whether we get the correct index set
         # Input
         instance = "model.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -94,7 +94,7 @@ class IndexTest(BaseTest):
 
         # Input
         instance = "model.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456

@@ -20,7 +20,7 @@ class RensTest(BaseTest):
     def test_rens_t1(self):
         # Input
         instance = "model.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -44,8 +44,8 @@ class RensTest(BaseTest):
 
     def test_rens_t2(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -69,8 +69,8 @@ class RensTest(BaseTest):
 
     def test_rens_t3(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -106,8 +106,8 @@ class RensTest(BaseTest):
 
     def test_rens_t4(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed

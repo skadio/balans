@@ -20,7 +20,7 @@ class CrossoverTest(BaseTest):
     def test_crossover(self):
         # Input
         instance = "noswot.mps"
-        instance_path = os.path.join(Constants.DATA_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -46,7 +46,7 @@ class CrossoverTest(BaseTest):
     def test_crossover_t1(self):
         # Input
         instance = "model.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -70,8 +70,8 @@ class CrossoverTest(BaseTest):
 
     def test_crossover_t2(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -95,8 +95,8 @@ class CrossoverTest(BaseTest):
 
     def test_crossover_t3(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -140,8 +140,8 @@ class CrossoverTest(BaseTest):
 
     def test_crossover_t4(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -188,8 +188,8 @@ class CrossoverTest(BaseTest):
 
     def test_crossover_t4_with_warm_start(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456

@@ -9,10 +9,9 @@ class LPSolTest(BaseTest):
 
     def test_lp_t1(self):
         # Input
-
         # 3 DISCRETE DECISION VARIABLES > model.cip
         instance = "model.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         mip = create_mip_solver(instance_path, 123, mip_solver_str="gurobi")
 
@@ -23,28 +22,24 @@ class LPSolTest(BaseTest):
 
     def test_lp_t2(self):
         # Input
-
-        # 3 DISCRETE DECISION VARIABLES > model.cip
-        instance = "10teams.mps"
-        instance_path = os.path.join(Constants.DATA_MIP, instance)
+        instance = "gen-ip054.mps"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         mip = create_mip_solver(instance_path, 123, mip_solver_str="gurobi")
 
         # LP solution
         lp_index_to_val, lp_obj_val = mip.solve_lp_and_undo()
 
-        self.assertAlmostEqual(lp_obj_val, 917)
+        self.assertAlmostEqual(lp_obj_val, 6765.209042644034)
 
     def test_lp_t3(self):
         # Input
-
-        # 3 DISCRETE DECISION VARIABLES > model.cip
-        instance = "30n20b8.mps"
-        instance_path = os.path.join(Constants.DATA_MIP, instance)
+        instance = "pk1.mps"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         mip = create_mip_solver(instance_path, 123, mip_solver_str="gurobi")
 
         # LP solution
         lp_index_to_val, lp_obj_val = mip.solve_lp_and_undo()
 
-        self.assertAlmostEqual(lp_obj_val, 1.5664076455877098)
+        self.assertAlmostEqual(lp_obj_val, 0.0)

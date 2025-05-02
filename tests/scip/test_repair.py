@@ -16,7 +16,7 @@ class RepairTest(BaseTest):
 
         # Input
         instance = "neos-5140963-mincio.mps"
-        instance_path = os.path.join(Constants.DATA_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456

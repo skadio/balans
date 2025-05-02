@@ -10,15 +10,15 @@ The hybrid framework integrates [MABWiser](https://github.com/fidelity/mabwiser/
 ## Quick Start
 
 ```python
-# Adaptive large neigborhood
+# ALNS for adaptive large neigborhood search
 from alns.select import MABSelector
 from alns.accept import HillClimbing, SimulatedAnnealing
 from alns.stop import MaxIterations, MaxRuntime
 
-# Contextual multi-armed bandits
+# MABWiser for contextual multi-armed bandits
 from mabwiser.mab import LearningPolicy
 
-# Meta-solver built on top of SCIP
+# Balans meta-solver for solving mixed integer programming problems
 from balans.solver import Balans, DestroyOperators, RepairOperators
 
 # Destroy operators
@@ -34,7 +34,7 @@ destroy_ops = [DestroyOperators.Crossover,
 # Repair operators
 repair_ops = [RepairOperators.Repair]
 
-# Rewards
+# Rewards for online learning feedback loop
 best, better, accept, reject = 4, 3, 2, 1
 
 # Bandit selector
@@ -44,7 +44,7 @@ selector = MABSelector(scores=[best, better, accept, reject],
                        learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50))
 
 # Acceptance criterion
-# accept = HillClimbing()
+# accept = HillClimbing() # for pure exploitation 
 accept = SimulatedAnnealing(start_temperature=20, end_temperature=1, step=0.1)
 
 # Stopping condition
@@ -59,10 +59,11 @@ balans = Balans(destroy_ops=destroy_ops,
                 stop=stop,
                 mip_solver="scip") # "gurobi"
 
-# Run
+# Run a mip instance to retrieve results 
 instance_path = "data/miplib/noswot.mps"
 result = balans.solve(instance_path)
 
+# Results of the best found solution and the objective
 print("Best solution:", result.best_state.solution())
 print("Best solution objective:", result.best_state.objective())
 ```
@@ -99,9 +100,28 @@ $ cd balans
 $ python -m unittest discover tests
 ```
 
+## Citation
+
+If you use Balans in a publication, please cite it as:
+
+```bibtex
+    @inproceedings{balans25,
+      author       = {Junyang Cai and
+                      Serdar Kadioglu and
+                      Bistra Dilkina},
+      title        = {BALANS: Multi-Armed Bandits-based Adaptive Large Neighborhood Search for Mixed-Integer Programming Problems},
+      booktitle    = {Proceedings of the Thirty-Fourth International Joint Conference on
+                      Artificial Intelligence, {IJCAI} 2025, Montreal, Canada, August 16-22,
+                      2025},
+      pages        = {xx--xx},
+      publisher    = {ijcai.org},
+      year         = {2025},
+      url          = {https://www.ijcai.org/proceedings/2025/xx},
+    }
+```
+
 ## License
 
 Balans is licensed under the [Apache License 2.0](LICENSE).
-
 
 <br>

@@ -16,20 +16,31 @@ from balans.base_mip import create_mip_solver
 from balans.base_state import _State
 from balans.destroy.crossover import crossover
 from balans.destroy.dins import dins
-from balans.destroy.local_branching import local_branching_05, local_branching_10, local_branching_15, local_branching_20, local_branching_25, local_branching_30, local_branching_35, local_branching_40,  local_branching_45,  local_branching_50, local_branching_55,  local_branching_60,  local_branching_65,  local_branching_70,  local_branching_75,  local_branching_80, local_branching_85,  local_branching_90,  local_branching_95
-from balans.destroy.local_branching_relax import local_branching_relax_10, local_branching_relax_25
-from balans.destroy.mutation import mutation_05, mutation_10, mutation_15, mutation_20, mutation_25, mutation_30, mutation_35, mutation_40, mutation_45, mutation_50, mutation_55, mutation_60, mutation_65, mutation_70, mutation_75, mutation_80, mutation_85, mutation_90, mutation_95
-from balans.destroy.proximity import proximity_05, proximity_10, proximity_15, proximity_20, proximity_25, proximity_30, proximity_35, proximity_40, proximity_45, proximity_50, proximity_55, proximity_60, proximity_65, proximity_70, proximity_75, proximity_80, proximity_85, proximity_90, proximity_95
+from balans.destroy.local_branching import local_branching_05, local_branching_10, local_branching_15, \
+    local_branching_20, local_branching_25, local_branching_30, local_branching_35, local_branching_40, \
+    local_branching_45, local_branching_50, local_branching_55, local_branching_60, local_branching_65, \
+    local_branching_70, local_branching_75, local_branching_80, local_branching_85, local_branching_90, \
+    local_branching_95
+from balans.destroy.mutation import mutation_05, mutation_10, mutation_15, mutation_20, mutation_25, mutation_30, \
+    mutation_35, mutation_40, mutation_45, mutation_50, mutation_55, mutation_60, mutation_65, mutation_70, mutation_75, \
+    mutation_80, mutation_85, mutation_90, mutation_95
+from balans.destroy.proximity import proximity_05, proximity_10, proximity_15, proximity_20, proximity_25, proximity_30, \
+    proximity_35, proximity_40, proximity_45, proximity_50, proximity_55, proximity_60, proximity_65, proximity_70, \
+    proximity_75, proximity_80, proximity_85, proximity_90, proximity_95
 from balans.destroy.random_objective import random_objective
-from balans.destroy.rens import rens_05, rens_10, rens_15, rens_20, rens_25, rens_30, rens_35, rens_40, rens_45, rens_50, rens_55, rens_60, rens_65, rens_70, rens_75, rens_80, rens_85, rens_90, rens_95
-from balans.destroy.rins import rins_05, rins_10, rins_15, rins_20, rins_25, rins_30, rins_35, rins_40, rins_45, rins_50, rins_55, rins_60, rins_65, rins_70, rins_75, rins_80, rins_85, rins_90, rins_95
+from balans.destroy.rens import rens_05, rens_10, rens_15, rens_20, rens_25, rens_30, rens_35, rens_40, rens_45, \
+    rens_50, rens_55, rens_60, rens_65, rens_70, rens_75, rens_80, rens_85, rens_90, rens_95
+from balans.destroy.rins import rins_05, rins_10, rins_15, rins_20, rins_25, rins_30, rins_35, rins_40, rins_45, \
+    rins_50, rins_55, rins_60, rins_65, rins_70, rins_75, rins_80, rins_85, rins_90, rins_95
 from balans.repair.repair import repair
 from balans.utils import Constants, check_false, check_true, create_rng
 
 
 class DestroyOperators(NamedTuple):
     Crossover = crossover
+
     Dins = dins
+
     Local_Branching_05 = local_branching_05
     Local_Branching_10 = local_branching_10
     Local_Branching_15 = local_branching_15
@@ -50,8 +61,8 @@ class DestroyOperators(NamedTuple):
     Local_Branching_90 = local_branching_90
     Local_Branching_95 = local_branching_95
 
-    Local_Branching_Relax_10 = local_branching_relax_10
-    Local_Branching_Relax_25 = local_branching_relax_25
+    # Local_Branching_Relax_10 = local_branching_relax_10
+    # Local_Branching_Relax_25 = local_branching_relax_25
 
     Mutation_05 = mutation_05
     Mutation_10 = mutation_10
@@ -162,8 +173,8 @@ DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Local_Branching_85),
                type(DestroyOperators.Local_Branching_90),
                type(DestroyOperators.Local_Branching_95),
-               type(DestroyOperators.Local_Branching_Relax_10),
-               type(DestroyOperators.Local_Branching_Relax_25),
+               # type(DestroyOperators.Local_Branching_Relax_10),
+               # type(DestroyOperators.Local_Branching_Relax_25),
                type(DestroyOperators.Mutation_05),
                type(DestroyOperators.Mutation_10),
                type(DestroyOperators.Mutation_15),
@@ -418,6 +429,7 @@ class Balans:
                 op == DestroyOperators.Local_Branching_85 or
                 op == DestroyOperators.Local_Branching_90 or
                 op == DestroyOperators.Local_Branching_95)
+
     @staticmethod
     def _is_proximity(op):
         return (op == DestroyOperators.Proximity_05 or

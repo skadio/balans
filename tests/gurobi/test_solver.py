@@ -20,7 +20,7 @@ class SolverTest(BaseTest):
     def test_balans_t1(self):
         # Input
         instance = "model.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -29,7 +29,6 @@ class SolverTest(BaseTest):
                        DestroyOperators.Proximity_05,
                        DestroyOperators.Mutation_50,
                        DestroyOperators.Local_Branching_10,
-                       # DestroyOperators.Zero_Objective, # TODO: Add back zero objective when figure it out
                        DestroyOperators.Rins_25,
                        DestroyOperators.Rens_25]
 
@@ -52,8 +51,8 @@ class SolverTest(BaseTest):
 
     def test_balans_t2(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -84,8 +83,8 @@ class SolverTest(BaseTest):
 
     def test_balans_t3(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -130,8 +129,8 @@ class SolverTest(BaseTest):
 
     def test_balans_t4(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -183,8 +182,8 @@ class SolverTest(BaseTest):
 
     def test_balans_t5(self):
         # Input
-        instance = "test5.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model3.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -229,7 +228,7 @@ class SolverTest(BaseTest):
     def test_balans_t6(self):
         # Input
         instance = "model.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456

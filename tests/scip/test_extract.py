@@ -10,8 +10,8 @@ class IndexExtractionTest(BaseTest):
 
     def test_extract(self):
         # Input
-        instance = "test5.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model3.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # MIP is an instance of _BaseMIP created from given mip instance
         mip = create_mip_solver(instance_path)

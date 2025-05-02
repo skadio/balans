@@ -17,14 +17,14 @@ from balans.base_state import _State
 
 #     return sorted_values, sorted_indices
 
-
+# NOTE: This is experimental, and not used for now
 def local_branching_relax(current: _State, rnd_state, delta) -> _State:
     print("*** Operator: ", "LB relax")
     print("\t Destroy current objective:", current.obj_val)
     next_state = copy.deepcopy(current)
     next_state.reset_solve_settings()
 
-    # TODO this is SCIP specific
+    # This is SCIP specific
     # variables = current.instance.mip.getVars()
     # binary_indexes = current.instance.binary_indexes
     # local_branching_size = int(len(binary_indexes) * delta)

@@ -20,7 +20,7 @@ class DinsTest(BaseTest):
     def test_dins_t1(self):
         # Input
         instance = "model.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -44,8 +44,8 @@ class DinsTest(BaseTest):
 
     def test_dins_t2(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -69,8 +69,8 @@ class DinsTest(BaseTest):
 
     def test_dins_t3(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -107,8 +107,8 @@ class DinsTest(BaseTest):
 
     def test_dins_t4(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -155,8 +155,8 @@ class DinsTest(BaseTest):
 
     def test_dins_t5(self):
         # Input
-        instance = "test5.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model3.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456

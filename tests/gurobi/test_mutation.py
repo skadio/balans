@@ -20,7 +20,7 @@ class MutationTest(BaseTest):
     def test_mutation(self):
         # Input
         instance = "noswot.mps"
-        instance_path = os.path.join(Constants.DATA_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -46,7 +46,7 @@ class MutationTest(BaseTest):
     def test_mutation_t1(self):
         # Input
         instance = "model.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -70,8 +70,8 @@ class MutationTest(BaseTest):
 
     def test_mutation_t2(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -95,8 +95,8 @@ class MutationTest(BaseTest):
 
     def test_mutation_t3(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -139,8 +139,8 @@ class MutationTest(BaseTest):
 
     def test_mutation_t4(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -185,8 +185,8 @@ class MutationTest(BaseTest):
 
     def test_mutation_t4_with_warm_start(self):
         # Input
-        instance = "test2.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model2.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456

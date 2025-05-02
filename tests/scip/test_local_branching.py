@@ -19,8 +19,8 @@ class LocalBranchingTest(BaseTest):
 
     def test_local_branching_t1(self):
         # Input
-        instance = "test5.13.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model4.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456
@@ -55,8 +55,8 @@ class LocalBranchingTest(BaseTest):
 
     def test_local_branching_classic_t2(self):
         # Input
-        instance = "test5.13.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model4.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
         print(instance_path)
 
         # Parameters
@@ -92,8 +92,8 @@ class LocalBranchingTest(BaseTest):
 
     def test_local_branching_v2_t3(self):
         # Input
-        instance = "test5.13.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model4.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456

@@ -45,17 +45,13 @@ class Constants(NamedTuple):
     M = 1000
 
     # Data folder constants
-    _DATA_DIR_NAME = "data"
-    _DATA_DIR_MIP_NAME = _DATA_DIR_NAME + os.sep + "miplib"
-    _DATA_DIR_MIPGZ_NAME = _DATA_DIR_NAME + os.sep + "miplib_gz"
     _TEST_DIR_NAME = "tests"
-    _DATA_DIR_TOY_NAME = _TEST_DIR_NAME + os.sep + "toy"
+    _DATA_DIR_NAME = "data"
+    _TEST_DATA_DIR_NAME = _TEST_DIR_NAME + os.sep + _DATA_DIR_NAME
 
     # Data paths
     _FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-    DATA_MIP = _FILE_DIR + os.sep + ".." + os.sep + _DATA_DIR_MIP_NAME
-    DATA_MIP_GZ = _FILE_DIR + os.sep + ".." + os.sep + _DATA_DIR_MIPGZ_NAME
-    DATA_TOY = _FILE_DIR + os.sep + ".." + os.sep + _DATA_DIR_TOY_NAME
+    DATA_TEST = _FILE_DIR + os.sep + ".." + os.sep + _TEST_DATA_DIR_NAME
 
 
 def create_rng(seed):

@@ -19,8 +19,8 @@ class ProximityTest(BaseTest):
 
     def test_proximity_t1(self):
         # Input
-        instance = "test5.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model3.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = Constants.default_seed
@@ -44,8 +44,8 @@ class ProximityTest(BaseTest):
 
     def test_proximity_t2(self):
         # Input
-        instance = "test5.5.lp"
-        instance_path = os.path.join(Constants.DATA_TOY, instance)
+        instance = "model3.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # Parameters
         seed = 123456

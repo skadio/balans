@@ -14,16 +14,13 @@ from tests.test_base import BaseTest
 class CorrectnessTest(BaseTest):
     is_skip = True
 
-    # TODO: implement the exact configs/runs below
-    # to run on these instances.
-    # Best configs of Balans_Softmax and Balans_TS
-    # from the paper ran for 1 hour.
-
+    # TODO: implement the exact configs/runs below to run on these instances.
+    # Best configs of Balans_Softmax and Balans_TS from the paper ran for 1 hour.
     @unittest.skipIf(is_skip, "Skipping correctness 1")
     def test_correctness1(self):
         # Input
         instance = "50v-10.mps"
-        instance_path = os.path.join(Constants.DATA_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
         # Balans
         balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                                      DestroyOperators.Dins,
@@ -50,7 +47,7 @@ class CorrectnessTest(BaseTest):
     def test_correctness2(self):
         # Input
         instance = "30n20b8.mps"
-        instance_path = os.path.join(Constants.DATA_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
         # Balans
         balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                                      DestroyOperators.Dins,
@@ -77,7 +74,7 @@ class CorrectnessTest(BaseTest):
     def test_correctness3(self):
         # Input
         instance = "b1c1s1.mps"
-        instance_path = os.path.join(Constants.DATA_MIP, instance)
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
         # Balans
         balans = Balans(destroy_ops=[DestroyOperators.Crossover,
                                      DestroyOperators.Dins,
