@@ -4,6 +4,7 @@ from typing import Tuple, Dict, Any, List
 
 import gurobipy as gp
 from gurobipy import GRB, quicksum
+
 from balans.base_mip import _BaseMIP
 from balans.utils import Constants
 

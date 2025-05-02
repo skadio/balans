@@ -12,6 +12,8 @@ from tests.test_base import BaseTest
 
 class RepairTest(BaseTest):
 
+    BaseTest.mip_solver = Constants.gurobi_solver
+
     def test_repair(self):
 
         # Input
@@ -28,7 +30,7 @@ class RepairTest(BaseTest):
         stop = MaxIterations(100)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)

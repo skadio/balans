@@ -21,6 +21,8 @@ rnd_state = np.random.RandomState(SEED)
 
 class IndexTest(BaseTest):
 
+    BaseTest.mip_solver = Constants.scip_solver
+
     def test_cont_index_t1(self):
         # Testing whether we get the correct index set
 
@@ -78,7 +80,7 @@ class IndexTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed)
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         # Initial solution
@@ -107,7 +109,7 @@ class IndexTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)

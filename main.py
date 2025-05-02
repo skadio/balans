@@ -2,7 +2,6 @@
 from alns.accept import SimulatedAnnealing
 from alns.select import MABSelector
 from alns.stop import MaxIterations
-
 # MABWiser for contextual multi-armed bandits
 from mabwiser.mab import LearningPolicy
 

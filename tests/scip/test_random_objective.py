@@ -5,14 +5,14 @@ from alns.select import *
 from alns.stop import *
 from mabwiser.mab import LearningPolicy
 
-from balans.base_instance import _Instance
-from balans.base_state import _State
 from balans.solver import Balans, DestroyOperators, RepairOperators
 from balans.utils import Constants
 from tests.test_base import BaseTest
 
 
 class RandomObjectiveTest(BaseTest):
+
+    BaseTest.mip_solver = Constants.scip_solver
 
     def test_random_objective_t1(self):
         # Input
@@ -31,7 +31,7 @@ class RandomObjectiveTest(BaseTest):
         stop = MaxIterations(10)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -59,7 +59,7 @@ class RandomObjectiveTest(BaseTest):
         stop = MaxIterations(10)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -83,7 +83,7 @@ class RandomObjectiveTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
         # With this seed, in the firs iteration index=1 is destroy

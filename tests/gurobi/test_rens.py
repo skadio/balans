@@ -17,6 +17,8 @@ from tests.test_base import BaseTest
 
 class RensTest(BaseTest):
 
+    BaseTest.mip_solver = Constants.gurobi_solver
+
     def test_rens_t1(self):
         # Input
         instance = "model.lp"
@@ -34,7 +36,7 @@ class RensTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -58,7 +60,7 @@ class RensTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -75,7 +77,7 @@ class RensTest(BaseTest):
         # Parameters
         seed = Constants.default_seed
 
-        mip = create_mip_solver(instance_path, seed, mip_solver_str="gurobi")
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
@@ -112,7 +114,7 @@ class RensTest(BaseTest):
         # Parameters
         seed = Constants.default_seed
 
-        mip = create_mip_solver(instance_path, seed, mip_solver_str="gurobi")
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}

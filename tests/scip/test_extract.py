@@ -8,13 +8,15 @@ from tests.test_base import BaseTest
 
 class IndexExtractionTest(BaseTest):
 
+    BaseTest.mip_solver = Constants.scip_solver
+
     def test_extract(self):
         # Input
         instance = "model3.lp"
         instance_path = os.path.join(Constants.DATA_TEST, instance)
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path)
+        mip = create_mip_solver(instance_path, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         instance.initial_solve(None)

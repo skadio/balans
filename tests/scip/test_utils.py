@@ -1,8 +1,12 @@
-from tests.test_base import BaseTest
 import pyscipopt as scip
+
+from balans.utils import Constants
+from tests.test_base import BaseTest
 
 
 class UtilsTest(BaseTest):
+
+    BaseTest.mip_solver = Constants.scip_solver
 
     def test_basic_scip(self):
         model = scip.Model("puzzle")

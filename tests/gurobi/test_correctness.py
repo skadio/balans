@@ -12,6 +12,8 @@ from tests.test_base import BaseTest
 
 
 class CorrectnessTest(BaseTest):
+
+    BaseTest.mip_solver = Constants.gurobi_solver
     is_skip = True
 
     # TODO: implement the exact configs/runs below to run on these instances.
@@ -36,7 +38,7 @@ class CorrectnessTest(BaseTest):
                         accept=HillClimbing(),
                         stop=MaxIterations(5),
                         seed=Constants.default_seed,
-                        mip_solver="gurobi")
+                        mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -64,7 +66,7 @@ class CorrectnessTest(BaseTest):
                         accept=HillClimbing(),
                         stop=MaxIterations(5),
                         seed=Constants.default_seed,
-                        mip_solver="gurobi")
+                        mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -91,7 +93,7 @@ class CorrectnessTest(BaseTest):
                         accept=HillClimbing(),
                         stop=MaxIterations(10),
                         seed=Constants.default_seed,
-                        mip_solver="gurobi")
+                        mip_solver=BaseTest.mip_solver)
 
         # SK: iter_5 >>> FINISH objective: 69333.51999999999 (no change)
         # SK: iter_10 >>> FINISH objective: 68517.54313799994

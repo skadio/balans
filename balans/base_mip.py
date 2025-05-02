@@ -88,7 +88,7 @@ class _BaseMIP(metaclass=abc.ABCMeta):
 
 def create_mip_solver(instance_path: str,
                       seed: int = Constants.default_seed,
-                      mip_solver_str: str = Constants.default_solver) -> _BaseMIP:
+                      mip_solver: str = Constants.default_solver) -> _BaseMIP:
     """ Returns a mip model of the given solver type for the given instance
 
         Parameters
@@ -97,7 +97,7 @@ def create_mip_solver(instance_path: str,
             the path to mip instance
         seed: int
             the seed to pass to mip model
-        mip_solver_str : string
+        mip_solver : string
             the type of the mip model, scip or gurobi
 
         Returns
@@ -105,8 +105,10 @@ def create_mip_solver(instance_path: str,
         out : _BaseMIP
             A MIP Solver object that implements the base solver class
     """
-    from balans.solver_scip import _SCIP
     from balans.solver_gurobi import _Gurobi
-    mip_factory = {Constants.scip_solver: _SCIP, Constants.gurobi_solver: _Gurobi}
+    from balans.solver_scip import _SCIP
 
-    return mip_factory.get(mip_solver_str)(instance_path, seed)
+    mip_factory = {Constants.gurobi_solver: _Gurobi,
+                   Constants.scip_solver: _SCIP,}
+
+    return mip_factory.get(mip_solver)(instance_path, seed)

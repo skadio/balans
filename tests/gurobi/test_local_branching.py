@@ -17,6 +17,8 @@ from tests.test_base import BaseTest
 
 class LocalBranchingTest(BaseTest):
 
+    BaseTest.mip_solver = Constants.gurobi_solver
+
     def test_local_branching_t1(self):
         # Input
         instance = "model4.lp"
@@ -25,7 +27,7 @@ class LocalBranchingTest(BaseTest):
         # Parameters
         seed = 123456
 
-        mip = create_mip_solver(instance_path, seed, mip_solver_str="gurobi")
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         index_to_val = {0: 0.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
@@ -62,7 +64,7 @@ class LocalBranchingTest(BaseTest):
         # Parameters
         seed = 123456
 
-        mip = create_mip_solver(instance_path, seed, mip_solver_str="gurobi")
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         index_to_val = {0: 1.0, 1: 1.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
@@ -98,7 +100,7 @@ class LocalBranchingTest(BaseTest):
         # Parameters
         seed = 123456
 
-        mip = create_mip_solver(instance_path, seed, mip_solver_str="gurobi")
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         index_to_val = {0: 1.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}
