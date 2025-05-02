@@ -17,6 +17,8 @@ from tests.test_base import BaseTest
 
 class DinsTest(BaseTest):
 
+    BaseTest.mip_solver = Constants.scip_solver
+
     def test_dins_t1(self):
         # Input
         instance = "model.lp"
@@ -34,7 +36,7 @@ class DinsTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -58,7 +60,7 @@ class DinsTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed)
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -76,7 +78,7 @@ class DinsTest(BaseTest):
         seed = 123456
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed)
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         index_to_val = {0: -0.0, 1: 10.0, 2: 10.0, 3: 20.0, 4: 20.0}
@@ -117,7 +119,7 @@ class DinsTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed)
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         # Initial solution
@@ -162,7 +164,7 @@ class DinsTest(BaseTest):
         seed = 123456
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed)
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         index_to_val = {0: 1.0, 1: 0.0, 2: 0.0, 3: 10.0, 4: 10.0, 5: 20.0, 6: 20.0}

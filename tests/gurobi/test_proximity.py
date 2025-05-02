@@ -17,6 +17,8 @@ from tests.test_base import BaseTest
 
 class ProximityTest(BaseTest):
 
+    BaseTest.mip_solver = Constants.gurobi_solver
+
     def test_proximity_t1(self):
         # Input
         instance = "model3.lp"
@@ -33,7 +35,7 @@ class ProximityTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -50,7 +52,7 @@ class ProximityTest(BaseTest):
         # Parameters
         seed = 123456
 
-        mip = create_mip_solver(instance_path, seed, mip_solver_str="gurobi")
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         initial_index_to_val, initial_obj_val = instance.initial_solve()

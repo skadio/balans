@@ -1,11 +1,11 @@
 import os
 
+import gurobipy as grb
 import numpy as np
 from alns.accept import *
 from alns.select import *
 from alns.stop import *
 from mabwiser.mab import LearningPolicy
-import gurobipy as grb
 
 from balans.base_instance import _Instance
 from balans.base_mip import create_mip_solver
@@ -20,6 +20,8 @@ rnd_state = np.random.RandomState(SEED)
 
 
 class IndexTest(BaseTest):
+
+    BaseTest.mip_solver = Constants.gurobi_solver
 
     def test_cont_index_t1(self):
         # Testing whether we get the correct index set
@@ -80,7 +82,7 @@ class IndexTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed, mip_solver_str="gurobi")
+        mip = create_mip_solver(instance_path, seed, mip_solver=BaseTest.mip_solver)
         instance = _Instance(mip)
 
         # Initial solution
@@ -109,7 +111,7 @@ class IndexTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)

@@ -7,13 +7,15 @@ from tests.test_base import BaseTest
 
 class LPSolTest(BaseTest):
 
+    BaseTest.mip_solver = Constants.scip_solver
+
     def test_lp_t1(self):
         # Input
         # 3 DISCRETE DECISION VARIABLES > model.cip
         instance = "model.lp"
         instance_path = os.path.join(Constants.DATA_TEST, instance)
 
-        mip = create_mip_solver(instance_path, 123)
+        mip = create_mip_solver(instance_path, 123, mip_solver=BaseTest.mip_solver)
 
         # LP solution
         lp_index_to_val, lp_obj_val = mip.solve_lp_and_undo()
@@ -26,7 +28,7 @@ class LPSolTest(BaseTest):
         instance = "gen-ip054.mps"
         instance_path = os.path.join(Constants.DATA_TEST, instance)
 
-        mip = create_mip_solver(instance_path, 123)
+        mip = create_mip_solver(instance_path, 123, mip_solver=BaseTest.mip_solver)
 
         # LP solution
         lp_index_to_val, lp_obj_val = mip.solve_lp_and_undo()
@@ -38,7 +40,7 @@ class LPSolTest(BaseTest):
         instance = "pk1.mps"
         instance_path = os.path.join(Constants.DATA_TEST, instance)
 
-        mip = create_mip_solver(instance_path, 123)
+        mip = create_mip_solver(instance_path, 123, mip_solver=BaseTest.mip_solver)
 
         # LP solution
         lp_index_to_val, lp_obj_val = mip.solve_lp_and_undo()

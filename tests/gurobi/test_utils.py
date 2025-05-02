@@ -1,7 +1,12 @@
-from tests.test_base import BaseTest
 import gurobipy as grb
 
+from balans.utils import Constants
+from tests.test_base import BaseTest
+
+
 class UtilsTest(BaseTest):
+
+    BaseTest.mip_solver = Constants.gurobi_solver
 
     def test_basic_gurobi(self):
 

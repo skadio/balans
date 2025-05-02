@@ -17,6 +17,8 @@ from tests.test_base import BaseTest
 
 class CrossoverTest(BaseTest):
 
+    BaseTest.mip_solver = Constants.gurobi_solver
+
     def test_crossover(self):
         # Input
         instance = "noswot.mps"
@@ -33,7 +35,7 @@ class CrossoverTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -60,7 +62,7 @@ class CrossoverTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -84,7 +86,7 @@ class CrossoverTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -105,7 +107,7 @@ class CrossoverTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed, mip_solver_str="gurobi")
+        mip = create_mip_solver(instance_path, seed, mip_solver = BaseTest.mip_solver)
         instance = _Instance(mip)
 
         # Initial solution
@@ -150,7 +152,7 @@ class CrossoverTest(BaseTest):
         repair_ops = [RepairOperators.Repair]
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, seed, mip_solver_str="gurobi")
+        mip = create_mip_solver(instance_path, seed, mip_solver = BaseTest.mip_solver)
         instance = _Instance(mip)
 
         # Initial solution
@@ -201,7 +203,7 @@ class CrossoverTest(BaseTest):
         stop = MaxIterations(1)
 
         # Solver
-        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+        balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
         # Indexes 0, 1, 2 are discrete so only these indexes can be destroyed
         # With this seed, in the firs iteration index=1 is destroy

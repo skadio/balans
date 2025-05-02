@@ -12,6 +12,9 @@ from tests.test_base import BaseTest
 
 
 class CorrectnessTest(BaseTest):
+
+    BaseTest.mip_solver = "scip"
+
     is_skip = True
 
     # TODO: implement the exact configs/runs below to run on these instances.
@@ -35,7 +38,8 @@ class CorrectnessTest(BaseTest):
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
                         stop=MaxIterations(5),
-                        seed=Constants.default_seed)
+                        seed=Constants.default_seed,
+                        mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -62,7 +66,8 @@ class CorrectnessTest(BaseTest):
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
                         stop=MaxIterations(15),
-                        seed=Constants.default_seed)
+                        seed=Constants.default_seed,
+                        mip_solver=BaseTest.mip_solver)
 
         # Run
         result = balans.solve(instance_path)
@@ -88,7 +93,8 @@ class CorrectnessTest(BaseTest):
                                              learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.50)),
                         accept=HillClimbing(),
                         stop=MaxIterations(15),
-                        seed=Constants.default_seed)
+                        seed=Constants.default_seed,
+                        mip_solver=BaseTest.mip_solver)
 
         # SK: iter_5 >>> FINISH objective: 69333.52 (no change)
         # SK: iter_10 >>> FINISH objective: 68020

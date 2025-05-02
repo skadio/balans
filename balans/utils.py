@@ -15,6 +15,7 @@ class Constants(NamedTuple):
     # Default MIP Solver
     scip_solver = "scip"
     gurobi_solver = "gurobi"
+    highs_solver = "highs"
     default_solver = scip_solver
 
     # Optimization sense

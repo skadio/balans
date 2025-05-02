@@ -10,6 +10,8 @@ from tests.test_base import BaseTest
 
 class InvalidTest(BaseTest):
 
+    BaseTest.mip_solver = Constants.gurobi_solver
+
     def test_invalid_destroy_op(self):
         with self.assertRaises(TypeError):
             # Parameters
@@ -22,7 +24,7 @@ class InvalidTest(BaseTest):
             stop = MaxIterations(5)
 
             # Solver
-            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
     def test_invalid_destroy_op_none(self):
         with self.assertRaises(TypeError):
@@ -36,7 +38,7 @@ class InvalidTest(BaseTest):
             stop = MaxIterations(5)
 
             # Solver
-            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
     def test_invalid_repair_op(self):
         with self.assertRaises(TypeError):
@@ -50,7 +52,7 @@ class InvalidTest(BaseTest):
             stop = MaxIterations(5)
 
             # Solver
-            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
     def test_invalid_repair_op_none(self):
         with self.assertRaises(TypeError):
@@ -64,7 +66,7 @@ class InvalidTest(BaseTest):
             stop = MaxIterations(5)
 
             # Solver
-            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
     def test_invalid_seed(self):
         with self.assertRaises(ValueError):
@@ -78,7 +80,7 @@ class InvalidTest(BaseTest):
             stop = MaxIterations(5)
 
             # Solver
-            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
     def test_invalid_selector(self):
         with self.assertRaises(TypeError):
@@ -91,7 +93,7 @@ class InvalidTest(BaseTest):
             stop = MaxIterations(5)
 
             # Solver
-            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
     def test_invalid_accept(self):
         with self.assertRaises(TypeError):
@@ -105,7 +107,7 @@ class InvalidTest(BaseTest):
             stop = MaxIterations(5)
 
             # Solver
-            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
     def test_invalid_stop(self):
         with self.assertRaises(TypeError):
@@ -118,7 +120,7 @@ class InvalidTest(BaseTest):
             stop = None
 
             # Solver
-            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
     def test_invalid_solve(self):
         with self.assertRaises(ValueError):
@@ -132,7 +134,7 @@ class InvalidTest(BaseTest):
             stop = MaxIterations(5)
 
             # Solver
-            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
             balans.solve("")
 
@@ -148,6 +150,6 @@ class InvalidTest(BaseTest):
             stop = MaxIterations(5)
 
             # Solver
-            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver="gurobi")
+            balans = Balans(destroy_ops, repair_ops, selector, accept, stop, seed, mip_solver=BaseTest.mip_solver)
 
             balans.solve("does_not_exist.mip")
