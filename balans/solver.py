@@ -522,7 +522,7 @@ class Balans:
 
         # MIP solver
         check_true(isinstance(mip_solver, str), TypeError("MIP solver backend must be a string." + str(mip_solver)))
-        check_true(mip_solver in ["scip", "gurobi"],
+        check_true(mip_solver in [Constants.highs_solver, Constants.gurobi_solver, Constants.scip_solver],
                    ValueError("MIP solver backend must be a scip or gurobi." + str(mip_solver)))
 
     @staticmethod

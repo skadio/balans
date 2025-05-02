@@ -107,8 +107,10 @@ def create_mip_solver(instance_path: str,
     """
     from balans.solver_gurobi import _Gurobi
     from balans.solver_scip import _SCIP
+    from balans.solver_highs import _HIGHS
 
     mip_factory = {Constants.gurobi_solver: _Gurobi,
-                   Constants.scip_solver: _SCIP,}
+                   Constants.scip_solver: _SCIP,
+                   Constants.highs_solver: _HIGHS}
 
     return mip_factory.get(mip_solver)(instance_path, seed)
