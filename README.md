@@ -27,7 +27,7 @@ destroy_ops = [DestroyOperators.Crossover,
                DestroyOperators.Mutation_25,
                DestroyOperators.Local_Branching_10,
                DestroyOperators.Rins_25,
-               DestroyOperators.Proximity_05,
+               DestroyOperators.Proximity_005,
                DestroyOperators.Rens_25,
                DestroyOperators.Random_Objective]
 
