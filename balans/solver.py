@@ -24,9 +24,9 @@ from balans.destroy.local_branching import local_branching_05, local_branching_1
 from balans.destroy.mutation import mutation_05, mutation_10, mutation_15, mutation_20, mutation_25, mutation_30, \
     mutation_35, mutation_40, mutation_45, mutation_50, mutation_55, mutation_60, mutation_65, mutation_70, mutation_75, \
     mutation_80, mutation_85, mutation_90, mutation_95
-from balans.destroy.proximity import proximity_05, proximity_10, proximity_15, proximity_20, proximity_25, proximity_30, \
-    proximity_35, proximity_40, proximity_45, proximity_50, proximity_55, proximity_60, proximity_65, proximity_70, \
-    proximity_75, proximity_80, proximity_85, proximity_90, proximity_95
+from balans.destroy.proximity import proximity_005, proximity_010, proximity_015, proximity_020, proximity_025, proximity_030, \
+    proximity_035, proximity_040, proximity_045, proximity_050, proximity_055, proximity_060, proximity_065, proximity_070, \
+    proximity_075, proximity_080, proximity_085, proximity_090, proximity_095
 from balans.destroy.random_objective import random_objective
 from balans.destroy.rens import rens_05, rens_10, rens_15, rens_20, rens_25, rens_30, rens_35, rens_40, rens_45, \
     rens_50, rens_55, rens_60, rens_65, rens_70, rens_75, rens_80, rens_85, rens_90, rens_95
@@ -84,25 +84,25 @@ class DestroyOperators(NamedTuple):
     Mutation_90 = mutation_90
     Mutation_95 = mutation_95
 
-    Proximity_05 = proximity_05
-    Proximity_10 = proximity_10
-    Proximity_15 = proximity_15
-    Proximity_20 = proximity_20
-    Proximity_25 = proximity_25
-    Proximity_30 = proximity_30
-    Proximity_35 = proximity_35
-    Proximity_40 = proximity_40
-    Proximity_45 = proximity_45
-    Proximity_50 = proximity_50
-    Proximity_55 = proximity_55
-    Proximity_60 = proximity_60
-    Proximity_65 = proximity_65
-    Proximity_70 = proximity_70
-    Proximity_75 = proximity_75
-    Proximity_80 = proximity_80
-    Proximity_85 = proximity_85
-    Proximity_90 = proximity_90
-    Proximity_95 = proximity_95
+    Proximity_005 = proximity_005
+    Proximity_010 = proximity_010
+    Proximity_015 = proximity_015
+    Proximity_020 = proximity_020
+    Proximity_025 = proximity_025
+    Proximity_030 = proximity_030
+    Proximity_035 = proximity_035
+    Proximity_040 = proximity_040
+    Proximity_045 = proximity_045
+    Proximity_050 = proximity_050
+    Proximity_055 = proximity_055
+    Proximity_060 = proximity_060
+    Proximity_065 = proximity_065
+    Proximity_070 = proximity_070
+    Proximity_075 = proximity_075
+    Proximity_080 = proximity_080
+    Proximity_085 = proximity_085
+    Proximity_090 = proximity_090
+    Proximity_095 = proximity_095
 
     Rens_05 = rens_05
     Rens_10 = rens_10
@@ -194,25 +194,25 @@ DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Mutation_85),
                type(DestroyOperators.Mutation_90),
                type(DestroyOperators.Mutation_95),
-               type(DestroyOperators.Proximity_05),
-               type(DestroyOperators.Proximity_10),
-               type(DestroyOperators.Proximity_15),
-               type(DestroyOperators.Proximity_20),
-               type(DestroyOperators.Proximity_25),
-               type(DestroyOperators.Proximity_30),
-               type(DestroyOperators.Proximity_35),
-               type(DestroyOperators.Proximity_40),
-               type(DestroyOperators.Proximity_45),
-               type(DestroyOperators.Proximity_50),
-               type(DestroyOperators.Proximity_55),
-               type(DestroyOperators.Proximity_60),
-               type(DestroyOperators.Proximity_65),
-               type(DestroyOperators.Proximity_70),
-               type(DestroyOperators.Proximity_75),
-               type(DestroyOperators.Proximity_80),
-               type(DestroyOperators.Proximity_85),
-               type(DestroyOperators.Proximity_90),
-               type(DestroyOperators.Proximity_95),
+               type(DestroyOperators.Proximity_005),
+               type(DestroyOperators.Proximity_010),
+               type(DestroyOperators.Proximity_015),
+               type(DestroyOperators.Proximity_020),
+               type(DestroyOperators.Proximity_025),
+               type(DestroyOperators.Proximity_030),
+               type(DestroyOperators.Proximity_035),
+               type(DestroyOperators.Proximity_040),
+               type(DestroyOperators.Proximity_045),
+               type(DestroyOperators.Proximity_050),
+               type(DestroyOperators.Proximity_055),
+               type(DestroyOperators.Proximity_060),
+               type(DestroyOperators.Proximity_065),
+               type(DestroyOperators.Proximity_070),
+               type(DestroyOperators.Proximity_075),
+               type(DestroyOperators.Proximity_080),
+               type(DestroyOperators.Proximity_085),
+               type(DestroyOperators.Proximity_090),
+               type(DestroyOperators.Proximity_095),
                type(DestroyOperators.Rens_05),
                type(DestroyOperators.Rens_10),
                type(DestroyOperators.Rens_15),
@@ -432,25 +432,25 @@ class Balans:
 
     @staticmethod
     def _is_proximity(op):
-        return (op == DestroyOperators.Proximity_05 or
-                op == DestroyOperators.Proximity_10 or
-                op == DestroyOperators.Proximity_15 or
-                op == DestroyOperators.Proximity_20 or
-                op == DestroyOperators.Proximity_25 or
-                op == DestroyOperators.Proximity_30 or
-                op == DestroyOperators.Proximity_35 or
-                op == DestroyOperators.Proximity_40 or
-                op == DestroyOperators.Proximity_45 or
-                op == DestroyOperators.Proximity_50 or
-                op == DestroyOperators.Proximity_55 or
-                op == DestroyOperators.Proximity_60 or
-                op == DestroyOperators.Proximity_65 or
-                op == DestroyOperators.Proximity_70 or
-                op == DestroyOperators.Proximity_75 or
-                op == DestroyOperators.Proximity_80 or
-                op == DestroyOperators.Proximity_85 or
-                op == DestroyOperators.Proximity_90 or
-                op == DestroyOperators.Proximity_95)
+        return (op == DestroyOperators.Proximity_005 or
+                op == DestroyOperators.Proximity_010 or
+                op == DestroyOperators.Proximity_015 or
+                op == DestroyOperators.Proximity_020 or
+                op == DestroyOperators.Proximity_025 or
+                op == DestroyOperators.Proximity_030 or
+                op == DestroyOperators.Proximity_035 or
+                op == DestroyOperators.Proximity_040 or
+                op == DestroyOperators.Proximity_045 or
+                op == DestroyOperators.Proximity_050 or
+                op == DestroyOperators.Proximity_055 or
+                op == DestroyOperators.Proximity_060 or
+                op == DestroyOperators.Proximity_065 or
+                op == DestroyOperators.Proximity_070 or
+                op == DestroyOperators.Proximity_075 or
+                op == DestroyOperators.Proximity_080 or
+                op == DestroyOperators.Proximity_085 or
+                op == DestroyOperators.Proximity_090 or
+                op == DestroyOperators.Proximity_095)
 
     def _set_alns_operators(self):
 

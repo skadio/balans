@@ -28,7 +28,7 @@ class SolverTest(BaseTest):
         seed = 123456
         destroy_ops = [DestroyOperators.Dins,
                        DestroyOperators.Crossover,
-                       DestroyOperators.Proximity_05,
+                       DestroyOperators.Proximity_005,
                        DestroyOperators.Mutation_50,
                        DestroyOperators.Local_Branching_10,
                        DestroyOperators.Rins_25,
@@ -59,7 +59,7 @@ class SolverTest(BaseTest):
         # Parameters
         seed = Constants.default_seed
         destroy_ops = [DestroyOperators.Dins,
-                       DestroyOperators.Proximity_05,
+                       DestroyOperators.Proximity_005,
                        DestroyOperators.Mutation_50,
                        DestroyOperators.Local_Branching_10,
                        DestroyOperators.Rins_25,
@@ -90,7 +90,7 @@ class SolverTest(BaseTest):
         # Parameters
         seed = 123456
         destroy_ops = [DestroyOperators.Dins,
-                       DestroyOperators.Proximity_05,
+                       DestroyOperators.Proximity_005,
                        DestroyOperators.Mutation_50,
                        DestroyOperators.Local_Branching_10,
                        DestroyOperators.Rins_25,
@@ -135,7 +135,7 @@ class SolverTest(BaseTest):
         # Parameters
         seed = 123456
         destroy_ops = [DestroyOperators.Dins,
-                       DestroyOperators.Proximity_05,
+                       DestroyOperators.Proximity_005,
                        DestroyOperators.Mutation_50,
                        DestroyOperators.Local_Branching_10,
                        DestroyOperators.Rins_25,
@@ -187,7 +187,7 @@ class SolverTest(BaseTest):
         # Parameters
         seed = 123456
         destroy_ops = [DestroyOperators.Dins,
-                       DestroyOperators.Proximity_05,
+                       DestroyOperators.Proximity_005,
                        DestroyOperators.Mutation_50,
                        DestroyOperators.Local_Branching_10,
                        DestroyOperators.Rins_25,
@@ -231,7 +231,7 @@ class SolverTest(BaseTest):
         # Parameters
         seed = 123456
         destroy_ops = [DestroyOperators.Dins,
-                       DestroyOperators.Proximity_05,
+                       DestroyOperators.Proximity_005,
                        DestroyOperators.Mutation_50,
                        DestroyOperators.Local_Branching_10,
                        DestroyOperators.Rins_25,

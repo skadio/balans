@@ -26,7 +26,7 @@ class ProximityTest(BaseTest):
 
         # Parameters
         seed = Constants.default_seed
-        destroy_ops = [DestroyOperators.Proximity_05]
+        destroy_ops = [DestroyOperators.Proximity_005]
         repair_ops = [RepairOperators.Repair]
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
@@ -68,7 +68,7 @@ class ProximityTest(BaseTest):
 
         # Create ALNS and add one or more destroy and repair operators
         alns = ALNS(np.random.RandomState(seed))
-        alns.add_destroy_operator(DestroyOperators.Proximity_05)
+        alns.add_destroy_operator(DestroyOperators.Proximity_005)
         alns.add_repair_operator(RepairOperators.Repair)
 
         selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=1, num_repair=1,
