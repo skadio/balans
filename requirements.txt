@@ -1,4 +1,5 @@
 alns[mabwiser]
+highspy
 mabwiser
 numpy
 pyscipopt

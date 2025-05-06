@@ -43,11 +43,15 @@ class _Gurobi(_BaseMIP):
 
     def get_obj_value(self, index_to_val) -> float:
         expr = self.org_objective_fn
-        obj_val = 0
-        for i in range(expr.size()):
-            var = expr.getVar(i)
-            coeff = expr.getCoeff(i)
-            obj_val += coeff * index_to_val[var.index]
+        # obj_val = 0
+        # for i in range(expr.size()):
+        #     var = expr.getVar(i)
+        #     coeff = expr.getCoeff(i)
+        #     obj_val +coeff * index_to_val[var.index]
+
+        # Calculate the objective value using list comprehension
+        obj_val = sum(expr.getCoeff(i) * index_to_val[expr.getVar(i).index]
+                      for i in range(expr.size()))
 
         return obj_val
 

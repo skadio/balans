@@ -2,12 +2,14 @@ import math
 import random
 from typing import Tuple, Dict, Any, List
 
-from highspy import Highs
+from highspy import Highs, ObjSense
 
 from balans.base_mip import _BaseMIP
 from balans.utils import Constants
 
 
+# Highs examples:
+# https://github.com/ERGO-Code/HiGHS/blob/latest/tests/test_highspy.py
 class _HIGHS(_BaseMIP):
 
     def __init__(self, instance_path: str, seed: int):
@@ -15,19 +17,20 @@ class _HIGHS(_BaseMIP):
 
         # Create HiGHS model
         self.model = Highs()
+        # self.model.silent()
         self.model.readModel(instance_path)
-        self.model.setOption('random_seed', seed)
+        self.model.setOptionValue('random_seed', 42)
 
         # Set variables
-        self.variables = self.model.getCols()
+        self.variables = self.model.getVariables()
 
         # Set original objective and flag if we changed from max to min.
         # We always minimize
-        self.org_objective_fn = self.model.getObjective()
-        self.org_objective_sense = self.model.getObjectiveSense()  # 1 for minimize, -1 for maximize
+        self.org_objective_fn = self.model.col_cost_ # this didnot work
+        self.org_objective_sense = self.model.getObjectiveSense()
         self.is_obj_sense_changed = False
-        if self.org_objective_sense == -1:
-            self.model.setObjective(-1 * self.org_objective_fn, 'minimize')
+        if self.org_objective_sense == ObjSense.kMaximize:
+            self.model.changeObjectiveSense(ObjSense.kMinimize)
             self.is_obj_sense_changed = True
 
         # Set constraints, proximity z, and a flag for objective transformation
@@ -52,6 +55,9 @@ class _HIGHS(_BaseMIP):
         binary_indexes = []
         integer_indexes = []
 
+        # highspy.HighsVarType.kContinuous,
+        # highspy.HighsVarType.kInteger
+
         for var in self.variables:
             # Variable types naming different
             if self.is_discrete(var.type):
@@ -66,6 +72,7 @@ class _HIGHS(_BaseMIP):
     def extract_lp(self, discrete_indexes) -> Tuple[Dict[Any, float], float, List[Any]]:
         lp_index_to_val, lp_obj_val = self.solve_lp_and_undo()
         lp_floating_discrete_indexes = [i for i in discrete_indexes if not math.isclose(lp_index_to_val[i] % 1, 0.0)]
+
         return lp_index_to_val, lp_obj_val, lp_floating_discrete_indexes
 
     def fix_vars(self, index_to_val, skip_indexes=None) -> None:
@@ -198,6 +205,7 @@ class _HIGHS(_BaseMIP):
         # Remove constraints, and reset
         for ct in self.constraints:
             self.model.removeConstraint(ct)
+            # highs.removeConstr(c1)
         self.constraints = []
 
         # Reset to original objective (random objective and proximity change objective)

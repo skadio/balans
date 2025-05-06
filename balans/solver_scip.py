@@ -41,9 +41,14 @@ class _SCIP(_BaseMIP):
         self.is_obj_transformed = False
 
     def get_obj_value(self, index_to_val) -> float:
-        obj_val = 0
-        for key, item in self.org_objective_fn.terms.items():
-            obj_val += item * index_to_val[key[0].getIndex()]
+        # obj_val = 0
+        # for key, item in self.org_objective_fn.terms.items():
+        #     obj_val += item * index_to_val[key[0].getIndex()]
+
+        # Calculate the objective value using list comprehension
+        obj_val = sum(item * index_to_val[key[0].getIndex()]
+                      for key, item in self.org_objective_fn.terms.items())
+
         return obj_val
 
     def extract_indexes(self) -> Tuple[List[Any], List[Any], List[Any]]:

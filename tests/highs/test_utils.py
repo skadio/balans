@@ -1,4 +1,6 @@
-import gurobipy as grb
+import os
+
+from highspy import Highs, HighsModel, HighsModelStatus, ObjSense
 
 from balans.utils import Constants
 from tests.test_base import BaseTest
@@ -10,26 +12,50 @@ class UtilsTest(BaseTest):
 
     def test_basic_highs(self):
 
-        # Create a new model
-        m = grb.Model()
-        m.setParam("OutputFlag", 0)
+        # Create HiGHS model
+        instance = "model.lp"
+        instance_path = os.path.join(Constants.DATA_TEST, instance)
 
-        # Create variables
-        x = m.addVar(vtype='I', name="x")
-        y = m.addVar(vtype='I', name="y")
-        z = m.addVar(vtype='B', name="z")
+        model = Highs()
+        model.readModel(instance_path)
 
-        # Set objective function
-        m.setObjective(x + y + 2 * z, grb.GRB.MAXIMIZE)
+        # Create a HiGHS model
+        model = Highs()
+        model.setOptionValue('random_seed', 42)
 
-        # Add constraints
-        m.addConstr(x + 2 * y + 3 * z <= 4)
-        m.addConstr(x + y >= 1)
+        x1 = model.addVariable(lb=-model.inf)
+        x2 = model.addVariable(lb=-model.inf)
 
-        # Solve it!
-        m.optimize()
+        model.addConstrs(x2 - x1 >= 2,
+                         x1 + x2 >= 0)
 
-        print(f"Optimal objective value: {m.objVal}")
-        print(f"Solution values: x={x.X}, y={y.X}, z={z.X}")
+        model.maximize()
+        model.changeObjectiveSense(ObjSense.kMinimize)
+
+        # Solve the problem
+        model.run()
+
+        vars = model.getVariablws()
+        print("vars:", vars)
+        print("vars:", vars[0].index)
+        print("vars:", vars[0])
+
+        # org_objective_fn = model.setMaximize()
+        # org_objective_sense = model.getObjectiveSense()
+
+        # Get the solution
+        solution = model.getSolution()
+        print("Optimal solution:", list(solution.col_value))
+        print("Optimal objective value:", model.getObjectiveValue())
+
+        # Get the solution information
+        info = model.getInfo()
+
+        status = model.getModelStatus()
+        self.assertEqual(status, HighsModelStatus.kOptimal)
+
+        # Retrieve the objective function value
+        objective_value = info.objective_function_value
+        print("Optimal objective value:", objective_value)
 
         self.assertTrue(True)
