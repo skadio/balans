@@ -11,7 +11,7 @@ from balans.utils import Constants
 
 class _SCIP(_BaseMIP):
 
-    def __init__(self, instance_path: str, seed: int):
+    def __init__(self, instance_path: str, n_threads: int, seed: int):
         super().__init__(seed)
 
         # Set Scip model, variables and objective

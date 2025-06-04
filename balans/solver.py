@@ -1,6 +1,9 @@
 import os
+import random
 from typing import List, Optional, Dict
 from typing import NamedTuple
+import pickle
+from multiprocessing import Pool
 
 import numpy as np
 from alns.ALNS import ALNS
@@ -10,6 +13,7 @@ from alns.accept import MovingAverageThreshold, GreatDeluge, HillClimbing
 from alns.accept import RecordToRecordTravel, SimulatedAnnealing, RandomAccept
 from alns.select import AlphaUCB, MABSelector, RandomSelect, RouletteWheel, SegmentedRouletteWheel
 from alns.stop import MaxIterations, MaxRuntime, NoImprovement, StoppingCriterion
+from mabwiser.mab import LearningPolicy
 
 from balans.base_instance import _Instance
 from balans.base_mip import create_mip_solver
@@ -24,9 +28,7 @@ from balans.destroy.local_branching import local_branching_05, local_branching_1
 from balans.destroy.mutation import mutation_05, mutation_10, mutation_15, mutation_20, mutation_25, mutation_30, \
     mutation_35, mutation_40, mutation_45, mutation_50, mutation_55, mutation_60, mutation_65, mutation_70, mutation_75, \
     mutation_80, mutation_85, mutation_90, mutation_95
-from balans.destroy.proximity import proximity_05, proximity_10, proximity_15, proximity_20, proximity_25, proximity_30, \
-    proximity_35, proximity_40, proximity_45, proximity_50, proximity_55, proximity_60, proximity_65, proximity_70, \
-    proximity_75, proximity_80, proximity_85, proximity_90, proximity_95
+from balans.destroy.proximity import proximity_05, proximity_10, proximity_15, proximity_20, proximity_25, proximity_30
 from balans.destroy.random_objective import random_objective
 from balans.destroy.rens import rens_05, rens_10, rens_15, rens_20, rens_25, rens_30, rens_35, rens_40, rens_45, \
     rens_50, rens_55, rens_60, rens_65, rens_70, rens_75, rens_80, rens_85, rens_90, rens_95
@@ -61,9 +63,6 @@ class DestroyOperators(NamedTuple):
     Local_Branching_90 = local_branching_90
     Local_Branching_95 = local_branching_95
 
-    # Local_Branching_Relax_10 = local_branching_relax_10
-    # Local_Branching_Relax_25 = local_branching_relax_25
-
     Mutation_05 = mutation_05
     Mutation_10 = mutation_10
     Mutation_15 = mutation_15
@@ -90,19 +89,6 @@ class DestroyOperators(NamedTuple):
     Proximity_20 = proximity_20
     Proximity_25 = proximity_25
     Proximity_30 = proximity_30
-    Proximity_35 = proximity_35
-    Proximity_40 = proximity_40
-    Proximity_45 = proximity_45
-    Proximity_50 = proximity_50
-    Proximity_55 = proximity_55
-    Proximity_60 = proximity_60
-    Proximity_65 = proximity_65
-    Proximity_70 = proximity_70
-    Proximity_75 = proximity_75
-    Proximity_80 = proximity_80
-    Proximity_85 = proximity_85
-    Proximity_90 = proximity_90
-    Proximity_95 = proximity_95
 
     Rens_05 = rens_05
     Rens_10 = rens_10
@@ -173,8 +159,6 @@ DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Local_Branching_85),
                type(DestroyOperators.Local_Branching_90),
                type(DestroyOperators.Local_Branching_95),
-               # type(DestroyOperators.Local_Branching_Relax_10),
-               # type(DestroyOperators.Local_Branching_Relax_25),
                type(DestroyOperators.Mutation_05),
                type(DestroyOperators.Mutation_10),
                type(DestroyOperators.Mutation_15),
@@ -200,19 +184,6 @@ DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Proximity_20),
                type(DestroyOperators.Proximity_25),
                type(DestroyOperators.Proximity_30),
-               type(DestroyOperators.Proximity_35),
-               type(DestroyOperators.Proximity_40),
-               type(DestroyOperators.Proximity_45),
-               type(DestroyOperators.Proximity_50),
-               type(DestroyOperators.Proximity_55),
-               type(DestroyOperators.Proximity_60),
-               type(DestroyOperators.Proximity_65),
-               type(DestroyOperators.Proximity_70),
-               type(DestroyOperators.Proximity_75),
-               type(DestroyOperators.Proximity_80),
-               type(DestroyOperators.Proximity_85),
-               type(DestroyOperators.Proximity_90),
-               type(DestroyOperators.Proximity_95),
                type(DestroyOperators.Rens_05),
                type(DestroyOperators.Rens_10),
                type(DestroyOperators.Rens_15),
@@ -313,12 +284,12 @@ class Balans:
                  accept: AcceptType,
                  stop: StopType,
                  seed: int = Constants.default_seed,  # The random seed
-                 n_jobs: int = 1,  # Number of parallel jobs
+                 n_threads: int = 1,  # Number of threads for the solver
                  mip_solver: str = Constants.default_solver  # MIP solver scip/gurobi
                  ):
 
         # Validate arguments
-        self._validate_balans_args(destroy_ops, repair_ops, selector, accept, stop, seed, n_jobs, mip_solver)
+        self._validate_balans_args(destroy_ops, repair_ops, selector, accept, stop, seed, n_threads, mip_solver)
 
         # Parameters
         self.destroy_ops = destroy_ops
@@ -327,7 +298,7 @@ class Balans:
         self.accept = accept
         self.stop = stop
         self.seed = seed
-        self.n_jobs = n_jobs
+        self.n_threads = n_threads
         self.mip_solver_str = mip_solver
 
         # RNG
@@ -371,7 +342,7 @@ class Balans:
         self._validate_solve_args(instance_path)
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, self.seed, self.mip_solver_str)
+        mip = create_mip_solver(instance_path, self.seed, self.n_threads, self.mip_solver_str)
 
         # Create instance with mip model created from mip instance
         self._instance = _Instance(mip, self.seed)
@@ -437,20 +408,7 @@ class Balans:
                 op == DestroyOperators.Proximity_15 or
                 op == DestroyOperators.Proximity_20 or
                 op == DestroyOperators.Proximity_25 or
-                op == DestroyOperators.Proximity_30 or
-                op == DestroyOperators.Proximity_35 or
-                op == DestroyOperators.Proximity_40 or
-                op == DestroyOperators.Proximity_45 or
-                op == DestroyOperators.Proximity_50 or
-                op == DestroyOperators.Proximity_55 or
-                op == DestroyOperators.Proximity_60 or
-                op == DestroyOperators.Proximity_65 or
-                op == DestroyOperators.Proximity_70 or
-                op == DestroyOperators.Proximity_75 or
-                op == DestroyOperators.Proximity_80 or
-                op == DestroyOperators.Proximity_85 or
-                op == DestroyOperators.Proximity_90 or
-                op == DestroyOperators.Proximity_95)
+                op == DestroyOperators.Proximity_30)
 
     def _set_alns_operators(self):
 
@@ -494,7 +452,7 @@ class Balans:
         return True
 
     @staticmethod
-    def _validate_balans_args(destroy_ops, repair_ops, selector, accept, stop, seed, n_jobs, mip_solver):
+    def _validate_balans_args(destroy_ops, repair_ops, selector, accept, stop, seed, n_threads, mip_solver):
 
         # Destroy Type
         for op in destroy_ops:
@@ -517,8 +475,8 @@ class Balans:
         check_true(isinstance(seed, int), TypeError("The seed must be an integer." + str(seed)))
 
         # Parallel jobs
-        check_true(isinstance(n_jobs, int), TypeError("Number of parallel jobs must be an integer." + str(n_jobs)))
-        check_true(n_jobs != 0, ValueError("Number of parallel jobs cannot be zero." + str(n_jobs)))
+        check_true(isinstance(n_threads, int), TypeError("Number of parallel jobs must be an integer." + str(n_threads)))
+        check_true(n_threads != 0, ValueError("Number of parallel jobs cannot be zero." + str(n_threads)))
 
         # MIP solver
         check_true(isinstance(mip_solver, str), TypeError("MIP solver backend must be a string." + str(mip_solver)))
@@ -532,3 +490,141 @@ class Balans:
         check_false(instance_path == "", ValueError("Instance cannot be empty: " + str(instance_path)))
         check_false(instance_path is None, ValueError("Instance cannot be None: " + str(instance_path)))
         check_true(os.path.isfile(instance_path), ValueError("Instance must exist: " + str(instance_path)))
+
+
+DESTROY_CATEGORIES = {
+    "crossover": [DestroyOperators.Crossover],
+    "mutation": [DestroyOperators.Mutation_10, DestroyOperators.Mutation_20, DestroyOperators.Mutation_30,
+                 DestroyOperators.Mutation_40, DestroyOperators.Mutation_50],
+    "local_branching": [DestroyOperators.Local_Branching_10, DestroyOperators.Local_Branching_20,
+                        DestroyOperators.Local_Branching_30, DestroyOperators.Local_Branching_40,
+                        DestroyOperators.Local_Branching_50],
+    "proximity": [DestroyOperators.Proximity_05, DestroyOperators.Proximity_10, DestroyOperators.Proximity_15,
+                  DestroyOperators.Proximity_20, DestroyOperators.Proximity_30],
+    "rens": [DestroyOperators.Rens_10, DestroyOperators.Rens_20, DestroyOperators.Rens_30, DestroyOperators.Rens_40,
+             DestroyOperators.Rens_50],
+    "rins": [DestroyOperators.Rins_10, DestroyOperators.Rins_20, DestroyOperators.Rins_30, DestroyOperators.Rins_40,
+             DestroyOperators.Rins_50],
+}
+repair_ops = [RepairOperators.Repair]
+
+
+class ParBalans:
+    """
+    Parallel Version of Balans, create several Balans solvers randomly and run them parallelly
+    """
+
+    def __init__(self,
+                 instance_path, 
+                 index_to_val= None,
+                 n_machines: int = 1, # Number of Balans solvers
+                 n_threads: int = 1,  # Number of threads for the solver
+                 mip_solver: str = Constants.default_solver,  # MIP solver scip/gurobi
+                 output_dir: str = "results/"
+                 ):
+        self.instance_path = instance_path
+        self.index_to_val = index_to_val
+        self.n_machines = n_machines
+        self.n_threads = n_threads
+        self.mip_solver = mip_solver
+        self.output_dir = output_dir
+        os.makedirs(self.output_dir, exist_ok=True)
+
+    def solve_instance_with_config(self, idx):
+        config_data = self.generate_random_config()
+        balans = Balans(
+            destroy_ops=config_data["destroy_ops"],
+            repair_ops=repair_ops,
+            selector=MABSelector(scores=config_data["scores"],
+                                 num_destroy=min(len(config_data["destroy_ops"]), len(DESTROY_CATEGORIES)),
+                                 num_repair=len(repair_ops), learning_policy=config_data["learning_policy"],
+                                 seed=config_data["seed"]),
+            accept=config_data["accept"],
+            stop=MaxRuntime(self.timelimit), 
+            n_threads=self.n_threads,
+            mip_solver=self.mip_solver)
+
+        if self.init_index_to_val:
+            result = balans.solve(self.instance, index_to_val=self.init_index_to_val)
+        else:
+            result = balans.solve(self.instance)
+
+        if result:
+            r = [result.statistics.objectives, np.cumsum(result.statistics.runtimes),
+                 dict(result.statistics.destroy_operator_counts)]
+            result_path = os.path.join(self.output_dir, f"result_{idx}.pkl")
+            with open(result_path, "wb") as fp:
+                pickle.dump(r, fp)
+    
+    def solve(self):
+        with Pool(processes=self.n_machines) as pool:
+            results = pool.map(self.solve_instance_with_config, range(self.n_machines))
+        
+      
+    def generate_random_config(self):
+        # randomly generate the configuration for one Balans solver
+        chosen_destroy_ops = self.pick_random_destroy_ops()
+        acceptance_obj = random.choice([HillClimbing(), SimulatedAnnealing(start_temperature=10, end_temperature=1,
+                                                                           step=random.uniform(0.01, 1),
+                                                                           method="linear")])
+        
+        possible_policies = [LearningPolicy.EpsilonGreedy(epsilon=random.uniform(0.01, 0.5)),
+                             LearningPolicy.Softmax(tau=random.uniform(1, 3)), LearningPolicy.ThompsonSampling()]
+        chosen_lp = random.choice(possible_policies)
+        lp_str = self.learning_policy_to_str(chosen_lp)
+
+        if lp_str == "THOMPSON_SAMPLING":
+            chosen_scores = random.choice([[1, 1, 0, 0], [1, 1, 1, 0]])
+        else:
+            chosen_scores = random.choice(
+                [[8, 4, 2, 1], [3, 2, 1, 0], [5, 2, 1, 0], [16, 4, 2, 1], [8, 3, 1, 0], [5, 4, 2, 0]])
+
+        chosen_seed = random.randint(1, 100000)
+        
+        config_data = {
+            "destroy_ops": chosen_destroy_ops,
+            "accept": acceptance_obj,
+            "learning_policy": chosen_lp,
+            "scores": chosen_scores,
+            "seed": chosen_seed
+        }
+        return config_data
+    
+    def pick_random_destroy_ops(self):
+        # Choose a random number between 4 and 16
+        num_elements = random.randint(4, 16)
+
+        # Initialize the list of chosen elements
+        chosen_elements = []
+
+        if num_elements > 5:
+            # Choose at least one member from each category
+            for category in DESTROY_CATEGORIES:
+                element = random.choice(DESTROY_CATEGORIES[category])
+                chosen_elements.append(element)
+
+            # Remove the already chosen elements from the pool
+            all_elements = [item for sublist in DESTROY_CATEGORIES.values() for item in sublist]
+            remaining_pool = list(set(all_elements) - set(chosen_elements))
+
+            # Choose the remaining elements randomly from the remaining pool
+            remaining_elements = num_elements - len(DESTROY_CATEGORIES)
+            chosen_elements.extend(random.sample(remaining_pool, remaining_elements))
+        else:
+            # Choose the categories to be included
+            chosen_categories = random.sample(list(DESTROY_CATEGORIES.keys()), num_elements)
+
+            # Choose one element from each chosen category
+            for category in chosen_categories:
+                element = random.choice(DESTROY_CATEGORIES[category])
+                chosen_elements.append(element)
+        return chosen_elements
+    
+    def learning_policy_to_str(self, lp):
+        if isinstance(lp, LearningPolicy.EpsilonGreedy):
+            return f"EPSILON_GREEDY_{lp.epsilon}"
+        elif isinstance(lp, LearningPolicy.Softmax):
+            return f"SOFTMAX_{lp.tau}"
+        elif isinstance(lp, LearningPolicy.ThompsonSampling):
+            return "THOMPSON_SAMPLING"
+        return "UNKNOWN"

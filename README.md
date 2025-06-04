@@ -57,7 +57,8 @@ balans = Balans(destroy_ops=destroy_ops,
                 selector=selector,
                 accept=accept,
                 stop=stop,
-                mip_solver="scip") # "gurobi"
+                mip_solver="scip", # "gurobi"
+                n_threads=1) # gurobi can have multiple threads for parallelization
 
 # Run a mip instance to retrieve results 
 instance_path = "data/miplib/noswot.mps"
@@ -66,6 +67,23 @@ result = balans.solve(instance_path)
 # Results of the best found solution and the objective
 print("Best solution:", result.best_state.solution())
 print("Best solution objective:", result.best_state.objective())
+```
+
+## Parallel Version of Balans
+
+We also offer a parallel version of Balans, which is randomly generate several configurations of Balans, and run them parallely. 
+
+```python
+from balans.solver import ParBalans
+
+instance_path = "tests/data/noswot.mps"
+# how many Balans do you want to run
+n_machines = 2
+
+balans = ParBalans(instance_path=instance_path, 
+                  n_machines=n_machines,
+                  output_dir="results/") # where you want to save the output file
+balans.solve()
 ```
 
 ## Available Destroy Operators
@@ -79,8 +97,8 @@ print("Best solution objective:", result.best_state.objective())
 [^4]: Berthold. RENS–the optimal rounding. Mathematical Programming Computation, 2014.
 * Rins[^5]
 [^5]: E. Danna, E. Rothberg, and C. L. Pape. Exploring relaxation induced neighborhoods to improve MIP solutions. Mathematical Programming, 2005.
-* Zero Objective[^6]
-[^6]: Zero Objective.
+* Random Objective[^6]
+[^6]: Random Objective.
 * Proximity Search[^7]
 [^7]: M. Fischetti and M. Monaci. Proximity search for 0-1 mixed-integer convex programming. Journal of Heuristics, 20(6):709–731, Dec 2014.
 * Crossover[^8]

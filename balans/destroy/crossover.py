@@ -17,7 +17,7 @@ def crossover(current: _State, rnd_state) -> _State:
     # Static features from the instance
     discrete_indexes = current.instance.discrete_indexes
 
-    r1_index_to_val, _ = current.instance.mip.solve_random_and_undo()
+    r1_index_to_val, _ = current.instance.mip.solve_random_and_undo(60)
 
     # If we don't find a random feasible solution
     if len(r1_index_to_val) == 0:
