@@ -596,8 +596,8 @@ class ParBalans:
         # Create the results directory
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def _solve_instance_with_config(self, idx, instance_path, index_to_val):
-        config_data = self._generate_random_config()
+    def _solve_instance_with_config(self, idx, instance_path, index_to_val, config_function):
+        config_data = config_function()
         balans = Balans(destroy_ops=config_data["destroy_ops"],
                         repair_ops=self.REPAIR_OPERATORS,
                         selector=MABSelector(scores=config_data["scores"],
@@ -635,10 +635,12 @@ class ParBalans:
         best solution and best result across all Balans runs
         """
 
+        # Can create other config generator function, random_config() just an example
         with Pool(processes=self.n_jobs) as pool:
             results = pool.map(partial(self._solve_instance_with_config,
                                        instance_path = instance_path,
-                                       index_to_val = index_to_val),
+                                       index_to_val = index_to_val,
+                                       config_function = self._generate_random_config()),
                                range(self.n_jobs))
 
         # Get the best objective value and its index
