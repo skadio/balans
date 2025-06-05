@@ -11,14 +11,14 @@ from balans.utils import Constants
 
 class _Gurobi(_BaseMIP):
 
-    def __init__(self, instance_path: str, n_threads: int, seed: int):
+    def __init__(self, instance_path: str, n_mip_jobs: int, seed: int):
         super().__init__(seed)
 
         # Create Gurobi model
         self.model = gp.read(instance_path)
         self.model.Params.OutputFlag = 0
         self.model.Params.Seed = self.seed
-        self.model.Params.Threads = n_threads
+        self.model.Params.Threads = n_mip_jobs
         # self.model.Params.Presolve = 0
 
         # Set variables

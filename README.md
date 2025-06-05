@@ -57,8 +57,8 @@ balans = Balans(destroy_ops=destroy_ops,
                 selector=selector,
                 accept=accept,
                 stop=stop,
-                mip_solver="scip", # "gurobi"
-                n_threads=1) # gurobi can have multiple threads for parallelization
+                mip_solver="scip",  # "gurobi"
+                n_mip_jobs=1)  # gurobi can have multiple threads for parallelization
 
 # Run a mip instance to retrieve results 
 instance_path = "data/miplib/noswot.mps"
@@ -69,22 +69,21 @@ print("Best solution:", result.best_state.solution())
 print("Best solution objective:", result.best_state.objective())
 ```
 
-## Parallel Version of Balans
-
-We also offer a parallel version of Balans, which is randomly generate several configurations of Balans, and run them parallely. 
+## Quick Start - ParBalans
 
 ```python
+# Parallel version of Balans, that runs several configurations parallely
 from balans.solver import ParBalans
 
+# Instance
 instance_path = "tests/data/noswot.mps"
-# how many Balans do you want to run
-n_machines = 2
 
-balans = ParBalans(instance_path=instance_path, 
-                  n_machines=n_machines,
-                  output_dir="results/", # where you want to save the output file
-                  timelimit=3600) # number of seconds for each Balans to run
-balans.solve()
+# ParBalans to run the instance with `n_job` different Balans configs
+parbalans = ParBalans(instance_path=instance_path,
+                      n_jobs=2,
+                      output_dir="results/",  # where you want to save the output file 
+                      timelimit=3600)
+parbalans.run()
 ```
 
 ## Available Destroy Operators
