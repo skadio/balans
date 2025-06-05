@@ -24,25 +24,32 @@ def proximity(current: _State, rnd_state, delta=0.005) -> _State:
     return next_state
 
 
-def proximity_05(current: _State, rnd_state) -> _State:
+def proximity_005(current: _State, rnd_state) -> _State:
     return proximity(current, rnd_state, delta=0.005)
 
 
-def proximity_10(current: _State, rnd_state) -> _State:
+def proximity_010(current: _State, rnd_state) -> _State:
     return proximity(current, rnd_state, delta=0.010)
 
 
-def proximity_15(current: _State, rnd_state) -> _State:
+def proximity_015(current: _State, rnd_state) -> _State:
     return proximity(current, rnd_state, delta=0.015)
 
 
-def proximity_20(current: _State, rnd_state) -> _State:
+def proximity_020(current: _State, rnd_state) -> _State:
     return proximity(current, rnd_state, delta=0.020)
 
 
-def proximity_25(current: _State, rnd_state) -> _State:
+def proximity_025(current: _State, rnd_state) -> _State:
     return proximity(current, rnd_state, delta=0.025)
 
+# TODO
 
-def proximity_30(current: _State, rnd_state) -> _State:
-    return proximity(current, rnd_state, delta=0.030)
+def proximity_035(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.035)
+
+def proximity_095(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.095)
+
+def proximity_10(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.10)

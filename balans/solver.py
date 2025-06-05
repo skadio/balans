@@ -28,7 +28,7 @@ from balans.destroy.local_branching import local_branching_05, local_branching_1
 from balans.destroy.mutation import mutation_05, mutation_10, mutation_15, mutation_20, mutation_25, mutation_30, \
     mutation_35, mutation_40, mutation_45, mutation_50, mutation_55, mutation_60, mutation_65, mutation_70, mutation_75, \
     mutation_80, mutation_85, mutation_90, mutation_95
-from balans.destroy.proximity import proximity_05, proximity_10, proximity_15, proximity_20, proximity_25, proximity_30
+from balans.destroy.proximity import proximity_005, proximity_010, proximity_015, proximity_020, proximity_025, proximity_030
 from balans.destroy.random_objective import random_objective
 from balans.destroy.rens import rens_05, rens_10, rens_15, rens_20, rens_25, rens_30, rens_35, rens_40, rens_45, \
     rens_50, rens_55, rens_60, rens_65, rens_70, rens_75, rens_80, rens_85, rens_90, rens_95
@@ -83,12 +83,12 @@ class DestroyOperators(NamedTuple):
     Mutation_90 = mutation_90
     Mutation_95 = mutation_95
 
-    Proximity_05 = proximity_05
-    Proximity_10 = proximity_10
-    Proximity_15 = proximity_15
-    Proximity_20 = proximity_20
-    Proximity_25 = proximity_25
-    Proximity_30 = proximity_30
+    Proximity_05 = proximity_005
+    Proximity_10 = proximity_010
+    Proximity_15 = proximity_015
+    Proximity_20 = proximity_020
+    Proximity_25 = proximity_025
+    Proximity_30 = proximity_030
 
     Rens_05 = rens_05
     Rens_10 = rens_10
@@ -517,19 +517,23 @@ class ParBalans:
 
     repair_ops = [RepairOperators.Repair]
 
-    def __init__(self,
-                 instance_path,
-                 index_to_val=None,
-                 n_jobs: int = 1,  # Number of Balans solvers
-                 n_mip_jobs: int = 1,  # Number of threads for the MIP solver
-                 mip_solver: str = Constants.default_solver,  # MIP solver scip/gurobi
-                 output_dir: str = "results/",
-                 timelimit: int = 3600  # Timelimit, in seconds
-                 ):
+    def __init__(self, n_jobs: int = 1, n_mip_jobs: int = 1, mip_solver: str = Constants.default_solver,
+                 output_dir: str = "results/", timelimit: int = 60):
+        """
+        ParBalans runs several Balans configurations in parallel.
+        See class members for the possible pool of configurations used to generate random Balans configs.
+
+
+        Parameters
+        ----------
+        n_jobs
+        n_mip_jobs  Only supported by Gurobi solver
+        mip_solver
+        output_dir: Saves one file (TODO: pkl or human readable) per parallel run
+        timelimit: timelimit in seconds per each run
+        """
 
         # Set params
-        self.instance_path = instance_path
-        self.index_to_val = index_to_val
         self.n_jobs = n_jobs
         self.n_mip_jobs = n_mip_jobs
         self.mip_solver = mip_solver
@@ -539,35 +543,44 @@ class ParBalans:
         # Create the results directory
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def _solve_instance_with_config(self, idx):
+    def _solve_instance_with_config(self, idx, instance_path, index_to_val):
         config_data = self._generate_random_config()
-        balans = Balans(
-            destroy_ops=config_data["destroy_ops"],
-            repair_ops=self.repair_ops,
-            selector=MABSelector(scores=config_data["scores"],
-                                 num_destroy=min(len(config_data["destroy_ops"]), len(self.DESTROY_CATEGORIES)),
-                                 num_repair=len(self.repair_ops), learning_policy=config_data["learning_policy"],
-                                 seed=config_data["seed"]),
-            accept=config_data["accept"],
-            stop=MaxRuntime(self.timelimit),
-            n_mip_jobs=self.n_mip_jobs,
-            mip_solver=self.mip_solver)
+        balans = Balans(destroy_ops=config_data["destroy_ops"],
+                        repair_ops=self.repair_ops,
+                        selector=MABSelector(scores=config_data["scores"],
+                                             num_destroy=min(len(config_data["destroy_ops"]),
+                                                             len(self.DESTROY_CATEGORIES)),
+                                             num_repair=len(self.repair_ops),
+                                             learning_policy=config_data["learning_policy"],
+                                             seed=config_data["seed"]),
+                        accept=config_data["accept"],
+                        stop=MaxRuntime(self.timelimit),
+                        n_mip_jobs=self.n_mip_jobs,
+                        mip_solver=self.mip_solver)
 
-        if self.index_to_val:
-            result = balans.solve(self.instance_path, index_to_val=self.init_index_to_val)
+        if index_to_val:
+            result = balans.solve(instance_path, index_to_val)
         else:
-            result = balans.solve(self.instance_path)
+            result = balans.solve(instance_path)
 
         if result:
-            r = [result.statistics.objectives, np.cumsum(result.statistics.runtimes),
+            r = [result.statistics.objectives,
+                 np.cumsum(result.statistics.runtimes),
                  dict(result.statistics.destroy_operator_counts)]
             result_path = os.path.join(self.output_dir, f"result_{idx}.pkl")
             with open(result_path, "wb") as fp:
                 pickle.dump(r, fp)
 
-    def run(self):
+    def run(self, instance_path, index_to_val=None):
+        # TODO add pydocs for params and return
+        # TODO add return type hinting
         with Pool(processes=self.n_jobs) as pool:
-            results = pool.map(self._solve_instance_with_config, range(self.n_jobs))
+            results = pool.map(self._solve_instance_with_config, range(self.n_jobs), instance_path, index_to_val)
+
+        # Get the best solution and the best objective value
+        best_solution = None
+        best_result = None
+        return best_solution, best_result
 
     def _generate_random_config(self):
         # randomly generate the configuration for one Balans solver
