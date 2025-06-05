@@ -1,314 +1,207 @@
 import math
 import random
-from typing import Tuple, Dict, Any, List
+from typing import Tuple, Dict, Any, List, Sequence
 
-from highspy import Highs, ObjSense
+import highspy
+import numpy as np
+from highspy import Highs, kHighsInf, HighsStatus, ObjSense, HighsVarType as VarType
 
 from balans.base_mip import _BaseMIP
 from balans.utils import Constants
 
 
-# Highs examples:
-# https://github.com/ERGO-Code/HiGHS/blob/latest/tests/test_highspy.py
-class _HIGHS(_BaseMIP):
+class HighsSolver(_BaseMIP):
+    """A thin wrapper around the modern `highspy` builder API (HiGHS>1.10).
+
+    It retains the public surface of the legacy `_HIGHS` helper while
+    using the *current* enum‑based variable‑type conventions
+    (`HighsVarType.kInteger`, `kBinary`, …).
+    """
 
     def __init__(self, instance_path: str, seed: int):
         super().__init__(seed)
 
-        # Create HiGHS model
         self.model = Highs()
-        # self.model.silent()
-        self.model.readModel(instance_path)
-        self.model.setOptionValue('random_seed', 42)
+        status = self.model.readModel(instance_path)
+        if status != HighsStatus.kOk:
+            raise RuntimeError(f"HiGHS failed to read '{instance_path}' (status={status}).")
 
-        # Set variables
-        self.variables = self.model.getVariables()
+        self.model.setOptionValue("random_seed", seed)
 
-        # Set original objective and flag if we changed from max to min.
-        # We always minimize
-        self.org_objective_fn = self.model.col_cost_ # this didnot work
-        self.org_objective_sense = self.model.getObjectiveSense()
+        self.variables = self.model.getCols()  # list[highs_var]
+        self.lp = self.model.getLp()
+
+        self.org_coeffs: List[float] = list(self.lp.col_cost_)
+        self.org_objective_fn = sum(c * v for c, v in zip(self.org_coeffs, self.variables))
+        self.org_objective_sense = self.model.getObjectiveSense()[1]
         self.is_obj_sense_changed = False
+
         if self.org_objective_sense == ObjSense.kMaximize:
-            self.model.changeObjectiveSense(ObjSense.kMinimize)
+            self.org_coeffs = [-c for c in self.org_coeffs]
+            self.org_objective_fn = -self.org_objective_fn
+            self.model.minimize(self.org_objective_fn)
             self.is_obj_sense_changed = True
 
-        # Set constraints, proximity z, and a flag for objective transformation
-        # These are used for incremental solve and undo solve
-        self.constraints = []
+        self.constraints: List[Any] = []
         self.proximity_z = None
         self.is_obj_transformed = False
 
-    def get_obj_value(self, index_to_val) -> float:
-        expr = self.org_objective_fn
-        obj_val = 0
-        for i in range(len(expr)):
-            var = expr[i]
-            coeff = self.model.getObjectiveCoeff(i)
-            obj_val += coeff * index_to_val[var.index]
+    def _objective_expression(self):
+        return sum(self.lp.col_cost_[i] * v for i, v in enumerate(self.variables))
 
-        return obj_val
+    @staticmethod
+    def _is_discrete(vtype: VarType) -> bool:
+        return vtype in (VarType.kBinary, VarType.kInteger)
 
-    def extract_indexes(self) -> Tuple[List[Any], List[Any], List[Any]]:
-        # Set indexes
-        discrete_indexes = []
-        binary_indexes = []
-        integer_indexes = []
+    @staticmethod
+    def _is_binary(vtype: VarType) -> bool:
+        return vtype == VarType.kBinary
 
-        # highspy.HighsVarType.kContinuous,
-        # highspy.HighsVarType.kInteger
+    def get_obj_value(self, index_to_val: Dict[int, float]) -> float:
+        return sum(self.org_coeffs[i] * index_to_val.get(i, 0.0)
+                   for i in range(len(self.org_coeffs)))
 
-        for var in self.variables:
-            # Variable types naming different
-            if self.is_discrete(var.type):
-                discrete_indexes.append(var.index)
-                if self.is_binary(var.type):
-                    binary_indexes.append(var.index)
-                else:
-                    integer_indexes.append(var.index)
+    def extract_indexes(self) -> Tuple[List[int], List[int], List[int]]:
+        discrete, binary, integer = [], [], []
+        for v in self.variables:
+            if self._is_discrete(v.type):
+                discrete.append(v.index)
+                (binary if self._is_binary(v.type) else integer).append(v.index)
+        return discrete, binary, integer
 
-        return discrete_indexes, binary_indexes, integer_indexes
+    def extract_lp(self, discrete_idxs: Sequence[int]):
+        lp_vals, lp_obj = self.solve_lp_and_undo()
+        floating = [i for i in discrete_idxs if not math.isclose(lp_vals[i] % 1, 0.0)]
+        return lp_vals, lp_obj, floating
 
-    def extract_lp(self, discrete_indexes) -> Tuple[Dict[Any, float], float, List[Any]]:
-        lp_index_to_val, lp_obj_val = self.solve_lp_and_undo()
-        lp_floating_discrete_indexes = [i for i in discrete_indexes if not math.isclose(lp_index_to_val[i] % 1, 0.0)]
-
-        return lp_index_to_val, lp_obj_val, lp_floating_discrete_indexes
-
-    def fix_vars(self, index_to_val, skip_indexes=None) -> None:
-        # If no solution given, do nothing
-        if index_to_val is None:
+    def fix_vars(self, idx_to_val: Dict[int, float] | None, skip: set[int] | None = None):
+        if not idx_to_val:
             return
-
-        # Walk the variables
-        for var in self.variables:
-            # If a value for this variable is not given, do nothing
-            if var.index not in index_to_val or index_to_val[var.index] is None:
+        for v in self.variables:
+            if v.index not in idx_to_val or (skip and v.index in skip):
                 continue
-            # if skip list given, and the variable is in there, do nothing
-            if skip_indexes and var.index in skip_indexes:
-                continue
+            cid = self.model.addConstr(v == idx_to_val[v.index])
+            self.constraints.append(cid)
 
-            # Variable has a value, and it's not in the skip set, FIX
-            self.constraints.append(self.model.addConstraint(var.index, '==', index_to_val[var.index]))
-
-    def dins(self, index_to_val, dins_set, lp_index_to_val) -> None:
-        for var in self.variables:
-            index = var.index
-            if index in dins_set:
-                # Add bounding constraint around initial lp solution
-                current_lp_diff = abs(index_to_val[index] - lp_index_to_val[index])
-                self.constraints.append(
-                    self.model.addConstraint(var.index, '>=', lp_index_to_val[index] - current_lp_diff))
-                self.constraints.append(
-                    self.model.addConstraint(var.index, '<=', lp_index_to_val[index] + current_lp_diff))
+    def dins(self, idx_to_val, dins_set, lp_vals):
+        for v in self.variables:
+            i = v.index
+            if i in dins_set:
+                diff = abs(idx_to_val[i] - lp_vals[i])
+                self.constraints.append(self.model.addConstr(v >= lp_vals[i] - diff))
+                self.constraints.append(self.model.addConstr(v <= lp_vals[i] + diff))
             else:
-                # fix the variable
-                self.constraints.append(self.model.addConstraint(var.index, '==', index_to_val[index]))
+                self.constraints.append(self.model.addConstr(v == idx_to_val[i]))
 
-    def local_branching(self, index_to_val, local_branching_size, binary_indexes) -> None:
-        zero_binary_vars, one_binary_vars = self.split_binary_vars(self.variables, binary_indexes, index_to_val)
-        zero_expr = sum(zero_binary_vars)
-        one_expr = sum(1 - var for var in one_binary_vars)
-        total_expr = zero_expr + one_expr
-        self.constraints.append(self.model.addConstraint(total_expr, '<=', local_branching_size))
+    def local_branching(self, idx_to_val, radius: int, binary_idx):
+        zero, one = self.split_binary_vars(self.variables, binary_idx, idx_to_val)
+        expr = sum(zero) + sum(1 - v for v in one)
+        self.constraints.append(self.model.addConstr(expr <= radius))
 
-    def proximity(self, index_to_val, obj_val, proximity_delta, binary_indexes) -> None:
-        # Set the flag so we can undo
+    def proximity(self, idx_to_val, obj_val, delta: float, binary_idx):
         self.is_obj_transformed = True
+        zero, one = self.split_binary_vars(self.variables, binary_idx, idx_to_val)
+        expr_obj = sum(zero) + sum(1 - v for v in one)
 
-        zero_binary_vars, one_binary_vars = self.split_binary_vars(self.variables, binary_indexes, index_to_val)
-        zero_expr = sum(zero_binary_vars)
-        one_expr = sum(1 - var for var in one_binary_vars)
+        self.proximity_z = self.model.addVariable(lb=0, name="proximity_z")
+        rhs = obj_val * (1 - delta) + self.proximity_z
+        self.constraints.append(self.model.addConstr(self._objective_expression() <= rhs))
 
-        # add cutoff constraint depending on sense, so that next state is better quality
-        self.proximity_z = self.model.addVar(lb=0, name='proximity_z')
-        self.constraints.append(self.model.addConstraint(self.model.getObjective(), '<=',
-                                                         obj_val * (1 - proximity_delta) + self.proximity_z))
+        self.model.minimize(expr_obj + Constants.M * self.proximity_z)
 
-        self.model.setObjective(zero_expr + one_expr + Constants.M * self.proximity_z, 'minimize')
-
-    def rens(self, index_to_val, rens_float_set, lp_index_to_val) -> None:
-        for var in self.variables:
-            if var.index in rens_float_set:
-                self.constraints.append(
-                    self.model.addConstraint(var.index, '>=', math.floor(lp_index_to_val[var.index])))
-                self.constraints.append(
-                    self.model.addConstraint(var.index, '<=', math.ceil(lp_index_to_val[var.index])))
+    def rens(self, idx_to_val, rens_set, lp_vals):
+        for v in self.variables:
+            i = v.index
+            if i in rens_set:
+                self.constraints.append(self.model.addConstr(v >= math.floor(lp_vals[i])))
+                self.constraints.append(self.model.addConstr(v <= math.ceil(lp_vals[i])))
             else:
-                self.constraints.append(self.model.addConstraint(var.index, '==', index_to_val[var.index]))
+                self.constraints.append(self.model.addConstr(v == idx_to_val[i]))
 
-    def random_objective(self) -> None:
-        # Set the flag so we can undo
+    def random_objective(self):
         self.is_obj_transformed = True
+        n = len(self.variables)
+        keep = max(1, int(0.25 * n))
+        chosen = set(random.sample(range(n), keep))
 
-        # Get original objective function
-        expr = self.org_objective_fn
+        expr = sum(self.org_coeffs[i] * self.variables[i] for i in chosen)
+        self.model.minimize(expr)
+        self.model.setOptionValue("solution_limit", 1)
+        self.model.setOptionValue("heuristics", 0)
 
-        # Extract variables and coefficients
-        vars = []
-        coeffs = []
+    def solve_and_undo(self, time_limit_sc: float | None = None, sol_limit: int | None = None):
+        if time_limit_sc is not None:
+            self.model.setOptionValue("time_limit", time_limit_sc)
+        if sol_limit is not None:
+            self.model.setOptionValue("solution_limit", sol_limit)
 
-        for i in range(len(expr)):
-            vars.append(expr[i])
-            coeffs.append(self.model.getObjectiveCoeff(i))
-
-        num_vars = len(vars)
-        num_keep = max(1, int(0.25 * num_vars))  # Ensure at least one variable is kept
-
-        # Randomly select indices to keep
-        indices = list(range(num_vars))
-        random.shuffle(indices)
-        keep_indices = set(indices[:num_keep])
-
-        # Build new objective function with 25% coefficients
-        new_obj = []
-        for i in range(num_vars):
-            if i in keep_indices:
-                if self.is_obj_sense_changed:
-                    new_obj.append((-coeffs[i], vars[i]))
-                else:
-                    new_obj.append((coeffs[i], vars[i]))
-            else:
-                # Coefficient is zero, do not add term
-                pass
-
-        # Set the new objective function
-        self.model.setObjective(new_obj, 'minimize')
-
-        # Set limits
-        self.model.setOption('solution_limit', 1)
-        self.model.setOption('heuristics', 0)
-
-    def solve_and_undo(self, time_limit_in_sc=None, solution_limit=None) -> Tuple[Dict[Any, float], float]:
-        # Set limits
-        if time_limit_in_sc is not None:
-            self.model.setOption('time_limit', time_limit_in_sc)
-        if solution_limit is not None:
-            self.model.setOption('solution_limit', solution_limit)
-
-        # Optimize
         self.model.run()
+        vals, obj = self.get_index_to_val_and_objective()
+        self._reset_after_solve(time_limit_sc, sol_limit)
+        return vals, obj
 
-        # Get solution
-        index_to_val, obj_val = self.get_index_to_val_and_objective()
+    def solve_random_and_undo(self, time_limit_sc: float | None = None):
+        if time_limit_sc is not None:
+            self.model.setOptionValue("time_limit", time_limit_sc)
 
-        # Free the model
-        self.model.clear()
-
-        # Undo limits
-        if time_limit_in_sc is not None:
-            self.model.setOption('time_limit', float('inf'))
-        if solution_limit is not None:
-            self.model.setOption('solution_limit', float('inf'))
-
-        # Remove constraints, and reset
-        for ct in self.constraints:
-            self.model.removeConstraint(ct)
-            # highs.removeConstr(c1)
-        self.constraints = []
-
-        # Reset to original objective (random objective and proximity change objective)
-        if self.is_obj_transformed:
-            self.is_obj_transformed = False
-
-            # Reset back to original minimize objective
-            if self.is_obj_sense_changed:
-                self.model.setObjective(-1 * self.org_objective_fn, 'minimize')
-            else:
-                self.model.setObjective(self.org_objective_fn, 'minimize')
-
-            # if proximity_z variable is added, remove it
-            if self.proximity_z:  # if proximity_delta > 0
-                self.model.removeVar(self.proximity_z)
-                self.proximity_z = None
-
-        return index_to_val, obj_val
-
-    def solve_random_and_undo(self, time_limit_in_sc=None) -> Tuple[Dict[Any, float], float]:
-        # Set limits
-        if time_limit_in_sc is not None:
-            self.model.setOption('time_limit', time_limit_in_sc)
-
-        # Set random objective
         self.random_objective()
+        self.model.run()
+        vals, obj = self.get_index_to_val_and_objective()
 
-        # Solve
+        # restore original objective & options
+        self.is_obj_transformed = False
+        self.model.minimize(self.org_objective_fn)
+        self.model.setOptionValue("solution_limit", kHighsInf)
+        if time_limit_sc is not None:
+            self.model.setOptionValue("time_limit", kHighsInf)
+
+        return vals, obj
+
+    def solve_lp_and_undo(self):
+        int_idx, bin_idx = [], []
+        for v in self.variables:
+            if self._is_binary(v.type):
+                bin_idx.append(v.index)
+            elif self._is_discrete(v.type):
+                int_idx.append(v.index)
+
+        if int_idx:
+            self.model.changeColsIntegrality(len(int_idx),
+                                             np.array(int_idx, dtype=np.int32),
+                                             np.full(len(int_idx), VarType.kContinuous, dtype=np.int32))
+
+        if bin_idx:
+            self.model.changeColsIntegrality(len(bin_idx),
+                                             np.array(bin_idx, dtype=np.int32),
+                                             np.full(len(bin_idx), VarType.kContinuous, dtype=np.int32))
+
         self.model.run()
 
-        index_to_val, obj_val = self.get_index_to_val_and_objective()
+        lp_vals, lp_obj = self.get_index_to_val_and_objective()
 
-        # Free the model
-        self.model.clear()
+        if int_idx:
+            self.model.changeColsIntegrality(len(int_idx),
+                                             np.array(int_idx, dtype=np.int32),
+                                             np.full(len(int_idx), VarType.kInteger, dtype=np.int32))
+        if bin_idx:
+            self.model.changeColsIntegrality(len(bin_idx),
+                                             np.array(bin_idx, dtype=np.int32),
+                                             np.full(len(bin_idx), VarType.kBinary, dtype=np.int32))
 
-        # Restore original objective
-        self.is_obj_transformed = False
+        return lp_vals, lp_obj
 
-        # Reset back to original minimize objective
-        if self.is_obj_sense_changed:
-            self.model.setObjective(-1 * self.org_objective_fn, 'minimize')
-        else:
-            self.model.setObjective(self.org_objective_fn, 'minimize')
+    def get_index_to_val_and_objective(self):
+        status = self.model.getModelStatus()
+        if status in (highspy.HighsModelStatus.kInfeasible, highspy.HighsModelStatus.kUnbounded):
+            return {}, float("inf")
 
-        self.model.setOption('solution_limit', float('inf'))
-        if time_limit_in_sc is not None:
-            self.model.setOption('time_limit', float('inf'))
+        sol = self.model.getSolution()
+        idx_to_val = {i: v for i, v in enumerate(sol.col_value)}
+        obj_val = self.model.getInfo().objective_function_value
+        return idx_to_val, obj_val
 
-        return index_to_val, obj_val
-
-    def solve_lp_and_undo(self) -> Tuple[Dict[Any, float], float]:
-        # Solve LP relaxation
-        int_vars = []
-        bin_vars = []
-        variables = self.model.getCols()
-
-        for var in variables:
-            if self.is_binary(var.type):
-                var.type = 'continuous'
-                bin_vars.append(var)
-            elif self.is_discrete(var.type):
-                var.type = 'continuous'
-                int_vars.append(var)
-
-        # Solve
-        self.model.runLpRelaxation()
-        lp_index_to_val, lp_obj_val = self.get_index_to_val_and_objective()
-
-        # Get back the original model
-        self.model.clear()
-
-        # Revert variable types
-        for var in int_vars:
-            var.type = 'integer'
-        for var in bin_vars:
-            var.type = 'binary'
-
-        return lp_index_to_val, lp_obj_val
-
-    def get_index_to_val_and_objective(self) -> Tuple[Dict[Any, float], float]:
-        if self.model.getNumSolutions() == 0 or self.model.getModelStatus() == 'infeasible':
-            return dict(), 9999999
-        else:
-            index_to_val = {var.index: var.value for var in self.variables}
-            obj_value = self.model.getObjectiveValue()
-            return index_to_val, obj_value
-
-    @staticmethod
-    def is_discrete(var_type) -> bool:
-        return var_type in ('binary', 'integer')
-
-    @staticmethod
-    def is_binary(var_type) -> bool:
-        return var_type == 'binary'
-
-    @staticmethod
-    def split_binary_vars(variables, binary_indexes, index_to_val) -> Tuple[List[Any], List[Any]]:
-        zero_binary_vars = []
-        one_binary_vars = []
-        for var in variables:
-            if var.index in binary_indexes:
-                if math.isclose(index_to_val[var.index], 0.0):
-                    zero_binary_vars.append(var)
-                else:
-                    one_binary_vars.append(var)
-        return zero_binary_vars, one_binary_vars
+    def _reset_after_solve(self, time_limit_sc, sol_limit):
+        if time_limit_sc is not None:
+            self.model.setOptionValue("time_limit", time_limit_sc)
+        if sol_limit is not None:
+            self.model.setOptionValue("solution_limit", sol_limit)
