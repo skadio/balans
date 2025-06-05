@@ -9,14 +9,9 @@ from highspy import Highs, kHighsInf, HighsStatus, ObjSense, HighsVarType as Var
 from balans.base_mip import _BaseMIP
 from balans.utils import Constants
 
-
+# Highs examples:
+# https://github.com/ERGO-Code/HiGHS/blob/latest/tests/test_highspy.py
 class HighsSolver(_BaseMIP):
-    """A thin wrapper around the modern `highspy` builder API (HiGHS>1.10).
-
-    It retains the public surface of the legacy `_HIGHS` helper while
-    using the *current* enum‑based variable‑type conventions
-    (`HighsVarType.kInteger`, `kBinary`, …).
-    """
 
     def __init__(self, instance_path: str, seed: int):
         super().__init__(seed)
