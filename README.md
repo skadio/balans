@@ -82,7 +82,8 @@ n_machines = 2
 
 balans = ParBalans(instance_path=instance_path, 
                   n_machines=n_machines,
-                  output_dir="results/") # where you want to save the output file
+                  output_dir="results/", # where you want to save the output file
+                  timelimit=3600) # number of seconds for each Balans to run
 balans.solve()
 ```
 

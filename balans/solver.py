@@ -520,7 +520,8 @@ class ParBalans:
                  n_machines: int = 1, # Number of Balans solvers
                  n_threads: int = 1,  # Number of threads for the solver
                  mip_solver: str = Constants.default_solver,  # MIP solver scip/gurobi
-                 output_dir: str = "results/"
+                 output_dir: str = "results/",
+                 timelimit: int = 3600 # Timelimit, in seconds
                  ):
         self.instance_path = instance_path
         self.index_to_val = index_to_val
@@ -529,6 +530,7 @@ class ParBalans:
         self.mip_solver = mip_solver
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
+        self.timelimit = timelimit
 
     def solve_instance_with_config(self, idx):
         config_data = self.generate_random_config()
@@ -544,10 +546,10 @@ class ParBalans:
             n_threads=self.n_threads,
             mip_solver=self.mip_solver)
 
-        if self.init_index_to_val:
-            result = balans.solve(self.instance, index_to_val=self.init_index_to_val)
+        if self.index_to_val:
+            result = balans.solve(self.instance_path, index_to_val=self.init_index_to_val)
         else:
-            result = balans.solve(self.instance)
+            result = balans.solve(self.instance_path)
 
         if result:
             r = [result.statistics.objectives, np.cumsum(result.statistics.runtimes),
