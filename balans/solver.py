@@ -4,6 +4,7 @@ from typing import List, Optional, Dict
 from typing import NamedTuple
 import pickle
 from multiprocessing import Pool
+from functools import partial
 
 import numpy as np
 from alns.ALNS import ALNS
@@ -28,7 +29,9 @@ from balans.destroy.local_branching import local_branching_05, local_branching_1
 from balans.destroy.mutation import mutation_05, mutation_10, mutation_15, mutation_20, mutation_25, mutation_30, \
     mutation_35, mutation_40, mutation_45, mutation_50, mutation_55, mutation_60, mutation_65, mutation_70, mutation_75, \
     mutation_80, mutation_85, mutation_90, mutation_95
-from balans.destroy.proximity import proximity_005, proximity_010, proximity_015, proximity_020, proximity_025, proximity_030
+from balans.destroy.proximity import proximity_005, proximity_010, proximity_015, proximity_020, proximity_025, \
+    proximity_030, proximity_035, proximity_040, proximity_045, proximity_05, proximity_055, proximity_060, proximity_065, \
+    proximity_070, proximity_075, proximity_080, proximity_085, proximity_090, proximity_095, proximity_10
 from balans.destroy.random_objective import random_objective
 from balans.destroy.rens import rens_05, rens_10, rens_15, rens_20, rens_25, rens_30, rens_35, rens_40, rens_45, \
     rens_50, rens_55, rens_60, rens_65, rens_70, rens_75, rens_80, rens_85, rens_90, rens_95
@@ -83,12 +86,26 @@ class DestroyOperators(NamedTuple):
     Mutation_90 = mutation_90
     Mutation_95 = mutation_95
 
-    Proximity_05 = proximity_005
-    Proximity_10 = proximity_010
-    Proximity_15 = proximity_015
-    Proximity_20 = proximity_020
-    Proximity_25 = proximity_025
-    Proximity_30 = proximity_030
+    Proximity_005 = proximity_005
+    Proximity_010 = proximity_010
+    Proximity_015 = proximity_015
+    Proximity_020 = proximity_020
+    Proximity_025 = proximity_025
+    Proximity_030 = proximity_030
+    Proximity_035 = proximity_035
+    Proximity_040 = proximity_040
+    Proximity_045 = proximity_045
+    Proximity_05 = proximity_05
+    Proximity_055 = proximity_055
+    Proximity_060 = proximity_060
+    Proximity_065 = proximity_065
+    Proximity_070 = proximity_070
+    Proximity_075 = proximity_075
+    Proximity_080 = proximity_080
+    Proximity_085 = proximity_085
+    Proximity_090 = proximity_090
+    Proximity_095 = proximity_095
+    Proximity_10 = proximity_10
 
     Rens_05 = rens_05
     Rens_10 = rens_10
@@ -178,12 +195,26 @@ DestroyType = (type(DestroyOperators.Crossover),
                type(DestroyOperators.Mutation_85),
                type(DestroyOperators.Mutation_90),
                type(DestroyOperators.Mutation_95),
+               type(DestroyOperators.Proximity_005),
+               type(DestroyOperators.Proximity_010),
+               type(DestroyOperators.Proximity_015),
+               type(DestroyOperators.Proximity_020),
+               type(DestroyOperators.Proximity_025),
+               type(DestroyOperators.Proximity_030),
+               type(DestroyOperators.Proximity_035),
+               type(DestroyOperators.Proximity_040),
+               type(DestroyOperators.Proximity_045),
                type(DestroyOperators.Proximity_05),
+               type(DestroyOperators.Proximity_055),
+               type(DestroyOperators.Proximity_060),
+               type(DestroyOperators.Proximity_065),
+               type(DestroyOperators.Proximity_070),
+               type(DestroyOperators.Proximity_075),
+               type(DestroyOperators.Proximity_080),
+               type(DestroyOperators.Proximity_085),
+               type(DestroyOperators.Proximity_090),
+               type(DestroyOperators.Proximity_095),
                type(DestroyOperators.Proximity_10),
-               type(DestroyOperators.Proximity_15),
-               type(DestroyOperators.Proximity_20),
-               type(DestroyOperators.Proximity_25),
-               type(DestroyOperators.Proximity_30),
                type(DestroyOperators.Rens_05),
                type(DestroyOperators.Rens_10),
                type(DestroyOperators.Rens_15),
@@ -403,12 +434,26 @@ class Balans:
 
     @staticmethod
     def _is_proximity(op):
-        return (op == DestroyOperators.Proximity_05 or
-                op == DestroyOperators.Proximity_10 or
-                op == DestroyOperators.Proximity_15 or
-                op == DestroyOperators.Proximity_20 or
-                op == DestroyOperators.Proximity_25 or
-                op == DestroyOperators.Proximity_30)
+        return (op == DestroyOperators.Proximity_005 or
+                op == DestroyOperators.Proximity_010 or
+                op == DestroyOperators.Proximity_015 or
+                op == DestroyOperators.Proximity_020 or
+                op == DestroyOperators.Proximity_025 or
+                op == DestroyOperators.Proximity_030 or
+                op == DestroyOperators.Proximity_035 or
+                op == DestroyOperators.Proximity_040 or
+                op == DestroyOperators.Proximity_045 or
+                op == DestroyOperators.Proximity_05 or
+                op == DestroyOperators.Proximity_055 or
+                op == DestroyOperators.Proximity_060 or
+                op == DestroyOperators.Proximity_065 or
+                op == DestroyOperators.Proximity_070 or
+                op == DestroyOperators.Proximity_075 or
+                op == DestroyOperators.Proximity_080 or
+                op == DestroyOperators.Proximity_085 or
+                op == DestroyOperators.Proximity_090 or
+                op == DestroyOperators.Proximity_095 or
+                op == DestroyOperators.Proximity_10)
 
     def _set_alns_operators(self):
 
@@ -505,9 +550,9 @@ class ParBalans:
                           "local_branching": [DestroyOperators.Local_Branching_10, DestroyOperators.Local_Branching_20,
                                               DestroyOperators.Local_Branching_30, DestroyOperators.Local_Branching_40,
                                               DestroyOperators.Local_Branching_50],
-                          "proximity": [DestroyOperators.Proximity_05, DestroyOperators.Proximity_10,
-                                        DestroyOperators.Proximity_15,
-                                        DestroyOperators.Proximity_20, DestroyOperators.Proximity_30],
+                          "proximity": [DestroyOperators.Proximity_020, DestroyOperators.Proximity_040,
+                                        DestroyOperators.Proximity_060,
+                                        DestroyOperators.Proximity_080, DestroyOperators.Proximity_10],
                           "rens": [DestroyOperators.Rens_10, DestroyOperators.Rens_20, DestroyOperators.Rens_30,
                                    DestroyOperators.Rens_40,
                                    DestroyOperators.Rens_50],
@@ -515,10 +560,18 @@ class ParBalans:
                                    DestroyOperators.Rins_40,
                                    DestroyOperators.Rins_50]}
 
-    repair_ops = [RepairOperators.Repair]
+    ACCEPT_TYPE = ["HillClimbing", "SimulatedAnnealing"]
 
-    def __init__(self, n_jobs: int = 1, n_mip_jobs: int = 1, mip_solver: str = Constants.default_solver,
-                 output_dir: str = "results/", timelimit: int = 60):
+    LEARNING_POLICY = ["EpsilonGreedy", "Softmax", "ThompsonSampling"]
+
+    REPAIR_OPERATORS = [RepairOperators.Repair]
+
+    def __init__(self,
+                 n_jobs: int = 1,
+                 n_mip_jobs: int = 1,
+                 mip_solver: str = Constants.default_solver,
+                 output_dir: str = "results/",
+                 stop: StopType = MaxIterations(10)):
         """
         ParBalans runs several Balans configurations in parallel.
         See class members for the possible pool of configurations used to generate random Balans configs.
@@ -526,11 +579,11 @@ class ParBalans:
 
         Parameters
         ----------
-        n_jobs
+        n_jobs  Parallel Balans runs
         n_mip_jobs  Only supported by Gurobi solver
-        mip_solver
-        output_dir: Saves one file (TODO: pkl or human readable) per parallel run
-        timelimit: timelimit in seconds per each run
+        mip_solver  "scip" or "gurobi
+        output_dir  Saves one file per parallel run
+        stop  Stop criteria per each run
         """
 
         # Set params
@@ -538,7 +591,7 @@ class ParBalans:
         self.n_mip_jobs = n_mip_jobs
         self.mip_solver = mip_solver
         self.output_dir = output_dir
-        self.timelimit = timelimit
+        self.stop = stop
 
         # Create the results directory
         os.makedirs(self.output_dir, exist_ok=True)
@@ -546,15 +599,15 @@ class ParBalans:
     def _solve_instance_with_config(self, idx, instance_path, index_to_val):
         config_data = self._generate_random_config()
         balans = Balans(destroy_ops=config_data["destroy_ops"],
-                        repair_ops=self.repair_ops,
+                        repair_ops=self.REPAIR_OPERATORS,
                         selector=MABSelector(scores=config_data["scores"],
                                              num_destroy=min(len(config_data["destroy_ops"]),
                                                              len(self.DESTROY_CATEGORIES)),
-                                             num_repair=len(self.repair_ops),
+                                             num_repair=len(self.REPAIR_OPERATORS),
                                              learning_policy=config_data["learning_policy"],
                                              seed=config_data["seed"]),
                         accept=config_data["accept"],
-                        stop=MaxRuntime(self.timelimit),
+                        stop=self.stop,
                         n_mip_jobs=self.n_mip_jobs,
                         mip_solver=self.mip_solver)
 
@@ -570,28 +623,52 @@ class ParBalans:
             result_path = os.path.join(self.output_dir, f"result_{idx}.pkl")
             with open(result_path, "wb") as fp:
                 pickle.dump(r, fp)
+        return result.best_state.solution(), result.best_state.objective()
 
     def run(self, instance_path, index_to_val=None):
-        # TODO add pydocs for params and return
-        # TODO add return type hinting
-        with Pool(processes=self.n_jobs) as pool:
-            results = pool.map(self._solve_instance_with_config, range(self.n_jobs), instance_path, index_to_val)
+        """
+        instance_path: the path to the MIP instance file
+        index_to_val: initial (partial) solution to warm start the variables
 
-        # Get the best solution and the best objective value
-        best_solution = None
-        best_result = None
-        return best_solution, best_result
+        Returns
+        -------
+        best solution and best result across all Balans runs
+        """
+
+        with Pool(processes=self.n_jobs) as pool:
+            results = pool.map(partial(self._solve_instance_with_config,
+                                       instance_path = instance_path,
+                                       index_to_val = index_to_val),
+                               range(self.n_jobs))
+
+        # Get the best objective value and its index
+        # Assume is a MINIMIZE problem
+        best = min(results, key=lambda t: t[1])
+        return best[0], best[1]
 
     def _generate_random_config(self):
         # randomly generate the configuration for one Balans solver
         chosen_destroy_ops = self._pick_random_destroy_ops()
-        acceptance_obj = random.choice([HillClimbing(), SimulatedAnnealing(start_temperature=10, end_temperature=1,
-                                                                           step=random.uniform(0.01, 1),
-                                                                           method="linear")])
 
-        possible_policies = [LearningPolicy.EpsilonGreedy(epsilon=random.uniform(0.01, 0.5)),
-                             LearningPolicy.Softmax(tau=random.uniform(1, 3)), LearningPolicy.ThompsonSampling()]
-        chosen_lp = random.choice(possible_policies)
+        chosen_accept_type = []
+        for op in self.ACCEPT_TYPE:
+            if "HillClimbing" in op:
+                chosen_accept_type.append(HillClimbing())
+            if "SimulatedAnnealing" in op:
+                chosen_accept_type.append(SimulatedAnnealing(start_temperature=10, end_temperature=1,
+                                                                           step=random.uniform(0.01, 1),
+                                                                           method="linear"))
+        acceptance_obj = random.choice(chosen_accept_type)
+
+        chosen_learning_policy = []
+        for op in self.LEARNING_POLICY:
+            if "EpsilonGreedy" in op:
+                chosen_learning_policy.append(LearningPolicy.EpsilonGreedy(epsilon=random.uniform(0.01, 0.5)))
+            if "Softmax" in op:
+                chosen_learning_policy.append(LearningPolicy.Softmax(tau=random.uniform(1, 3)))
+            if "ThompsonSampling" in op:
+                chosen_learning_policy.append(LearningPolicy.ThompsonSampling())
+        chosen_lp = random.choice(chosen_learning_policy)
         lp_str = self.learning_policy_to_str(chosen_lp)
 
         if lp_str == "THOMPSON_SAMPLING":
@@ -616,13 +693,13 @@ class ParBalans:
         return config_data
 
     def _pick_random_destroy_ops(self):
-        # Choose a random number between 4 and 16
-        num_elements = random.randint(4, 16)
+        # Choose a random number for number of destory operators
+        num_elements = random.randint(len(self.DESTROY_CATEGORIES) - 2, len(self.DESTROY_CATEGORIES) * 3)
 
         # Initialize the list of chosen elements
         chosen_elements = []
 
-        if num_elements > 5:
+        if num_elements > len(self.DESTROY_CATEGORIES) - 1:
             # Choose at least one member from each category
             for category in self.DESTROY_CATEGORIES:
                 element = random.choice(self.DESTROY_CATEGORIES[category])

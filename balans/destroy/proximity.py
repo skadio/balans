@@ -43,13 +43,62 @@ def proximity_020(current: _State, rnd_state) -> _State:
 def proximity_025(current: _State, rnd_state) -> _State:
     return proximity(current, rnd_state, delta=0.025)
 
-# TODO
+
+def proximity_030(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.030)
+
 
 def proximity_035(current: _State, rnd_state) -> _State:
     return proximity(current, rnd_state, delta=0.035)
 
+
+def proximity_040(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.040)
+
+
+def proximity_045(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.045)
+
+
+def proximity_05(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.05)
+
+
+def proximity_055(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.055)
+
+
+def proximity_060(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.060)
+
+
+def proximity_065(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.065)
+
+
+def proximity_070(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.070)
+
+
+def proximity_075(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.075)
+
+
+def proximity_080(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.080)
+
+
+def proximity_085(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.085)
+
+
+def proximity_090(current: _State, rnd_state) -> _State:
+    return proximity(current, rnd_state, delta=0.090)
+
+
 def proximity_095(current: _State, rnd_state) -> _State:
     return proximity(current, rnd_state, delta=0.095)
+
 
 def proximity_10(current: _State, rnd_state) -> _State:
     return proximity(current, rnd_state, delta=0.10)

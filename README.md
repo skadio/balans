@@ -1,3 +1,5 @@
+from alns.stop import MaxIterations
+
 # Balans: Bandit-based Adaptive Large Neighborhood Search
 
 Balans is a meta-solver for Mixed-Integer Programming problems (MIPs) using 
@@ -73,13 +75,14 @@ print("Best solution objective:", result.best_state.objective())
 ```python
 # Parallel version of Balans, that runs several configurations parallely
 from balans.solver import ParBalans
+from alns.stop import MaxIterations
 
 # ParBalans to run different Balans configs in parallel and save results
 parbalans = ParBalans(n_jobs=2,             # parallel Balans runs
-                      n_mip_jobs=4,         # parallel MIP threads
+                      n_mip_jobs=1,         # parallel MIP threads, Only supported by Gurobi solver
                       mip_solver="scip",
                       output_dir="results/", 
-                      timelimit=60)         # time limit per each run
+                      stop=MaxIterations(10))         # Stop criteria per each run
 
 # Run a mip instance to retrieve several results 
 instance_path = "data/miplib/noswot.mps"
