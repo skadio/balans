@@ -601,8 +601,7 @@ class ParBalans:
         balans = Balans(destroy_ops=config_data["destroy_ops"],
                         repair_ops=self.REPAIR_OPERATORS,
                         selector=MABSelector(scores=config_data["scores"],
-                                             num_destroy=min(len(config_data["destroy_ops"]),
-                                                             len(self.DESTROY_CATEGORIES)),
+                                             num_destroy=len(config_data["destroy_ops"]),
                                              num_repair=len(self.REPAIR_OPERATORS),
                                              learning_policy=config_data["learning_policy"],
                                              seed=config_data["seed"]),
@@ -695,7 +694,7 @@ class ParBalans:
         return config_data
 
     def _pick_random_destroy_ops(self):
-        # Choose a random number for number of destory operators
+        # Choose a random number for number of destroy operators
         num_elements = random.randint(len(self.DESTROY_CATEGORIES) - 2, len(self.DESTROY_CATEGORIES) * 3)
 
         # Initialize the list of chosen elements
