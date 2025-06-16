@@ -1,5 +1,3 @@
-from alns.stop import MaxIterations
-
 # Balans: Bandit-based Adaptive Large Neighborhood Search
 
 Balans is a meta-solver for Mixed-Integer Programming problems (MIPs) using 
