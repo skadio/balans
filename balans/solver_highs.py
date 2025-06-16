@@ -9,8 +9,12 @@ from highspy import Highs, kHighsInf, HighsStatus, ObjSense, HighsVarType as Var
 from balans.base_mip import _BaseMIP
 from balans.utils import Constants
 
+
 # Highs examples:
 # https://github.com/ERGO-Code/HiGHS/blob/latest/tests/test_highspy.py
+# highs/example/call_highs_from_python.py
+# highs/example/call_highs_from_python_highspy.py
+# changeColsCost
 class HighsSolver(_BaseMIP):
 
     def __init__(self, instance_path: str, seed: int):
