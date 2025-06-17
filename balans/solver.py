@@ -310,17 +310,47 @@ class Balans:
     """
 
     def __init__(self,
-                 destroy_ops: List,
-                 repair_ops: List,
-                 selector: SelectorType,
-                 accept: AcceptType,
-                 stop: StopType,
+                 destroy_ops = None, # List
+                 repair_ops = None, # List
+                 selector = None, # SelectorType
+                 accept = None, # AcceptType
+                 stop = None, # StopType
                  seed: int = Constants.default_seed,  # The random seed
                  n_mip_jobs: int = 1,  # Number of threads for the solver
                  mip_solver: str = Constants.default_solver  # MIP solver scip/gurobi
                  ):
 
         # Validate arguments
+        if destroy_ops is None:
+            destroy_ops = [DestroyOperators.Crossover,
+                           DestroyOperators.Mutation_25,
+                           DestroyOperators.Mutation_50,
+                           DestroyOperators.Mutation_75,
+                           DestroyOperators.Local_Branching_10,
+                           DestroyOperators.Local_Branching_25,
+                           DestroyOperators.Local_Branching_50,
+                           DestroyOperators.Proximity_005,
+                           DestroyOperators.Proximity_015,
+                           DestroyOperators.Proximity_030,
+                           DestroyOperators.Rens_25,
+                           DestroyOperators.Rens_50,
+                           DestroyOperators.Rens_75,
+                           DestroyOperators.Rins_25,
+                           DestroyOperators.Rins_50,
+                           DestroyOperators.Rins_75]
+        if repair_ops is None:
+            repair_ops = [RepairOperators.Repair]
+        if selector is None:
+            best, better, accept, reject = 1, 1, 0, 0
+            selector = MABSelector(scores=[best, better, accept, reject],
+                                   num_destroy=len(destroy_ops),
+                                   num_repair=len(repair_ops),
+                                   learning_policy=LearningPolicy.ThompsonSampling())
+        if accept is None:
+            accept = SimulatedAnnealing(start_temperature=20, end_temperature=1, step=0.1)
+        if stop is None:
+            stop = MaxIterations(10)
+
         self._validate_balans_args(destroy_ops, repair_ops, selector, accept, stop, seed, n_mip_jobs, mip_solver)
 
         # Parameters
@@ -604,9 +634,11 @@ class ParBalans:
                                                        balans=self.balans_generator()),
                                                range(self.n_jobs))
 
-        # Get the best objective value and its index
-        # TODO Fix Assume is a MINIMIZE problem
-        best_index_to_val, best_obj = min(best_sol_and_obj_of_job, key=lambda t: t[1])
+        # Get the best objective value and its index base on the objective sense
+        if mip.org_objective_sense == -1 or Constants.maximize:
+            best_index_to_val, best_obj = max(best_sol_and_obj_of_job, key=lambda t: t[1])
+        else:
+            best_index_to_val, best_obj = min(best_sol_and_obj_of_job, key=lambda t: t[1])
         return best_index_to_val, best_obj
 
     def _solve_instance_with_balans(self, idx, instance_path, index_to_val, balans):
@@ -716,7 +748,7 @@ class ParBalans:
         chosen_seed = random.randint(1, 100000)
 
         # Stop
-        stop = MaxIterations(10)
+        stop = MaxIterations(10) # MaxRuntime(100)
 
         # Balans
         balans = Balans(destroy_ops=chosen_destroy_ops,
