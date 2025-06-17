@@ -32,7 +32,7 @@ class LPSolTest(BaseTest):
         # LP solution
         lp_index_to_val, lp_obj_val = mip.solve_lp_and_undo()
 
-        self.assertAlmostEqual(lp_obj_val, 6765.209042644034)
+        self.assertAlmostEqual(lp_obj_val, 6765.2090426)
 
     def test_lp_t3(self):
         # Input

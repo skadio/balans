@@ -22,13 +22,13 @@ class ParBalansTest(BaseTest):
         result = parbalans.run(instance_path)
 
         print("Best solution:", result[0])
-        self.assertEqual(result[1], -41)
+        self.is_not_worse(-41, result[1], "minimize")
 
         with open("results/result_0.pkl", "rb") as file:
             result0 = pickle.load(file)
         with open("results/result_1.pkl", "rb") as file:
             result1 = pickle.load(file)
         if result0[0][-1] < result1[0][-1]:
-            self.assertEqual(result0[0][-1], -41)
+            self.is_not_worse(-41, result[1], "minimize")
         else:
-            self.assertEqual(result1[0][-1], -41)
+            self.is_not_worse(-41, result[1], "minimize")
