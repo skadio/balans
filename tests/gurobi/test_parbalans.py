@@ -13,8 +13,8 @@ class ParBalansTest(BaseTest):
         instance = "noswot.mps"
         instance_path = os.path.join(Constants.DATA_TEST, instance)
 
-        balans = ParBalans(n_jobs=2)
-        result = balans.run(instance_path)
+        parbalans = ParBalans(n_jobs=2)
+        result = parbalans.run(instance_path)
 
         print("Best solution:", result[0])
 

@@ -1,6 +1,6 @@
 import os
 import random
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 from typing import NamedTuple
 import pickle
 from multiprocessing import Pool
@@ -330,7 +330,7 @@ class Balans:
         self.accept = accept
         self.stop = stop
         self.seed = seed
-        self.n_threads = n_mip_jobs
+        self.n_mip_jobs = n_mip_jobs
         self.mip_solver_str = mip_solver
 
         # RNG
@@ -374,7 +374,7 @@ class Balans:
         self._validate_solve_args(instance_path)
 
         # MIP is an instance of _BaseMIP created from given mip instance
-        mip = create_mip_solver(instance_path, self.seed, self.n_threads, self.mip_solver_str)
+        mip = create_mip_solver(instance_path, self.seed, self.n_mip_jobs, self.mip_solver_str)
 
         # Create instance with mip model created from mip instance
         self._instance = _Instance(mip, self.seed)
@@ -559,7 +559,11 @@ class ParBalans:
         n_jobs: Parallel Balans runs
         n_mip_jobs: The number of threads for the underlying mip solver, only supported by Gurobi
         mip_solver: "scip" or "gurobi"
-        output_dir: Saves one file per parallel Balans run TODO explain what's in each file/pickle?
+        output_dir: Saves one file per parallel Balans run as a pickle object
+                    The object is tuple with three elements: obj_of_iteration, time_of_iteration, and arm_to_reward_counts
+                    There N+1 iterations, including the initial solution
+                    The time is cumulative runtime when the iteration happens
+                    Reward counts is the overall statistics
         balans_generator: A function that generates a Balans instance for each parallel run.
                           If none given, a default random Balans generator is used.
         """
@@ -578,28 +582,32 @@ class ParBalans:
         # Create the results directory
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def run(self, instance_path, index_to_val=None):
+    def run(self, instance_path, index_to_val=None) -> Tuple[Dict[int, float], float]:
         """
         instance_path: the path to the MIP instance file
         index_to_val: initial (partial) solution to warm start the variables
 
         Returns
         -------
-        best solution and best result across all Balans runs
+        best_index_to_val, best_obj a tuple that contains the best solution (index_to_val) dictionary
+                                    and the best objective found
         """
+
+        # Create a dummy solver to understand objective sense
+        mip = create_mip_solver(instance_path, Constants.default_seed, self.n_mip_jobs, self.mip_solver)
 
         # Can create other config generator function, random_config() just an example
         with Pool(processes=self.n_jobs) as pool:
-            results = pool.map(partial(self._solve_instance_with_balans,
-                                       instance_path=instance_path,
-                                       index_to_val=index_to_val,
-                                       balans=self.balans_generator()),
-                               range(self.n_jobs))
+            best_sol_and_obj_of_job = pool.map(partial(self._solve_instance_with_balans,
+                                                       instance_path=instance_path,
+                                                       index_to_val=index_to_val,
+                                                       balans=self.balans_generator()),
+                                               range(self.n_jobs))
 
         # Get the best objective value and its index
-        # Assume is a MINIMIZE problem
-        best = min(results, key=lambda t: t[1])
-        return best[0], best[1]
+        # TODO Fix Assume is a MINIMIZE problem
+        best_index_to_val, best_obj = min(best_sol_and_obj_of_job, key=lambda t: t[1])
+        return best_index_to_val, best_obj
 
     def _solve_instance_with_balans(self, idx, instance_path, index_to_val, balans):
 
@@ -609,9 +617,14 @@ class ParBalans:
             result = balans.solve(instance_path)
 
         if result:
-            r = [result.statistics.objectives,
-                 np.cumsum(result.statistics.runtimes),
-                 dict(result.statistics.destroy_operator_counts)]
+            # There N+1 iterations, including the initial solution
+            # The time is cumulative runtime when the iteration happens
+            # Reward counts is the overall statistics
+            obj_of_iteration = result.statistics.objectives
+            time_of_iteration = np.cumsum(result.statistics.runtimes)
+            arm_to_reward_counts = dict(result.statistics.destroy_operator_counts)
+
+            r = [obj_of_iteration, time_of_iteration, arm_to_reward_counts]
             result_path = os.path.join(self.output_dir, f"result_{idx}.pkl")
             with open(result_path, "wb") as fp:
                 pickle.dump(r, fp)
