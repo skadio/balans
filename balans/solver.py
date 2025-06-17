@@ -30,7 +30,8 @@ from balans.destroy.mutation import mutation_05, mutation_10, mutation_15, mutat
     mutation_35, mutation_40, mutation_45, mutation_50, mutation_55, mutation_60, mutation_65, mutation_70, mutation_75, \
     mutation_80, mutation_85, mutation_90, mutation_95
 from balans.destroy.proximity import proximity_005, proximity_010, proximity_015, proximity_020, proximity_025, \
-    proximity_030, proximity_035, proximity_040, proximity_045, proximity_05, proximity_055, proximity_060, proximity_065, \
+    proximity_030, proximity_035, proximity_040, proximity_045, proximity_05, proximity_055, proximity_060, \
+    proximity_065, \
     proximity_070, proximity_075, proximity_080, proximity_085, proximity_090, proximity_095, proximity_10
 from balans.destroy.random_objective import random_objective
 from balans.destroy.rens import rens_05, rens_10, rens_15, rens_20, rens_25, rens_30, rens_35, rens_40, rens_45, \
@@ -543,47 +544,24 @@ class ParBalans:
     ParBalans: Run several Balans configurations in parallel.
     """
 
-    DESTROY_CATEGORIES = {"crossover": [DestroyOperators.Crossover],
-                          "mutation": [DestroyOperators.Mutation_10, DestroyOperators.Mutation_20,
-                                       DestroyOperators.Mutation_30,
-                                       DestroyOperators.Mutation_40, DestroyOperators.Mutation_50],
-                          "local_branching": [DestroyOperators.Local_Branching_10, DestroyOperators.Local_Branching_20,
-                                              DestroyOperators.Local_Branching_30, DestroyOperators.Local_Branching_40,
-                                              DestroyOperators.Local_Branching_50],
-                          "proximity": [DestroyOperators.Proximity_020, DestroyOperators.Proximity_040,
-                                        DestroyOperators.Proximity_060,
-                                        DestroyOperators.Proximity_080, DestroyOperators.Proximity_10],
-                          "rens": [DestroyOperators.Rens_10, DestroyOperators.Rens_20, DestroyOperators.Rens_30,
-                                   DestroyOperators.Rens_40,
-                                   DestroyOperators.Rens_50],
-                          "rins": [DestroyOperators.Rins_10, DestroyOperators.Rins_20, DestroyOperators.Rins_30,
-                                   DestroyOperators.Rins_40,
-                                   DestroyOperators.Rins_50]}
-
-    ACCEPT_TYPE = ["HillClimbing", "SimulatedAnnealing"]
-
-    LEARNING_POLICY = ["EpsilonGreedy", "Softmax", "ThompsonSampling"]
-
-    REPAIR_OPERATORS = [RepairOperators.Repair]
-
     def __init__(self,
                  n_jobs: int = 1,
                  n_mip_jobs: int = 1,
                  mip_solver: str = Constants.default_solver,
                  output_dir: str = "results/",
-                 stop: StopType = MaxIterations(10)):
+                 balans_generator=None):
         """
         ParBalans runs several Balans configurations in parallel.
         See class members for the possible pool of configurations used to generate random Balans configs.
 
-
         Parameters
         ----------
-        n_jobs  Parallel Balans runs
-        n_mip_jobs  Only supported by Gurobi solver
-        mip_solver  "scip" or "gurobi
-        output_dir  Saves one file per parallel run
-        stop  Stop criteria per each run
+        n_jobs: Parallel Balans runs
+        n_mip_jobs: The number of threads for the underlying mip solver, only supported by Gurobi
+        mip_solver: "scip" or "gurobi"
+        output_dir: Saves one file per parallel Balans run TODO explain what's in each file/pickle?
+        balans_generator: A function that generates a Balans instance for each parallel run.
+                          If none given, a default random Balans generator is used.
         """
 
         # Set params
@@ -591,23 +569,39 @@ class ParBalans:
         self.n_mip_jobs = n_mip_jobs
         self.mip_solver = mip_solver
         self.output_dir = output_dir
-        self.stop = stop
+        self.balans_generator = balans_generator
+
+        # If no balans generator is given, use random balans generator by default
+        if self.balans_generator is None:
+            self.balans_generator = ParBalans._generate_random_balans
 
         # Create the results directory
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def _solve_instance_with_config(self, idx, instance_path, index_to_val, config_data):
-        balans = Balans(destroy_ops=config_data["destroy_ops"],
-                        repair_ops=self.REPAIR_OPERATORS,
-                        selector=MABSelector(scores=config_data["scores"],
-                                             num_destroy=len(config_data["destroy_ops"]),
-                                             num_repair=len(self.REPAIR_OPERATORS),
-                                             learning_policy=config_data["learning_policy"],
-                                             seed=config_data["seed"]),
-                        accept=config_data["accept"],
-                        stop=self.stop,
-                        n_mip_jobs=self.n_mip_jobs,
-                        mip_solver=self.mip_solver)
+    def run(self, instance_path, index_to_val=None):
+        """
+        instance_path: the path to the MIP instance file
+        index_to_val: initial (partial) solution to warm start the variables
+
+        Returns
+        -------
+        best solution and best result across all Balans runs
+        """
+
+        # Can create other config generator function, random_config() just an example
+        with Pool(processes=self.n_jobs) as pool:
+            results = pool.map(partial(self._solve_instance_with_balans,
+                                       instance_path=instance_path,
+                                       index_to_val=index_to_val,
+                                       balans=self.balans_generator()),
+                               range(self.n_jobs))
+
+        # Get the best objective value and its index
+        # Assume is a MINIMIZE problem
+        best = min(results, key=lambda t: t[1])
+        return best[0], best[1]
+
+    def _solve_instance_with_balans(self, idx, instance_path, index_to_val, balans):
 
         if index_to_val:
             result = balans.solve(instance_path, index_to_val)
@@ -623,45 +617,75 @@ class ParBalans:
                 pickle.dump(r, fp)
         return result.best_state.solution(), result.best_state.objective()
 
-    def run(self, instance_path, index_to_val=None):
-        """
-        instance_path: the path to the MIP instance file
-        index_to_val: initial (partial) solution to warm start the variables
+    @staticmethod
+    def _generate_random_balans(n_mip_jobs: int = 1, mip_solver: str = Constants.default_solver) -> Balans:
 
-        Returns
-        -------
-        best solution and best result across all Balans runs
-        """
+        # Pool of options
+        DESTROY_CATEGORIES = {"crossover": [DestroyOperators.Crossover],
+                              "mutation": [DestroyOperators.Mutation_10, DestroyOperators.Mutation_20,
+                                           DestroyOperators.Mutation_30,
+                                           DestroyOperators.Mutation_40, DestroyOperators.Mutation_50],
+                              "local_branching": [DestroyOperators.Local_Branching_10,
+                                                  DestroyOperators.Local_Branching_20,
+                                                  DestroyOperators.Local_Branching_30,
+                                                  DestroyOperators.Local_Branching_40,
+                                                  DestroyOperators.Local_Branching_50],
+                              "proximity": [DestroyOperators.Proximity_020, DestroyOperators.Proximity_040,
+                                            DestroyOperators.Proximity_060,
+                                            DestroyOperators.Proximity_080, DestroyOperators.Proximity_10],
+                              "rens": [DestroyOperators.Rens_10, DestroyOperators.Rens_20, DestroyOperators.Rens_30,
+                                       DestroyOperators.Rens_40,
+                                       DestroyOperators.Rens_50],
+                              "rins": [DestroyOperators.Rins_10, DestroyOperators.Rins_20, DestroyOperators.Rins_30,
+                                       DestroyOperators.Rins_40,
+                                       DestroyOperators.Rins_50]}
+        ACCEPT_TYPE = ["HillClimbing", "SimulatedAnnealing"]
+        LEARNING_POLICY = ["EpsilonGreedy", "Softmax", "ThompsonSampling"]
+        REPAIR_OPERATORS = [RepairOperators.Repair]
+        LP_to_REWARDS = {"binary": [[1, 1, 0, 0], [1, 1, 1, 0]],
+                         "numeric": [[3, 2, 1, 0], [5, 2, 1, 0], [5, 4, 2, 0], [8, 3, 1, 0],
+                                     [8, 4, 2, 1], [16, 4, 2, 1]]}
 
-        # Can create other config generator function, random_config() just an example
-        with Pool(processes=self.n_jobs) as pool:
-            results = pool.map(partial(self._solve_instance_with_config,
-                                       instance_path = instance_path,
-                                       index_to_val = index_to_val,
-                                       config_data = self._generate_random_config()),
-                               range(self.n_jobs))
+        # Destroy
+        num_destroy = random.randint(len(DESTROY_CATEGORIES) - 2, len(DESTROY_CATEGORIES) * 3)
+        chosen_destroy_ops = []
+        if num_destroy > len(DESTROY_CATEGORIES) - 1:
+            # Choose at least one member from each category
+            for category in DESTROY_CATEGORIES:
+                element = random.choice(DESTROY_CATEGORIES[category])
+                chosen_destroy_ops.append(element)
 
-        # Get the best objective value and its index
-        # Assume is a MINIMIZE problem
-        best = min(results, key=lambda t: t[1])
-        return best[0], best[1]
+            # Remove the already chosen elements from the pool
+            all_elements = [item for sublist in DESTROY_CATEGORIES.values() for item in sublist]
+            remaining_pool = list(set(all_elements) - set(chosen_destroy_ops))
 
-    def _generate_random_config(self):
-        # randomly generate the configuration for one Balans solver
-        chosen_destroy_ops = self._pick_random_destroy_ops()
+            # Choose the remaining elements randomly from the remaining pool
+            remaining_elements = num_destroy - len(DESTROY_CATEGORIES)
+            chosen_destroy_ops.extend(random.sample(remaining_pool, remaining_elements))
+        else:
+            # Choose the categories to be included
+            chosen_categories = random.sample(list(DESTROY_CATEGORIES.keys()), num_destroy)
 
+            # Choose one element from each chosen category
+            for category in chosen_categories:
+                element = random.choice(DESTROY_CATEGORIES[category])
+                chosen_destroy_ops.append(element)
+
+        # Accept
         chosen_accept_type = []
-        for op in self.ACCEPT_TYPE:
+        for op in ACCEPT_TYPE:
             if "HillClimbing" in op:
                 chosen_accept_type.append(HillClimbing())
             if "SimulatedAnnealing" in op:
-                chosen_accept_type.append(SimulatedAnnealing(start_temperature=10, end_temperature=1,
-                                                                           step=random.uniform(0.01, 1),
-                                                                           method="linear"))
+                chosen_accept_type.append(SimulatedAnnealing(start_temperature=10,
+                                                             end_temperature=1,
+                                                             step=random.uniform(0.01, 1),
+                                                             method="linear"))
         acceptance_obj = random.choice(chosen_accept_type)
 
+        # Learning Policy
         chosen_learning_policy = []
-        for op in self.LEARNING_POLICY:
+        for op in LEARNING_POLICY:
             if "EpsilonGreedy" in op:
                 chosen_learning_policy.append(LearningPolicy.EpsilonGreedy(epsilon=random.uniform(0.01, 0.5)))
             if "Softmax" in op:
@@ -669,65 +693,29 @@ class ParBalans:
             if "ThompsonSampling" in op:
                 chosen_learning_policy.append(LearningPolicy.ThompsonSampling())
         chosen_lp = random.choice(chosen_learning_policy)
-        lp_str = self.learning_policy_to_str(chosen_lp)
 
-        if lp_str == "THOMPSON_SAMPLING":
-            chosen_scores = random.choice([[1, 1, 0, 0],
-                                           [1, 1, 1, 0]])
-        else:
-            chosen_scores = random.choice([[8, 4, 2, 1],
-                                           [3, 2, 1, 0],
-                                           [5, 2, 1, 0],
-                                           [16, 4, 2, 1],
-                                           [8, 3, 1, 0],
-                                           [5, 4, 2, 0]])
+        # Rewards
+        chosen_scores = random.choice(LP_to_REWARDS["numeric"])
+        if isinstance(chosen_lp, LearningPolicy.ThompsonSampling):
+            chosen_scores = random.choice(LP_to_REWARDS["binary"])
 
+        # Seed
         chosen_seed = random.randint(1, 100000)
 
-        config_data = {"destroy_ops": chosen_destroy_ops,
-                       "accept": acceptance_obj,
-                       "learning_policy": chosen_lp,
-                       "scores": chosen_scores,
-                       "seed": chosen_seed}
+        # Stop
+        stop = MaxIterations(10)
 
-        return config_data
+        # Balans
+        balans = Balans(destroy_ops=chosen_destroy_ops,
+                        repair_ops=REPAIR_OPERATORS,
+                        selector=MABSelector(scores=chosen_scores,
+                                             num_destroy=len(chosen_destroy_ops),
+                                             num_repair=len(REPAIR_OPERATORS),
+                                             learning_policy=chosen_lp,
+                                             seed=chosen_seed),
+                        accept=acceptance_obj,
+                        stop=stop,
+                        n_mip_jobs=n_mip_jobs,
+                        mip_solver=mip_solver)
 
-    def _pick_random_destroy_ops(self):
-        # Choose a random number for number of destroy operators
-        num_elements = random.randint(len(self.DESTROY_CATEGORIES) - 2, len(self.DESTROY_CATEGORIES) * 3)
-
-        # Initialize the list of chosen elements
-        chosen_elements = []
-
-        if num_elements > len(self.DESTROY_CATEGORIES) - 1:
-            # Choose at least one member from each category
-            for category in self.DESTROY_CATEGORIES:
-                element = random.choice(self.DESTROY_CATEGORIES[category])
-                chosen_elements.append(element)
-
-            # Remove the already chosen elements from the pool
-            all_elements = [item for sublist in self.DESTROY_CATEGORIES.values() for item in sublist]
-            remaining_pool = list(set(all_elements) - set(chosen_elements))
-
-            # Choose the remaining elements randomly from the remaining pool
-            remaining_elements = num_elements - len(self.DESTROY_CATEGORIES)
-            chosen_elements.extend(random.sample(remaining_pool, remaining_elements))
-        else:
-            # Choose the categories to be included
-            chosen_categories = random.sample(list(self.DESTROY_CATEGORIES.keys()), num_elements)
-
-            # Choose one element from each chosen category
-            for category in chosen_categories:
-                element = random.choice(self.DESTROY_CATEGORIES[category])
-                chosen_elements.append(element)
-        return chosen_elements
-
-    @staticmethod
-    def learning_policy_to_str(lp):
-        if isinstance(lp, LearningPolicy.EpsilonGreedy):
-            return f"EPSILON_GREEDY_{lp.epsilon}"
-        elif isinstance(lp, LearningPolicy.Softmax):
-            return f"SOFTMAX_{lp.tau}"
-        elif isinstance(lp, LearningPolicy.ThompsonSampling):
-            return "THOMPSON_SAMPLING"
-        return "UNKNOWN"
+        return balans
