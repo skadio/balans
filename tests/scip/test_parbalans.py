@@ -28,7 +28,7 @@ class ParBalansTest(BaseTest):
             result0 = pickle.load(file)
         with open("results/result_1.pkl", "rb") as file:
             result1 = pickle.load(file)
-        if result0[1][-1] < result1[1][-1]:
+        if result0[0][-1] < result1[0][-1]:
             self.assertEqual(result0[0][-1], -41)
         else:
-            self.assertEqual(result1[1][-1], -41)
+            self.assertEqual(result1[0][-1], -41)
