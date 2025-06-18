@@ -14,11 +14,11 @@ class ParBalansTest(BaseTest):
         instance = "noswot.mps"
         instance_path = os.path.join(Constants.DATA_TEST, instance)
 
-        parbalans = ParBalans(n_jobs = 2,
-                             n_mip_jobs = 1,
-                             mip_solver = BaseTest.mip_solver,
-                             output_dir = "results/",
-                             balans_generator = ParBalans._generate_random_balans)
+        parbalans = ParBalans(n_jobs=2,
+                              n_mip_jobs=1,
+                              mip_solver=BaseTest.mip_solver,
+                              output_dir="results/",
+                              balans_generator=ParBalans._generate_random_balans)
         result = parbalans.run(instance_path)
 
         print("Best solution:", result[0])
