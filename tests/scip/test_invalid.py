@@ -103,7 +103,7 @@ class InvalidTest(BaseTest):
             repair_ops = [RepairOperators.Repair]
             selector = MABSelector(scores=[5, 2, 1, 0.5], num_destroy=5, num_repair=1,
                                    learning_policy=LearningPolicy.EpsilonGreedy(epsilon=0.15))
-            accept = None
+            accept = MaxIterations(5)
             stop = MaxIterations(5)
 
             # Solver

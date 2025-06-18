@@ -68,6 +68,30 @@ print("Best solution:", result.best_state.solution())
 print("Best solution objective:", result.best_state.objective())
 ```
 
+## Quick Start - ParBalans
+
+```python
+# Parallel version of Balans, that runs several configurations parallely
+from balans.solver import ParBalans
+from alns.stop import MaxIterations
+
+# ParBalans to run different Balans configs in parallel and save results
+parbalans = ParBalans(n_jobs=2,                 # parallel Balans runs
+                      n_mip_jobs=1,             # parallel MIP threads, Only supported by Gurobi solver
+                      mip_solver="scip",
+                      output_dir="results/", 
+                      stop=MaxIterations(10))   # Stop criteria per each run
+
+# Run a mip instance to retrieve several results 
+instance_path = "data/miplib/noswot.mps"
+best_solution, best_objective = parbalans.run(instance_path)
+
+# Results of the best found solution and the objective
+print("Best solution:", best_solution)
+print("Best solution objective:", best_objective)
+
+```
+
 ## Available Destroy Operators
 * Dins[^1] 
 [^1]: S. Ghosh. DINS, a MIP Improvement Heuristic. Integer Programming and Combinatorial Optimization: IPCO, 2007.
@@ -79,8 +103,8 @@ print("Best solution objective:", result.best_state.objective())
 [^4]: Berthold. RENS–the optimal rounding. Mathematical Programming Computation, 2014.
 * Rins[^5]
 [^5]: E. Danna, E. Rothberg, and C. L. Pape. Exploring relaxation induced neighborhoods to improve MIP solutions. Mathematical Programming, 2005.
-* Zero Objective[^6]
-[^6]: Zero Objective.
+* Random Objective[^6]
+[^6]: Random Objective.
 * Proximity Search[^7]
 [^7]: M. Fischetti and M. Monaci. Proximity search for 0-1 mixed-integer convex programming. Journal of Heuristics, 20(6):709–731, Dec 2014.
 * Crossover[^8]

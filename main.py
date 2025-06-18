@@ -17,9 +17,9 @@ destroy_ops = [DestroyOperators.Crossover,
                DestroyOperators.Local_Branching_10,
                DestroyOperators.Local_Branching_25,
                DestroyOperators.Local_Branching_50,
-               DestroyOperators.Proximity_05,
-               DestroyOperators.Proximity_15,
-               DestroyOperators.Proximity_30,
+               DestroyOperators.Proximity_005,
+               DestroyOperators.Proximity_015,
+               DestroyOperators.Proximity_030,
                # DestroyOperators.Random_Objective
                DestroyOperators.Rens_25,
                DestroyOperators.Rens_50,
@@ -74,12 +74,11 @@ print("Best solution objective:", result.best_state.objective())
 
 # Check for optimality using Gurobi
 # import gurobipy as grb
-# from gurobi_onboarder import init_gurobi
-#
-# gurobi_venv, GUROBI_FOUND = init_gurobi.initialize_gurobi()
-# gurobi_venv.setParam("OutputFlag", 1)
-# gurobi_venv.setParam("LogToConsole", 0)
-# gurobi_venv.setParam("LogFile", "asd.log")
+# # from gurobi_onboarder import init_gurobi
+# # gurobi_venv, GUROBI_FOUND = init_gurobi.initialize_gurobi()
+# # gurobi_venv.setParam("OutputFlag", 1)
+# # gurobi_venv.setParam("LogToConsole", 0)
+# # gurobi_venv.setParam("LogFile", "asd.log")
 #
 # file_path = "data/miplib/noswot.mps"
 # model = grb.read(f'{file_path}',env=gurobi_venv)

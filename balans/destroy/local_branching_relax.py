@@ -1,6 +1,6 @@
+# NOTE: This is experimental, and not used for now
 import copy
 
-# from balans.utils_scip import get_index_to_val_and_objective, split_binary_vars
 from balans.base_state import _State
 
 
@@ -17,7 +17,6 @@ from balans.base_state import _State
 
 #     return sorted_values, sorted_indices
 
-# NOTE: This is experimental, and not used for now
 def local_branching_relax(current: _State, rnd_state, delta) -> _State:
     print("*** Operator: ", "LB relax")
     print("\t Destroy current objective:", current.obj_val)

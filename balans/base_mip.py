@@ -88,6 +88,7 @@ class _BaseMIP(metaclass=abc.ABCMeta):
 
 def create_mip_solver(instance_path: str,
                       seed: int = Constants.default_seed,
+                      n_mip_jobs: int = 1,
                       mip_solver: str = Constants.default_solver) -> _BaseMIP:
     """ Returns a mip model of the given solver type for the given instance
 
@@ -111,4 +112,4 @@ def create_mip_solver(instance_path: str,
     mip_factory = {Constants.gurobi_solver: _Gurobi,
                    Constants.scip_solver: _SCIP,}
 
-    return mip_factory.get(mip_solver)(instance_path, seed)
+    return mip_factory.get(mip_solver)(instance_path, n_mip_jobs, seed)
