@@ -13,7 +13,7 @@ with open(os.path.join('balans', '_version.py')) as f:
 
 # python setup.py bdist_wheel
 setuptools.setup(
-    name="Balans",
+    name="balans",
     description="Balans: Bandit-based Adaptive Large Neighborhood Search",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -27,7 +27,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     project_urls={
-        "Documentation": "https://github.com/skadio/balns",
-        "Source": "https://github.com/skadio/balns"
+        "Documentation": "https://github.com/skadio/balans",
+        "Source": "https://github.com/skadio/balans"
     }
 )
