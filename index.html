@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Balans — Bandit-based Adaptive Large Neighborhood Search</title>
+  <meta name="description" content="Balans: An online-learning meta-solver for Mixed-Integer Programming problems through multi-armed bandit-based adaptive large neighborhood search.">
+  <meta name="keywords" content="Balans, ParBalans, MIP, Mixed-Integer Programming, ALNS, Multi-Armed Bandits, Large Neighborhood Search, SCIP, Gurobi">
+  <meta name="author" content="Serdar Kadıoğlu">
+
+  <meta property="og:title" content="Balans — Bandit-based Adaptive Large Neighborhood Search">
+  <meta property="og:description" content="Balans: An online-learning meta-solver for Mixed-Integer Programming problems through multi-armed bandit-based adaptive large neighborhood search.">
+  <meta property="og:type" content="article">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Balans — Bandit-based Adaptive Large Neighborhood Search">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --ink: #1a1a2e;
+      --paper: #faf9f7;
+      --warm: #f5f0ea;
+      --accent: #c0392b;
+      --accent-soft: #e74c3c;
+      --teal: #16a085;
+      --teal-soft: #1abc9c;
+      --blue: #2471a3;
+      --blue-soft: #2e86c1;
+      --gold: #d4a017;
+      --muted: #6b7280;
+      --border: #e2ddd5;
+      --card-bg: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.10);
+      --radius: 10px;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans: 'Source Sans 3', 'Segoe UI', sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.7;
+      font-size: 17px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(250,249,247,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .nav-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    nav .nav-brand {
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: var(--accent);
+      letter-spacing: 0.03em;
+      text-decoration: none;
+    }
+    nav .nav-links {
+      display: flex;
+      gap: 1.75rem;
+      list-style: none;
+    }
+    nav .nav-links a {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    nav .nav-links a:hover { color: var(--ink); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+      background: linear-gradient(175deg, var(--paper) 0%, var(--warm) 100%);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(192,57,43,0.04), transparent),
+                  radial-gradient(ellipse 60% 50% at 80% 100%, rgba(22,160,133,0.04), transparent);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 820px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .hero-label {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(192,57,43,0.07);
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero .subtitle {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 640px;
+      margin: 0 auto 1.5rem;
+      font-weight: 300;
+    }
+    .hero .authors {
+      font-size: 1.05rem;
+      margin-bottom: 0.3rem;
+    }
+    .hero .authors a {
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px dashed var(--border);
+      transition: border-color 0.2s;
+    }
+    .hero .authors a:hover { border-color: var(--accent); }
+    .hero .affiliation {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    .hero .affiliation span { display: inline-block; margin: 0 0.5rem; }
+
+    .hero-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.3rem;
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.25s;
+      border: 1.5px solid transparent;
+    }
+    .btn-primary {
+      background: var(--ink);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #2c2c4a;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    .btn-outline {
+      background: var(--card-bg);
+      color: var(--ink);
+      border-color: var(--border);
+    }
+    .btn-outline:hover {
+      border-color: var(--ink);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .section-header h2 {
+      font-family: var(--serif);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      position: relative;
+      display: inline-block;
+    }
+    .section-header h2::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background: var(--accent);
+      margin: 0.6rem auto 0;
+      border-radius: 2px;
+    }
+    .section-header p {
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0.75rem auto 0;
+      font-size: 1rem;
+    }
+
+    /* ── OVERVIEW / PIPELINE ── */
+    .pipeline-visual {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .pipe-step {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.25rem;
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .pipe-step:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .pipe-step .step-num {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .pipe-step .step-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.6rem;
+    }
+    .pipe-step h3 {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    .pipe-step p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ── ABSTRACT ── */
+    .abstract-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      max-width: 780px;
+      margin: 0 auto;
+      font-size: 0.98rem;
+      line-height: 1.85;
+      color: #374151;
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-block {
+      background: var(--ink);
+      color: #e2e8f0;
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      max-width: 780px;
+      margin: 2rem auto 0;
+      position: relative;
+    }
+    .code-block pre {
+      margin: 0;
+      white-space: pre;
+    }
+    .code-block .copy-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e2e8f0;
+      padding: 0.35rem 0.75rem;
+      border-radius: 5px;
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .code-block .copy-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .code-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    /* ── PROJECT CARDS ── */
+    .projects-grid {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .project-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: box-shadow 0.3s, transform 0.3s;
+    }
+    .project-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-3px);
+    }
+    .project-card-inner {
+      display: grid;
+      grid-template-columns: 5px 1fr;
+    }
+    .card-accent {
+      border-radius: var(--radius) 0 0 var(--radius);
+    }
+    .card-accent.red { background: var(--accent); }
+    .card-accent.teal { background: var(--teal); }
+    .card-accent.blue { background: var(--blue); }
+    .card-accent.gold { background: var(--gold); }
+
+    .card-body {
+      padding: 2rem 2.25rem;
+    }
+    .card-body .card-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.7rem;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+    .card-tag.red { color: var(--accent); background: rgba(192,57,43,0.07); }
+    .card-tag.teal { color: var(--teal); background: rgba(22,160,133,0.07); }
+    .card-tag.blue { color: var(--blue); background: rgba(36,113,163,0.07); }
+    .card-tag.gold { color: #96740b; background: rgba(212,160,23,0.10); }
+
+    .card-header-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+    .card-header-row h3 {
+      font-family: var(--serif);
+      font-size: 1.55rem;
+      line-height: 1.3;
+    }
+
+    .card-body .card-desc {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.7;
+    }
+    .card-body .card-venue {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--ink);
+      background: var(--paper);
+      transition: all 0.2s;
+    }
+    .card-link:hover {
+      border-color: var(--ink);
+      background: var(--card-bg);
+    }
+    .card-link i {
+      font-size: 0.85rem;
+    }
+    .card-link .hf-emoji {
+      font-size: 0.95rem;
+      line-height: 1;
+    }
+
+    /* ── ANCHOR / PERMALINK BUTTON ── */
+    .anchor-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      color: var(--border);
+      text-decoration: none;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-size: 0.85rem;
+      position: relative;
+    }
+    .anchor-link:hover {
+      color: var(--accent);
+      background: rgba(192,57,43,0.06);
+    }
+    .anchor-link .anchor-tooltip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 500;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+    }
+    .anchor-link:hover .anchor-tooltip {
+      opacity: 1;
+    }
+    .anchor-link .anchor-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: var(--ink);
+    }
+
+    /* ── HASH HIGHLIGHT ── */
+    @keyframes anchorHighlight {
+      0% { box-shadow: 0 0 0 0 rgba(192,57,43,0.3); }
+      40% { box-shadow: 0 0 0 6px rgba(192,57,43,0.15); }
+      100% { box-shadow: 0 0 0 0 rgba(192,57,43,0); }
+    }
+    .anchor-highlight {
+      animation: anchorHighlight 1.8s ease-out;
+    }
+
+    /* ── BIBTEX ── */
+    .bibtex-block {
+      background: var(--ink);
+      color: #e2e8f0;
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      position: relative;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .bibtex-block .copy-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e2e8f0;
+      padding: 0.35rem 0.75rem;
+      border-radius: 5px;
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .bibtex-block .copy-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* ── INLINE BIBTEX (Collapsible) ── */
+    .bibtex-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--ink);
+      background: var(--paper);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .bibtex-toggle:hover {
+      border-color: var(--ink);
+      background: var(--card-bg);
+    }
+    .bibtex-toggle i {
+      font-size: 0.75rem;
+      transition: transform 0.2s;
+    }
+    .bibtex-toggle.active i {
+      transform: rotate(180deg);
+    }
+    .bibtex-inline {
+      display: none;
+      margin-top: 1rem;
+      background: var(--ink);
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      position: relative;
+    }
+    .bibtex-inline.active {
+      display: block;
+    }
+    .bibtex-inline .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e2e8f0;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .bibtex-inline .copy-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .bibtex-inline pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+    footer a {
+      color: var(--muted);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    footer a:hover { color: var(--ink); }
+
+    /* ── DIVIDERS ── */
+    .section-divider {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    .section-divider hr {
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero-inner > * {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .hero-inner > *:nth-child(2) { animation-delay: 0.08s; }
+    .hero-inner > *:nth-child(3) { animation-delay: 0.14s; }
+    .hero-inner > *:nth-child(4) { animation-delay: 0.2s; }
+    .hero-inner > *:nth-child(5) { animation-delay: 0.26s; }
+    .hero-inner > *:nth-child(6) { animation-delay: 0.32s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .pipeline-visual {
+        grid-template-columns: 1fr 1fr;
+      }
+      .nav-links { display: none; }
+      .card-body { padding: 1.5rem; }
+    }
+    @media (max-width: 480px) {
+      .pipeline-visual {
+        grid-template-columns: 1fr;
+      }
+      section { padding: 2.5rem 1.25rem; }
+      .hero { padding: 3rem 1.25rem 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">Balans</a>
+    <ul class="nav-links">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#howitworks">How It Works</a></li>
+      <li><a href="#quickstart">Quick Start</a></li>
+      <li><a href="#parbalans">ParBalans</a></li>
+<!--      <li><a href="#citation">Citation</a></li>-->
+    </ul>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">COIN-OR FOUNDATION  · IJCAI'25</div>
+    <h1>Bandit-based Adaptive<br><span>Large Neighborhood Search</span></h1>
+    <p class="subtitle">An online-learning meta-solver for Mixed-Integer Programming problems through multi-armed bandit-based adaptive large neighborhood search, ALNS(MIP).</p>
+    <p class="authors">
+      <a href="https://cs.brown.edu/people/serdark/" target="_blank">Serdar Kadıoğlu</a><sup>1,2</sup> &nbsp;
+      <a href="#">Junyang Cai</a><sup>3</sup> &nbsp;
+      <a href="#">Bistra Dilkina</a><sup>3</sup> &nbsp;
+      <a href="#">Alican Yılmaz</a><sup>4</sup>
+    </p>
+    <p class="affiliation">
+      <span><sup>1</sup> Brown University</span>
+      <span><sup>2</sup> Fidelity Investments</span>
+      <span><sup>3</sup> University of Southern California</span>
+      <span><sup>4</sup> Northeastern University</span>
+    </p>
+    <div class="hero-buttons">
+      <a href="https://www.ijcai.org/proceedings/2025/286" class="btn btn-primary" target="_blank"><i class="fa-solid fa-file-lines"></i> Paper</a>
+      <a href="https://github.com/coin-or/balans" class="btn btn-outline" target="_blank"><i class="fa-brands fa-github"></i> Code</a>
+      <a href="https://nbviewer.org/github/skadio/skadio.github.io/blob/master/files/2025_IJCAI_Balans_Kadioglu.pdf" class="btn btn-outline" target="_blank"><i class="fa-solid fa-file-powerpoint"></i> Slides</a>
+      <a href="https://huggingface.co/collections/skadio/balans-bandit-based-adaptive-lns" class="btn btn-outline" target="_blank"><span style="font-size:1rem; line-height:1;">🤗</span> Dataset</a>
+      <a href="https://pypi.python.org/pypi/balans/" class="btn btn-outline" target="_blank"><i class="fa-brands fa-python"></i> PyPI</a>
+    </div>
+  </div>
+</header>
+
+<!-- ─── OVERVIEW ─── -->
+<section id="overview">
+  <div class="section-header">
+    <h2>Overview</h2>
+    <p>A modular, extensible, solver-agnostic meta-solver for MIP</p>
+  </div>
+  <div class="abstract-box">
+    <strong>Balans</strong> is an online-learning meta-solver designed to tackle Mixed-Integer Programming problems (MIPs) through multi-armed bandit-based adaptive large neighborhood search strategy, ALNS(MIP).
+    <br><br>
+    The framework integrates several powerful components into a highly configurable, modular, extensible, solver-agnostic, open-source software:
+    <br><br>
+    <ul style="margin-left: 1.5rem;">
+      <li><a href="https://github.com/fidelity/mabwiser/" target="_blank"><strong>MABWiser</strong></a> for contextual multi-armed bandits</li>
+      <li><a href="https://github.com/N-Wouda/ALNS/" target="_blank"><strong>ALNS</strong></a> for adaptive large neighborhood search</li>
+      <li><a href="https://scipopt.org/" target="_blank"><strong>SCIP</strong></a> and <a href="https://www.gurobi.com/" target="_blank"><strong>Gurobi</strong></a> for solving mixed-integer linear programming problems</li>
+    </ul>
+    <br>
+    More broadly, Balans is an integration technology at the intersection of adaptive search, meta-heuristics, multi-armed bandits, and mixed integer programming. When configured with a single neighborhood, it generalizes and subsumes prior work on Large Neighborhood Search for MIP, LNS(MIP).
+  </div>
+</section>
+
+<div class="section-divider"><hr></div>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section id="howitworks">
+  <div class="section-header">
+    <h2>How It Works</h2>
+    <p>Balans iteratively improves solutions through a bandit-guided destroy-and-repair loop</p>
+  </div>
+
+  <div class="pipeline-visual">
+    <div class="pipe-step">
+      <div class="step-num">Step 1</div>
+      <div class="step-icon">📖</div>
+      <h3>Read MIP</h3>
+      <p>Load a MIP instance (.mps/.lp) via the built-in solver reader</p>
+    </div>
+    <div class="pipe-step">
+      <div class="step-num">Step 2</div>
+      <div class="step-icon">🎯</div>
+      <h3>Initial Solution</h3>
+      <p>Find a feasible starting solution with the MIP solver</p>
+    </div>
+    <div class="pipe-step">
+      <div class="step-num">Step 3</div>
+      <div class="step-icon">🎰</div>
+      <h3>Bandit Selection</h3>
+      <p>Multi-armed bandit selects destroy &amp; repair operators</p>
+    </div>
+    <div class="pipe-step">
+      <div class="step-num">Step 4</div>
+      <div class="step-icon">🔄</div>
+      <h3>ALNS Loop</h3>
+      <p>Iteratively improve via adaptive neighborhood search</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><hr></div>
+
+<!-- ─── QUICK START ─── -->
+<section id="quickstart">
+  <div class="section-header">
+    <h2>Quick Start</h2>
+    <p>Get started with Balans in just a few lines of Python</p>
+  </div>
+
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    <span class="code-label">Install</span>
+    <pre>pip install balans</pre>
+  </div>
+
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    <span class="code-label">Python</span>
+    <pre># Balans meta-solver for solving mixed-integer programming problems
+from balans.solver import Balans
+
+# Balans with default configuration
+balans = Balans()
+
+# Solve
+result = balans.solve("mip_instance.mps")
+
+# Results
+print("Best solution:", result.best_state.solution())
+print("Best solution objective:", result.best_state.objective())</pre>
+  </div>
+
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    <span class="code-label">Custom Configuration</span>
+    <pre># Supply a custom JSON configuration file
+from balans.solver import Balans
+balans = Balans(config="/path/to/config.json")</pre>
+  </div>
+
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    <span class="code-label">Command Line</span>
+    <pre># Run directly from the command line after pip install
+balans mip_instance.mps
+balans mip_instance.mps config.json</pre>
+  </div>
+</section>
+
+<div class="section-divider"><hr></div>
+
+<!-- ─── PARBALANS ─── -->
+<section id="parbalans">
+  <div class="section-header">
+    <h2>ParBalans</h2>
+    <p>Parallel multi-armed bandits-based adaptive large neighborhood search</p>
+  </div>
+
+  <div class="projects-grid">
+    <div class="project-card" id="parbalans-card">
+      <div class="project-card-inner">
+        <div class="card-accent teal"></div>
+        <div class="card-body">
+          <div class="card-tag teal">Parallelization</div>
+          <div class="card-header-row">
+            <h3>ParBalans</h3>
+            <button class="anchor-link" onclick="copyAnchor('parbalans-card')" title="Copy link">
+              <i class="fa-solid fa-link"></i>
+              <span class="anchor-tooltip">Copy link</span>
+            </button>
+          </div>
+          <p class="card-desc"><strong>ParBalans</strong> extends the Balans framework with parallelization strategies at both the outer configuration level (<code>n_jobs</code>) and the inner branch-and-bound level (<code>n_mip_jobs</code>) to exploit modern multicore architectures. It runs multiple Balans configurations in parallel and returns the best found solution across all processes.</p>
+          <p class="card-venue">Alican Yılmaz, Junyang Cai, Serdar Kadıoğlu, Bistra Dilkina · arXiv 2025</p>
+          <div class="card-links">
+            <a href="https://arxiv.org/abs/2508.06736" class="card-link" target="_blank"><i class="fa-solid fa-file-lines"></i> arXiv'25</a>
+            <a href="https://github.com/coin-or/balans#quick-start---parbalans" class="card-link" target="_blank"><i class="fa-brands fa-github"></i> Code</a>
+            <button class="bibtex-toggle" onclick="toggleBibtex(this)"><i class="fa-solid fa-chevron-down"></i> BibTeX</button>
+          </div>
+          <div class="bibtex-inline">
+            <button class="copy-btn" onclick="copyBibtexInline(this)">Copy</button>
+            <pre>@misc{parbalans,
+  title         = {ParBalans: Parallel Multi-Armed Bandits-based Adaptive Large Neighborhood Search},
+  author        = {Alican Yilmaz and Junyang Cai and Serdar Kadıoğlu and Bistra Dilkina},
+  year          = {2025},
+  eprint        = {2508.06736},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2508.06736}
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    <span class="code-label">ParBalans — Python</span>
+    <pre># Parallel version of Balans, that runs several configurations in parallel
+from balans.solver import ParBalans
+
+if __name__ == '__main__':
+
+    # ParBalans to run different Balans configs in parallel and save results
+    parbalans = ParBalans(n_jobs=2,           # Outer-level: parallel Balans configurations
+                          n_mip_jobs=1,       # Inner-level: parallel BnB search (Gurobi only)
+                          mip_solver="scip",
+                          output_dir="parbalans_results/",
+                          balans_generator=ParBalans.TOP_CONFIGS)
+
+    # Run a mip instance to retrieve several results
+    instance_path = "mip_instance.mps"
+    best_solution, best_objective = parbalans.run(instance_path)
+
+    # Results of the best found solution and the objective
+    print("Best solution:", best_solution)
+    print("Best solution objective:", best_objective)</pre>
+  </div>
+</section>
+
+<div class="section-divider"><hr></div>
+
+<!--&lt;!&ndash; ─── CITATION ─── &ndash;&gt;-->
+<!--<section id="citation">-->
+<!--  <div class="section-header">-->
+<!--    <h2>Citation</h2>-->
+<!--    <p>If you use Balans in a publication, please cite it as:</p>-->
+<!--  </div>-->
+<!--  <div class="bibtex-block">-->
+<!--    <button class="copy-btn" onclick="copyBibtex(this, 'bibtex-balans')">Copy</button>-->
+<!--    <pre id="bibtex-balans">@inproceedings{balans,-->
+<!--  title     = {Balans: Multi-Armed Bandits-based Adaptive Large Neighborhood Search for Mixed-Integer Programming Problems},-->
+<!--  author    = {Cai, Junyang and Kadıoğlu, Serdar and Dilkina, Bistra},-->
+<!--  booktitle = {Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence, {IJCAI-25}},-->
+<!--  publisher = {International Joint Conferences on Artificial Intelligence Organization},-->
+<!--  editor    = {James Kwok},-->
+<!--  pages     = {2566&#45;&#45;2574},-->
+<!--  year      = {2025},-->
+<!--  month     = {8},-->
+<!--  note      = {Main Track},-->
+<!--  doi       = {10.24963/ijcai.2025/286},-->
+<!--  url       = {https://doi.org/10.24963/ijcai.2025/286},-->
+<!--}-->
+
+<!--@misc{parbalans,-->
+<!--  title         = {ParBalans: Parallel Multi-Armed Bandits-based Adaptive Large Neighborhood Search},-->
+<!--  author        = {Alican Yilmaz and Junyang Cai and Serdar Kadıoğlu and Bistra Dilkina},-->
+<!--  year          = {2025},-->
+<!--  eprint        = {2508.06736},-->
+<!--  archivePrefix = {arXiv},-->
+<!--  primaryClass  = {cs.AI},-->
+<!--  url           = {https://arxiv.org/abs/2508.06736},-->
+<!--}</pre>-->
+<!--  </div>-->
+<!--</section>-->
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <p>
+    <a href="https://www.coin-or.org/" target="_blank">COIN-OR Foundation</a> ·
+    <a href="https://github.com/coin-or/balans" target="_blank">GitHub</a> ·
+    Licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache 2.0</a>
+  </p>
+</footer>
+
+<script>
+function toggleBibtex(btn) {
+  btn.classList.toggle('active');
+  const bibtexDiv = btn.closest('.card-links').nextElementSibling;
+  bibtexDiv.classList.toggle('active');
+}
+
+function copyBibtexInline(btn) {
+  const pre = btn.nextElementSibling;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+function copyBibtex(btn, id) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+function copyCode(btn) {
+  const pre = btn.parentElement.querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+function copyAnchor(id) {
+  const url = window.location.origin + window.location.pathname + '#' + id;
+  navigator.clipboard.writeText(url).then(() => {
+    const target = document.getElementById(id);
+    if (!target) return;
+    const btn = target.querySelector('.anchor-link');
+    if (btn) {
+      const tooltip = btn.querySelector('.anchor-tooltip');
+      if (tooltip) {
+        const orig = tooltip.textContent;
+        tooltip.textContent = 'Copied!';
+        tooltip.style.opacity = '1';
+        setTimeout(() => {
+          tooltip.textContent = orig;
+          tooltip.style.opacity = '';
+        }, 1500);
+      }
+    }
+  });
+}
+
+function highlightTarget() {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return;
+  const target = document.getElementById(hash);
+  if (!target) return;
+  document.querySelectorAll('.anchor-highlight').forEach(el => {
+    el.classList.remove('anchor-highlight');
+  });
+  target.classList.add('anchor-highlight');
+  setTimeout(() => {
+    target.classList.remove('anchor-highlight');
+  }, 2000);
+}
+
+window.addEventListener('hashchange', highlightTarget);
+window.addEventListener('load', () => {
+  setTimeout(highlightTarget, 300);
+});
+</script>
+
+</body>
+</html>
+
