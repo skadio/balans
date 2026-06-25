@@ -217,6 +217,74 @@
       transform: translateY(-1px);
       box-shadow: var(--shadow-sm);
     }
+        .install-top-row {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .install-command {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.45rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card-bg);
+    }
+    .install-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(192,57,43,0.08);
+      border-radius: 4px;
+      padding: 0.2rem 0.45rem;
+    }
+    .install-command code {
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      color: var(--ink);
+      background: none;
+      padding: 0;
+    }
+    .downloads-badge {
+      display: inline-flex;
+    }
+    .downloads-badge img {
+      height: 22px;
+      width: auto;
+      display: block;
+      border-radius: 4px;
+    }
+    .downloads-row {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .card-install {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      color: var(--ink);
+      background: var(--warm);
+      border: 1px dashed var(--border);
+      border-radius: 999px;
+      padding: 0.3rem 0.65rem;
+      margin-bottom: 1.1rem;
+    }
+    .card-install i {
+      color: var(--accent);
+      font-size: 0.76rem;
+    }
 
     /* ── SECTIONS ── */
     section {
@@ -731,10 +799,16 @@
     <div class="hero-buttons">
       <a href="https://www.ijcai.org/proceedings/2025/286" class="btn btn-primary" target="_blank"><i class="fa-solid fa-file-lines"></i> IJCAI'25</a>
       <a href="https://github.com/coin-or/balans" class="btn btn-outline" target="_blank"><i class="fa-brands fa-github"></i> Code</a>
-      <a href="https://docs.google.com/viewer?url=https://raw.githubusercontent.com/skadio/skadio.github.io/master/files/2025_IJCAI_Balans_Kadioglu.pdf" class="btn btn-outline" target="_blank"><i class="fa-solid fa-file-powerpoint"></i> Slides</a>
+      <a href="https://docs.google.com/viewer?url=https://raw.githubusercontent.com/skadio/skadio.github.io/master/files/2025_IJCAI_Balans_Kadioglu.pdf" class="btn btn-outline" target="_blank"><i class="fa-solid fa-file-powerpoint" style="color: #c0392b;"></i> Slides</a>
       <a href="https://huggingface.co/collections/skadio/balans-bandit-based-adaptive-lns" class="btn btn-outline" target="_blank"><span style="font-size:1rem; line-height:1;">🤗</span> Dataset</a>
-      <a href="https://pypi.python.org/pypi/balans/" class="btn btn-outline" target="_blank"><i class="fa-brands fa-python"></i> PyPI</a>
+      <a href="https://pypi.python.org/pypi/balans/" class="btn btn-outline" target="_blank"><i class="fa-brands fa-python" style="color: #16a085;"></i> PyPI</a>
       <button class="btn btn-outline" onclick="toggleBibtexById('bibtex-hero')"><i class="fa-solid fa-chevron-down"></i> BibTeX</button>
+    </div>
+    <div class="install-top-row">
+      <div class="install-command"><span class="install-label">Install</span><code>pip install balans</code></div>
+      <a href="https://pepy.tech/project/balans" class="downloads-badge" target="_blank" rel="noopener noreferrer">
+        <img src="https://static.pepy.tech/personalized-badge/balans?period=total&units=international_system&left_color=grey&right_color=orange&left_text=Downloads" alt="Balans downloads">
+      </a>
     </div>
     <div class="bibtex-inline" id="bibtex-hero" style="max-width: 640px; margin: 1.5rem auto 0; text-align: left;">
       <button class="copy-btn" onclick="copyBibtexInline(this)">Copy</button>
